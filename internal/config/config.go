@@ -5,6 +5,7 @@ import "os"
 type Config struct {
 	Port     string
 	Database DatabaseConfig
+	CronJobs CronJobsConfig
 }
 
 type DatabaseConfig struct {
@@ -14,6 +15,11 @@ type DatabaseConfig struct {
 	Password string
 	DBName   string
 	SSLMode  string
+}
+
+type CronJobsConfig struct {
+	PingURL      string
+	PingSchedule string
 }
 
 func Load() *Config {
@@ -26,6 +32,10 @@ func Load() *Config {
 			Password: getEnv("DB_PASSWORD", ""),
 			DBName:   getEnv("DB_NAME", "api21_db"),
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
+		},
+		CronJobs: CronJobsConfig{
+			PingURL:      getEnv("PING_URL", ""),
+			PingSchedule: getEnv("PING_SCHEDULE", "*/5 * * * *"), // Default: every 5 minutes
 		},
 	}
 }
