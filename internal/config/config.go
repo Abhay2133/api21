@@ -9,6 +9,7 @@ type Config struct {
 }
 
 type DatabaseConfig struct {
+	Driver   string // "sqlite" or "postgres"
 	Host     string
 	Port     string
 	User     string
@@ -26,6 +27,7 @@ func Load() *Config {
 	return &Config{
 		Port: getEnv("PORT", "3000"),
 		Database: DatabaseConfig{
+			Driver:   getEnv("DB_DRIVER", "sqlite"),
 			Host:     getEnv("DB_HOST", "localhost"),
 			Port:     getEnv("DB_PORT", "5432"),
 			User:     getEnv("DB_USER", "postgres"),

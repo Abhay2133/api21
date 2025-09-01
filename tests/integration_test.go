@@ -8,13 +8,10 @@ import (
 	"os"
 	"testing"
 
+	"api21/internal/app"
 	"api21/internal/config"
-	"api21/internal/routes"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )
@@ -34,52 +31,8 @@ func (suite *IntegrationTestSuite) SetupSuite() {
 	// Load configuration
 	cfg := config.Load()
 
-	// Initialize Fiber app with same configuration as main
-	app := fiber.New(fiber.Config{
-		AppName: "API21 v1.0.0 (Test)",
-		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			code := fiber.StatusInternalServerError
-			if e, ok := err.(*fiber.Error); ok {
-				code = e.Code
-			}
-			return c.Status(code).JSON(fiber.Map{
-				"error": err.Error(),
-			})
-		},
-	})
-
-	// Add middleware
-	app.Use(logger.New())
-	app.Use(recover.New())
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
-		AllowMethods: "GET, POST, PUT, DELETE, OPTIONS",
-	}))
-
-	// Health check route
-	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"status":  "ok",
-			"message": "API21 is running",
-		})
-	})
-
-	// Root route
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"status":  "ok",
-			"service": "API21",
-			"version": "v1.0.0",
-			"message": "Welcome to API21!",
-		})
-	})
-
-	// Setup API routes
-	routes.SetupRoutes(app)
-
-	suite.app = app
-	_ = cfg // Use cfg to avoid unused variable error
+	// Use the production app configuration
+	suite.app = app.NewApp(cfg)
 }
 
 // TearDownSuite runs after all tests in the suite

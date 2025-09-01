@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -30,7 +31,7 @@ func RequestIDMiddleware() fiber.Handler {
 		// Generate a simple request ID using timestamp
 		requestID := time.Now().UnixNano()
 		c.Locals("requestID", requestID)
-		c.Set("X-Request-ID", string(rune(requestID)))
+		c.Set("X-Request-ID", strconv.FormatInt(requestID, 10))
 		return c.Next()
 	}
 }

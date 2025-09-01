@@ -42,9 +42,13 @@ func ValidateEmail(email string) bool {
 
 // SanitizeString removes potentially harmful characters from a string
 func SanitizeString(input string) string {
-	// Remove HTML tags and script content
-	re := regexp.MustCompile(`<[^>]*>`)
-	sanitized := re.ReplaceAllString(input, "")
+	// Remove script tags and their content first
+	scriptRe := regexp.MustCompile(`<script[^>]*>.*?</script>`)
+	sanitized := scriptRe.ReplaceAllString(input, "")
+
+	// Remove remaining HTML tags
+	htmlRe := regexp.MustCompile(`<[^>]*>`)
+	sanitized = htmlRe.ReplaceAllString(sanitized, "")
 
 	// Trim whitespace
 	sanitized = strings.TrimSpace(sanitized)

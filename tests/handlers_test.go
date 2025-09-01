@@ -7,19 +7,19 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"api21/internal/handlers"
+	"api21/internal/app"
+	"api21/internal/config"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetUsers(t *testing.T) {
 	// Setup
-	app := fiber.New()
-	app.Get("/users", handlers.GetUsers)
+	cfg := config.Load()
+	app := app.NewApp(cfg)
 
 	// Create request
-	req := httptest.NewRequest("GET", "/users", nil)
+	req := httptest.NewRequest("GET", "/api/v1/users", nil)
 	resp, err := app.Test(req)
 
 	// Assertions
@@ -39,8 +39,8 @@ func TestGetUsers(t *testing.T) {
 
 func TestGetUser(t *testing.T) {
 	// Setup
-	app := fiber.New()
-	app.Get("/users/:id", handlers.GetUser)
+	cfg := config.Load()
+	app := app.NewApp(cfg)
 
 	// Test cases
 	testCases := []struct {
@@ -65,7 +65,7 @@ func TestGetUser(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest("GET", "/users/"+tc.userID, nil)
+			req := httptest.NewRequest("GET", "/api/v1/users/"+tc.userID, nil)
 			resp, err := app.Test(req)
 
 			assert.NoError(t, err)
@@ -84,8 +84,8 @@ func TestGetUser(t *testing.T) {
 
 func TestCreateUser(t *testing.T) {
 	// Setup
-	app := fiber.New()
-	app.Post("/users", handlers.CreateUser)
+	cfg := config.Load()
+	app := app.NewApp(cfg)
 
 	// Test data
 	userData := map[string]interface{}{
@@ -95,7 +95,7 @@ func TestCreateUser(t *testing.T) {
 	userJSON, _ := json.Marshal(userData)
 
 	// Create request
-	req := httptest.NewRequest("POST", "/users", bytes.NewReader(userJSON))
+	req := httptest.NewRequest("POST", "/api/v1/users", bytes.NewReader(userJSON))
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := app.Test(req)
 
@@ -114,8 +114,8 @@ func TestCreateUser(t *testing.T) {
 
 func TestUpdateUser(t *testing.T) {
 	// Setup
-	app := fiber.New()
-	app.Put("/users/:id", handlers.UpdateUser)
+	cfg := config.Load()
+	app := app.NewApp(cfg)
 
 	// Test data
 	userData := map[string]interface{}{
@@ -125,7 +125,7 @@ func TestUpdateUser(t *testing.T) {
 	userJSON, _ := json.Marshal(userData)
 
 	// Create request
-	req := httptest.NewRequest("PUT", "/users/123", bytes.NewReader(userJSON))
+	req := httptest.NewRequest("PUT", "/api/v1/users/123", bytes.NewReader(userJSON))
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := app.Test(req)
 
@@ -144,11 +144,11 @@ func TestUpdateUser(t *testing.T) {
 
 func TestDeleteUser(t *testing.T) {
 	// Setup
-	app := fiber.New()
-	app.Delete("/users/:id", handlers.DeleteUser)
+	cfg := config.Load()
+	app := app.NewApp(cfg)
 
 	// Create request
-	req := httptest.NewRequest("DELETE", "/users/123", nil)
+	req := httptest.NewRequest("DELETE", "/api/v1/users/123", nil)
 	resp, err := app.Test(req)
 
 	// Assertions
@@ -166,8 +166,8 @@ func TestDeleteUser(t *testing.T) {
 
 func TestGetItems(t *testing.T) {
 	// Setup
-	app := fiber.New()
-	app.Get("/items", handlers.GetItems)
+	cfg := config.Load()
+	app := app.NewApp(cfg)
 
 	// Test cases for pagination
 	testCases := []struct {
@@ -192,7 +192,7 @@ func TestGetItems(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest("GET", "/items"+tc.queryParam, nil)
+			req := httptest.NewRequest("GET", "/api/v1/items"+tc.queryParam, nil)
 			resp, err := app.Test(req)
 
 			assert.NoError(t, err)
@@ -215,11 +215,11 @@ func TestGetItems(t *testing.T) {
 
 func TestGetItem(t *testing.T) {
 	// Setup
-	app := fiber.New()
-	app.Get("/items/:id", handlers.GetItem)
+	cfg := config.Load()
+	app := app.NewApp(cfg)
 
 	// Create request
-	req := httptest.NewRequest("GET", "/items/456", nil)
+	req := httptest.NewRequest("GET", "/api/v1/items/456", nil)
 	resp, err := app.Test(req)
 
 	// Assertions
@@ -237,8 +237,8 @@ func TestGetItem(t *testing.T) {
 
 func TestCreateItem(t *testing.T) {
 	// Setup
-	app := fiber.New()
-	app.Post("/items", handlers.CreateItem)
+	cfg := config.Load()
+	app := app.NewApp(cfg)
 
 	// Test data
 	itemData := map[string]interface{}{
@@ -249,7 +249,7 @@ func TestCreateItem(t *testing.T) {
 	itemJSON, _ := json.Marshal(itemData)
 
 	// Create request
-	req := httptest.NewRequest("POST", "/items", bytes.NewReader(itemJSON))
+	req := httptest.NewRequest("POST", "/api/v1/items", bytes.NewReader(itemJSON))
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := app.Test(req)
 
@@ -268,8 +268,8 @@ func TestCreateItem(t *testing.T) {
 
 func TestUpdateItem(t *testing.T) {
 	// Setup
-	app := fiber.New()
-	app.Put("/items/:id", handlers.UpdateItem)
+	cfg := config.Load()
+	app := app.NewApp(cfg)
 
 	// Test data
 	itemData := map[string]interface{}{
@@ -280,7 +280,7 @@ func TestUpdateItem(t *testing.T) {
 	itemJSON, _ := json.Marshal(itemData)
 
 	// Create request
-	req := httptest.NewRequest("PUT", "/items/789", bytes.NewReader(itemJSON))
+	req := httptest.NewRequest("PUT", "/api/v1/items/789", bytes.NewReader(itemJSON))
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := app.Test(req)
 
@@ -299,11 +299,11 @@ func TestUpdateItem(t *testing.T) {
 
 func TestDeleteItem(t *testing.T) {
 	// Setup
-	app := fiber.New()
-	app.Delete("/items/:id", handlers.DeleteItem)
+	cfg := config.Load()
+	app := app.NewApp(cfg)
 
 	// Create request
-	req := httptest.NewRequest("DELETE", "/items/789", nil)
+	req := httptest.NewRequest("DELETE", "/api/v1/items/789", nil)
 	resp, err := app.Test(req)
 
 	// Assertions

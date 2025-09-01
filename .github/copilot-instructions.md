@@ -13,22 +13,20 @@ This is a Go Fiber REST API with clean architecture patterns. Key components:
 
 ### Primary Development Commands
 ```bash
-./run.sh dev          # Hot reload with Air (phttps://api21-s5nh.onrender.com/referred for development)
-make dev              # Alternative hot reload
+make dev              # Hot reload with Air (preferred for development)
 go run cmd/server/main.go  # Direct execution
 ```
 
 ### Testing Strategy
 - **Location**: All tests in `./tests/` directory (not package-level `_test.go` files)
 - **Pattern**: External testing using `package tests` and importing `api21/internal/*`
-- **Run Tests**: `go test ./tests/...` or `./run.sh test`
+- **Run Tests**: `go test ./tests/...` or `make test`
 - **Integration Tests**: Full HTTP server testing with actual Fiber app instances
 
 ### Build and Deploy
 ```bash
-./run.sh build        # Single platform build
+make build            # Single platform build
 make build-all        # Multi-platform builds (Linux/Windows/macOS)
-docker-compose up     # Full stack (API + PostgreSQL + Redis + PgAdmin)
 ```
 
 ## Project-Specific Patterns
@@ -77,12 +75,7 @@ docker-compose up     # Full stack (API + PostgreSQL + Redis + PgAdmin)
 ### Hot Reload Setup
 - **Tool**: Air (github.com/air-verse/air)
 - **Config**: Air config in project root enables automatic rebuilds
-- **Command**: `./run.sh dev` or `make dev`
-
-### Docker Development Stack
-- **Services**: API (port 3000), PostgreSQL (5432), Redis (6379), PgAdmin (8080)
-- **PgAdmin Access**: admin@api21.com / admin
-- **Network**: Services communicate via `api21-network`
+- **Command**: `make dev`
 
 ## Testing Conventions
 

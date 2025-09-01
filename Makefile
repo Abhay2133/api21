@@ -14,7 +14,7 @@ YELLOW=\033[1;33m
 RED=\033[0;31m
 NC=\033[0m # No Color
 
-.PHONY: help build run dev clean test lint fmt vet deps install docker-build docker-run migrate
+.PHONY: help build run dev clean test lint fmt vet deps install migrate
 
 # Default target
 all: fmt vet build
@@ -69,7 +69,7 @@ build-all: build-linux build-windows build-mac ## Build for all platforms
 # Testing commands
 test: ## Run tests
 	@echo "$(YELLOW)Running tests...$(NC)"
-	@go test -v ./...
+	@go test -v ./tests/...
 
 test-coverage: ## Run tests with coverage
 	@echo "$(YELLOW)Running tests with coverage...$(NC)"
@@ -121,15 +121,6 @@ install: ## Install the application
 migrate: ## Run database migrations
 	@echo "$(YELLOW)Running database migrations...$(NC)"
 	@go run $(MAIN_PATH) -migrate
-
-# Docker commands
-docker-build: ## Build Docker image
-	@echo "$(YELLOW)Building Docker image...$(NC)"
-	@docker build -t $(BINARY_NAME):latest .
-
-docker-run: ## Run Docker container
-	@echo "$(YELLOW)Running Docker container...$(NC)"
-	@docker run -p 3000:3000 --env-file .env $(BINARY_NAME):latest
 
 # Utility commands
 clean: ## Clean build artifacts
