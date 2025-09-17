@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API21 - Static Files Demo</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>API21 - Golang Fiber MVC</h1>
+            <p>Static file serving demonstration</p>
+        </header>
+        
+        <main>
+            <section class="api-info">
+                <h2>Available API Endpoints</h2>
+                <ul>
+                    <li><strong>GET</strong> <code>/api/health</code> - Health check</li>
+                    <li><strong>GET</strong> <code>/api/users</code> - Get all users</li>
+                    <li><strong>GET</strong> <code>/api/users/:id</code> - Get user by ID</li>
+                    <li><strong>POST</strong> <code>/api/users</code> - Create user</li>
+                </ul>
+            </section>
+
+            <section class="demo-section">
+                <h2>API Test</h2>
+                <button id="test-health" class="btn">Test Health Endpoint</button>
+                <button id="test-users" class="btn">Get Users</button>
+                <div id="response" class="response"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 API21 - Built with Go Fiber</p>
+        </footer>
+    </div>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>
