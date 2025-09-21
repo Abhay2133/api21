@@ -15,6 +15,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"api21/src"
+	"api21/src/cache"
 	"api21/src/config"
 	"api21/src/migrations"
 	"api21/src/routes"
@@ -87,6 +88,10 @@ func main() {
 	// Shutdown cron scheduler
 	log.Println("[MAIN] Stopping cron scheduler...")
 	cronScheduler.Stop()
+
+	// Close cache manager
+	log.Println("[MAIN] Closing cache manager...")
+	cache.GetManager().Close()
 
 	// Close database connection
 	log.Println("[MAIN] Closing database connection...")
