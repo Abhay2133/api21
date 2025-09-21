@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"testing"
 
+	"api21/src/cache"
 	"api21/src/controllers"
 	"api21/tests/utils"
 
@@ -50,6 +51,8 @@ func (suite *ClipboardControllerTestSuite) TearDownSuite() {
 // SetupTest runs before each test
 func (suite *ClipboardControllerTestSuite) SetupTest() {
 	utils.TruncateTables(suite.T())
+	// Clear cache to ensure fresh state for each test
+	cache.GetManager().ClearAll()
 }
 
 func (suite *ClipboardControllerTestSuite) TestGetClipboards_Empty() {

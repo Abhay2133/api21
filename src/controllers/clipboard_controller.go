@@ -20,7 +20,8 @@ func NewClipboardController() *ClipboardController {
 
 // GetClipboards handles GET /api/clipboard - returns all clipboard entries
 func (cc *ClipboardController) GetClipboards(c *fiber.Ctx) error {
-	clipboards, err := models.GetAllClipboards()
+	// Use cached version for better performance
+	clipboards, err := models.GetAllClipboardsCached()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false,
@@ -49,7 +50,8 @@ func (cc *ClipboardController) GetClipboard(c *fiber.Ctx) error {
 		})
 	}
 
-	clipboard, err := models.GetClipboardByID(uint(id))
+	// Use cached version for better performance
+	clipboard, err := models.GetClipboardByIDCached(uint(id))
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -81,7 +83,8 @@ func (cc *ClipboardController) GetClipboardByTitle(c *fiber.Ctx) error {
 		})
 	}
 
-	clipboard, err := models.GetClipboardByTitle(title)
+	// Use cached version for better performance
+	clipboard, err := models.GetClipboardByTitleCached(title)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -110,7 +113,8 @@ func (cc *ClipboardController) GetClipboardRawByTitle(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString("Title parameter is required")
 	}
 
-	clipboard, err := models.GetClipboardByTitle(title)
+	// Use optimized cached method that only stores/returns content
+	content, err := models.GetClipboardContentByTitleCached(title)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).SendString("Clipboard entry not found")
@@ -120,7 +124,7 @@ func (cc *ClipboardController) GetClipboardRawByTitle(c *fiber.Ctx) error {
 
 	// Set content type to plain text and return only the content
 	c.Set("Content-Type", "text/plain; charset=utf-8")
-	return c.Status(fiber.StatusOK).SendString(clipboard.Content)
+	return c.Status(fiber.StatusOK).SendString(content)
 }
 
 // CreateClipboard handles POST /api/clipboard - creates a new clipboard entry
@@ -147,7 +151,10 @@ func (cc *ClipboardController) CreateClipboard(c *fiber.Ctx) error {
 
 	// Note: Title is now optional - if empty, the model will generate a random ID
 	clipboard := models.NewClipboard(requestData.Title, requestData.Content)
-	if err := clipboard.CreateClipboard(); err != nil {
+	
+	// Use cached service for proper cache invalidation
+	cachedService := models.GetCachedClipboardService()
+	if err := cachedService.CreateClipboard(clipboard); err != nil {
 		// Check if it's a unique constraint violation (title already exists)
 		if err.Error() == "UNIQUE constraint failed: clipboard.title" ||
 			strings.Contains(err.Error(), "duplicate key value violates unique constraint") {

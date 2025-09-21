@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 
+	"api21/src/cache"
 	"api21/src/controllers"
 )
 
@@ -15,14 +16,34 @@ func SetupRoutes(app *fiber.App) {
 	// API routes group
 	api := app.Group("/api")
 
-	// Health check endpoint
+	// Health check endpoint with cache metrics
 	api.Get("/health", func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		// Get cache metrics
+		manager := cache.GetManager()
+		cacheMetrics := manager.GetAllMetrics()
+		
+		response := fiber.Map{
 			"success": true,
 			"message": "API is healthy",
 			"service": "api21",
 			"version": "1.0.0",
-		})
+		}
+		
+		// Add cache metrics if any caches exist
+		if len(cacheMetrics) > 0 {
+			response["cache"] = fiber.Map{
+				"enabled": true,
+				"caches":  len(cacheMetrics),
+				"metrics": cacheMetrics,
+			}
+		} else {
+			response["cache"] = fiber.Map{
+				"enabled": true,
+				"caches":  0,
+			}
+		}
+		
+		return c.Status(fiber.StatusOK).JSON(response)
 	})
 
 	// User routes group
