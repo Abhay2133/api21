@@ -152,8 +152,18 @@ migration-create: ## Create a new migration file (usage: make migration-create n
 
 migrate-up: ## Run all pending migrations
 	@echo "⬆️  Running pending migrations..."
-	@migrate -path migrations -database "$(DB_URL)" up
-	@echo "✅ Migrations completed"
+	@if migrate -path migrations -database "$(DB_URL)" up; then \
+		echo "✅ Migrations completed"; \
+	elif [ $$? -eq 127 ]; then \
+		echo "❌ migrate command not found. Installing golang-migrate CLI..."; \
+		$(MAKE) migrate-install; \
+		echo "🔄 Retrying migrations..."; \
+		migrate -path migrations -database "$(DB_URL)" up; \
+		echo "✅ Migrations completed"; \
+	else \
+		echo "❌ Migration failed with error code $$?"; \
+		exit 1; \
+	fi
 
 migrate-down: ## Rollback last migration
 	@echo "⬇️  Rolling back last migration..."
