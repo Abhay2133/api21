@@ -35,12 +35,13 @@ func SetupRoutes(app *fiber.App) {
 
 	// Clipboard routes group
 	clipboardRoutes := api.Group("/clipboard")
-	clipboardRoutes.Get("/", clipboardController.GetClipboards)                   // GET /api/clipboard
-	clipboardRoutes.Get("/:id", clipboardController.GetClipboard)                 // GET /api/clipboard/:id
-	clipboardRoutes.Get("/title/:title", clipboardController.GetClipboardByTitle) // GET /api/clipboard/title/:title
-	clipboardRoutes.Post("/", clipboardController.CreateClipboard)                // POST /api/clipboard
-	clipboardRoutes.Put("/:id", clipboardController.UpdateClipboard)              // PUT /api/clipboard/:id
-	clipboardRoutes.Delete("/:id", clipboardController.DeleteClipboard)           // DELETE /api/clipboard/:id
+	clipboardRoutes.Get("/", clipboardController.GetClipboards)                    // GET /api/clipboard
+	clipboardRoutes.Get("/:id", clipboardController.GetClipboard)                  // GET /api/clipboard/:id
+	clipboardRoutes.Get("/title/:title", clipboardController.GetClipboardByTitle)  // GET /api/clipboard/title/:title
+	clipboardRoutes.Get("/raw/:title", clipboardController.GetClipboardRawByTitle) // GET /api/clipboard/raw/:title
+	clipboardRoutes.Post("/", clipboardController.CreateClipboard)                 // POST /api/clipboard
+	clipboardRoutes.Put("/:id", clipboardController.UpdateClipboard)               // PUT /api/clipboard/:id
+	clipboardRoutes.Delete("/:id", clipboardController.DeleteClipboard)            // DELETE /api/clipboard/:id
 
 	// Root route
 	app.Get("/", func(c *fiber.Ctx) error {
@@ -49,12 +50,13 @@ func SetupRoutes(app *fiber.App) {
 			"message": "Welcome to API21",
 			"version": "1.0.0",
 			"endpoints": fiber.Map{
-				"health":             "/api/health",
-				"users":              "/api/users",
-				"user_by_id":         "/api/users/:id",
-				"clipboard":          "/api/clipboard",
-				"clipboard_by_id":    "/api/clipboard/:id",
-				"clipboard_by_title": "/api/clipboard/title/:title",
+				"health":                 "/api/health",
+				"users":                  "/api/users",
+				"user_by_id":             "/api/users/:id",
+				"clipboard":              "/api/clipboard",
+				"clipboard_by_id":        "/api/clipboard/:id",
+				"clipboard_by_title":     "/api/clipboard/title/:title",
+				"clipboard_raw_by_title": "/api/clipboard/raw/:title",
 			},
 		})
 	})

@@ -103,6 +103,26 @@ func (cc *ClipboardController) GetClipboardByTitle(c *fiber.Ctx) error {
 	})
 }
 
+// GetClipboardRawByTitle handles GET /api/clipboard/raw/:title - returns only the content as plain text
+func (cc *ClipboardController) GetClipboardRawByTitle(c *fiber.Ctx) error {
+	title := c.Params("title")
+	if title == "" {
+		return c.Status(fiber.StatusBadRequest).SendString("Title parameter is required")
+	}
+
+	clipboard, err := models.GetClipboardByTitle(title)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(fiber.StatusNotFound).SendString("Clipboard entry not found")
+		}
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to retrieve clipboard entry: " + err.Error())
+	}
+
+	// Set content type to plain text and return only the content
+	c.Set("Content-Type", "text/plain; charset=utf-8")
+	return c.Status(fiber.StatusOK).SendString(clipboard.Content)
+}
+
 // CreateClipboard handles POST /api/clipboard - creates a new clipboard entry
 func (cc *ClipboardController) CreateClipboard(c *fiber.Ctx) error {
 	var requestData struct {
