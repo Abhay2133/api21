@@ -193,7 +193,9 @@ func RunMigrations(db *gorm.DB) error {
 	if err != nil {
 		return fmt.Errorf("failed to create migration manager: %w", err)
 	}
-	defer manager.Close()
+	// NOTE: We intentionally don't call manager.Close() here to avoid closing
+	// the underlying database connection that GORM is using. The migrate
+	// instance will be garbage collected when the manager goes out of scope.
 
 	return manager.Up()
 }

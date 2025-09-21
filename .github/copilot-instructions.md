@@ -61,6 +61,11 @@ make migrate-version                # Check migration status
 make migrate-install                # Install golang-migrate CLI
 ```
 
+**Important**: Migration commands automatically detect the database URL in this order:
+1. `DATABASE_URL` from `.env` file (if exists)
+2. `DATABASE_URL` environment variable
+3. Fallback to `sqlite3://tmp/api21.db` for development
+
 ### Key Environment Variables
 - `DATABASE_URL`: PostgreSQL connection string for production (auto-switches from SQLite)
 - `PING_URL`: Target URL for health check pings
@@ -106,9 +111,28 @@ userRoutes := api.Group("/users")
 - Migration status can be checked with `make migrate-version`
 - Use `make test` for running tests
 
+### Database Connection Debugging
+If you encounter "sql: database is closed" errors in API endpoints:
+
+1. **Test Database Standalone**: Create a test script to verify database operations work in isolation
+2. **Test Simplified Server**: Run server without migrations/cron jobs to isolate the issue
+3. **Check Migration Manager**: Ensure `RunMigrations()` doesn't close the database connection
+4. **Use Debug Endpoints**: Create temporary debug endpoints with detailed error logging
+
+**Example Debug Commands**:
+```bash
+# Test database operations directly
+go run tests/db_test_standalone.go
+
+# Test simplified server (skip migrations/cron)
+go run test_main.go  # Custom test server on different port
+```
+
 ## Common Pitfalls
 - Cron jobs skip silently if environment variables are invalid
 - Controllers must handle ID parameter conversion errors
 - Background processes need proper cleanup in shutdown sequence
 - Migration files should never be modified after being applied in production
 - Always test migrations in development before production deployment
+- **Migration Manager**: The `RunMigrations()` function intentionally doesn't call `manager.Close()` to avoid closing the underlying database connection that GORM uses
+- **Database URL Priority**: Makefile migration commands read from `.env` file first, then environment variables, then fallback to SQLite

@@ -95,7 +95,7 @@ make migrate-down
 make migrate-version
 ```
 
-**📖 For detailed migration documentation, see [MIGRATIONS.md](MIGRATIONS.md)**
+**📖 For complete migration documentation, see the Migration System Documentation section below**
 
 ## �🚀 Quick Start
 
@@ -425,4 +425,260 @@ This project is licensed under the MIT License.
 - [GORM Documentation](https://gorm.io/docs/) - ORM library documentation  
 - [golang-migrate Documentation](https://github.com/golang-migrate/migrate) - Database migration tool
 - [Go Documentation](https://golang.org/doc/) - Official Go documentation
-- [API21 Migration Guide](MIGRATIONS.md) - Detailed migration system documentation
+
+## 📋 Migration System Documentation
+
+API21 uses [golang-migrate/migrate](https://github.com/golang-migrate/migrate) for database migrations, providing a robust and reliable migration system.
+
+### Migration Features
+
+- ✅ **Version Control**: Track and manage database schema versions
+- ✅ **Rollback Support**: Safely rollback migrations when needed
+- ✅ **Multi-Database Support**: Works with both SQLite (development) and PostgreSQL (production)
+- ✅ **CLI Integration**: Easy-to-use Makefile commands
+- ✅ **Application Integration**: Automatic migrations on application startup
+- ✅ **Sequential Migrations**: Migrations are applied in order
+- ✅ **Atomic Operations**: Each migration runs in a transaction
+
+### Quick Migration Guide
+
+#### 1. Install Migration CLI (if not already installed)
+```bash
+make migrate-install
+```
+
+#### 2. Create Your First Migration
+```bash
+make migration-create name=create_products_table
+```
+
+This creates two files:
+- `migrations/000003_create_products_table.up.sql` - Forward migration
+- `migrations/000003_create_products_table.down.sql` - Rollback migration
+
+#### 3. Edit Migration Files
+
+**000003_create_products_table.up.sql:**
+```sql
+CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(255) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_products_name ON products(name);
+```
+
+**000003_create_products_table.down.sql:**
+```sql
+DROP TABLE IF EXISTS products;
+```
+
+#### 4. Apply Migrations
+```bash
+make migrate-up
+```
+
+### Migration File Structure
+
+```
+migrations/
+├── README.md
+├── 000001_create_users_table.up.sql
+├── 000001_create_users_table.down.sql
+├── 000002_add_posts_table.up.sql
+├── 000002_add_posts_table.down.sql
+└── ...
+```
+
+#### Naming Convention
+- **Sequential Numbers**: `000001`, `000002`, etc.
+- **Descriptive Names**: `create_users_table`, `add_email_index`
+- **Direction**: `.up.sql` (forward), `.down.sql` (rollback)
+
+### Migration Best Practices
+
+#### 1. Migration Content
+- **Always** include `IF NOT EXISTS` for CREATE statements
+- **Always** include `IF EXISTS` for DROP statements
+- Use descriptive column names and appropriate data types
+- Add indexes for frequently queried columns
+
+#### 2. Rollback Strategy
+- Every `.up.sql` must have a corresponding `.down.sql`
+- Test rollbacks in development before production
+- Keep rollbacks simple and safe
+
+#### 3. Schema Changes
+- **Additive changes** are safer (adding columns, tables, indexes)
+- **Destructive changes** need careful planning (dropping columns, changing types)
+- Consider data migration separately from schema changes
+
+#### 4. Version Control
+- Commit migration files with your code changes
+- Never modify existing migration files after they're applied in production
+- Create new migrations to fix issues
+
+### Migration Examples
+
+#### Creating a Table
+```sql
+-- up.sql
+CREATE TABLE IF NOT EXISTS categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- down.sql
+DROP TABLE IF EXISTS categories;
+```
+
+#### Adding a Column
+```sql
+-- up.sql
+ALTER TABLE users ADD COLUMN phone VARCHAR(20);
+
+-- down.sql
+ALTER TABLE users DROP COLUMN phone;
+```
+
+#### Adding an Index
+```sql
+-- up.sql
+CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
+
+-- down.sql
+DROP INDEX IF EXISTS idx_users_created_at;
+```
+
+#### Foreign Key Relationship
+```sql
+-- up.sql
+CREATE TABLE IF NOT EXISTS orders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    total DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+
+-- down.sql
+DROP TABLE IF EXISTS orders;
+```
+
+### Troubleshooting Migrations
+
+#### Common Issues
+
+**1. Migration fails to apply**
+```bash
+# Check current status
+make migrate-version
+
+# Force to specific version if needed (emergency)
+make migrate-force version=1
+```
+
+**2. Database is dirty**
+```bash
+# Check what went wrong and fix manually, then:
+make migrate-force version=<correct_version>
+```
+
+**3. Want to start fresh**
+```bash
+# ⚠️ This will delete ALL data
+make migrate-drop
+make migrate-up
+```
+
+#### Debugging
+- Check the `schema_migrations` table in your database
+- Migration files are in `migrations/` directory
+- Application logs show migration status during startup
+
+### Production Deployment
+
+1. **Test migrations** in staging environment first
+2. **Backup database** before applying migrations
+3. **Apply migrations** during maintenance window if needed
+4. **Monitor** application startup logs
+5. **Have rollback plan** ready
+
+## 📚 Documentation Updates Summary
+
+This section summarizes the recent documentation updates made to reflect the migration system implementation.
+
+### Key Documentation Changes
+
+#### 1. Enhanced Architecture Documentation
+- ✅ Updated project overview to mention database migrations with golang-migrate
+- ✅ Added database architecture section explaining SQLite/PostgreSQL setup
+- ✅ Added migration system details including file format and management
+- ✅ Updated MVC structure to mention GORM-based models
+- ✅ Added comprehensive migration commands to development workflow
+- ✅ Updated environment variables to include DATABASE_URL
+
+#### 2. Migration System Integration
+The documentation now properly reflects that API21 has moved from:
+
+**Before (Old System)**
+- Mock data in models
+- GORM AutoMigrate for schema management
+- No version control for database changes
+- Limited rollback capabilities
+
+**After (New System)**  
+- Real database operations with GORM
+- golang-migrate for robust schema management
+- Version-controlled migrations with up/down files
+- Full rollback and migration management capabilities
+- Support for both SQLite (dev) and PostgreSQL (prod)
+
+#### 3. Comprehensive Command Reference
+All migration commands are now documented with clear usage examples:
+- `make migration-create name=<name>`
+- `make migrate-up/down`
+- `make migrate-version`
+- Database URL detection from `.env` file, environment variables, or fallback to SQLite
+
+#### 4. Clear Architecture Documentation
+The documentation now clearly explains:
+- Database layer architecture
+- Migration system integration
+- Environment-based database selection
+- Application lifecycle including migrations
+
+#### 5. Developer-Friendly Examples
+Practical examples for:
+- Creating migrations
+- Adding tables, columns, indexes
+- Handling foreign keys
+- Rolling back changes
+- Production deployment
+
+### Migration System Features Summary
+
+#### Core Benefits
+- **Robust Version Control**: Track and manage database schema versions with precision
+- **Safe Rollback Support**: Confidently rollback migrations when needed
+- **Multi-Database Compatibility**: Seamless support for SQLite (development) and PostgreSQL (production)
+- **Integrated CLI Tools**: Easy-to-use Makefile commands for all migration operations
+- **Automatic Application Integration**: Migrations run automatically on application startup
+- **Sequential Processing**: Migrations are applied in correct order
+- **Atomic Operations**: Each migration runs in a transaction for data integrity
+
+#### Key Implementation Features
+- **Environment-Based Configuration**: Automatic database selection based on `DATABASE_URL`
+- **Developer Workflow Integration**: Migration commands integrated into Makefile
+- **Production-Ready**: Safe deployment strategies and rollback procedures
+- **Comprehensive Documentation**: Complete guides for development and production use
+
+The migration system provides a solid foundation for managing database schema changes safely and reliably across all environments!

@@ -125,8 +125,15 @@ build-all: build-linux build-windows build-mac ## Build for all platforms
 	@echo "✅ All platform builds complete"
 
 # Migration commands
-# Detect database URL for migration commands
-DB_URL := $(shell if [ -n "$$DATABASE_URL" ]; then echo "$$DATABASE_URL"; else echo "sqlite3://tmp/api21.db"; fi)
+# Detect database URL for migration commands (check .env file first, then environment)
+DB_URL := $(shell \
+	if [ -f .env ] && grep -q "^DATABASE_URL=" .env; then \
+		grep "^DATABASE_URL=" .env | cut -d '=' -f2- | sed 's/^"//;s/"$$//'; \
+	elif [ -n "$$DATABASE_URL" ]; then \
+		echo "$$DATABASE_URL"; \
+	else \
+		echo "sqlite3://tmp/api21.db"; \
+	fi)
 
 migrate-install: ## Install golang-migrate CLI tool
 	@echo "📦 Installing golang-migrate CLI..."
