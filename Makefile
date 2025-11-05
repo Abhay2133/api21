@@ -1,4 +1,4 @@
-.PHONY: run build clean dev test help
+.PHONY: run build clean dev test help docker-up docker-down docker-logs docker-ps db-url
 
 # Variables
 BINARY_NAME=api21
@@ -31,13 +31,18 @@ clean: ## Clean build artifacts
 	go clean
 	@echo "✅ Clean complete"
 
-dev: ## Run with auto-reload (requires air)
-	@echo "🔄 Starting development server with auto-reload..."
-	@if ! command -v air > /dev/null; then \
-		echo "Installing air for auto-reload..."; \
-		go install github.com/cosmtrek/air@latest; \
+dev: ## Run with auto-reload (uses air or reflex if available, otherwise runs directly)
+	@echo "🔄 Starting development server (auto-reload if available)..."
+	@if command -v air > /dev/null; then \
+		echo "Using air for auto-reload..."; \
+		air; \
+	elif command -v reflex > /dev/null; then \
+		echo "Using reflex for auto-reload..."; \
+		reflex -s -r '\.go$$' -- sh -c "go run $(MAIN_FILE)"; \
+	else \
+		echo "air/reflex not found, running without auto-reload..."; \
+		go run $(MAIN_FILE); \
 	fi
-	air
 
 test: ## Run tests
 	@echo "🧪 Running tests..."
@@ -204,3 +209,22 @@ migrate-goto: ## Migrate to specific version (usage: make migrate-goto version=2
 	@echo "🎯 Migrating to version $(version)..."
 	@migrate -path migrations -database "$(DB_URL)" goto $(version)
 	@echo "✅ Migrated to version $(version)"
+
+# Docker / Compose helpers for local development
+docker-up: ## Start Postgres service using docker compose
+	@echo "🐳 Starting Postgres via docker compose..."
+	@docker compose up -d db
+
+docker-down: ## Stop and remove containers/volumes created by compose
+	@echo "🛑 Stopping Postgres and removing volumes..."
+	@docker compose down -v
+
+docker-logs: ## Follow Postgres container logs
+	@echo "📜 Attaching to db logs... (Ctrl-C to exit)"
+	@docker compose logs -f db
+
+docker-ps: ## Show `docker compose ps` for services
+	@docker compose ps
+
+db-url: ## Print example DATABASE_URL for local docker-compose Postgres
+	@echo "postgres://api21:api21_password@localhost:5432/api21_dev?sslmode=disable"

@@ -197,5 +197,30 @@ func RunMigrations(db *gorm.DB) error {
 	// the underlying database connection that GORM is using. The migrate
 	// instance will be garbage collected when the manager goes out of scope.
 
+	// If the database is in a dirty state (partial migration), attempt a
+	// safe recovery automatically in development (SQLite) so `make dev`
+	// can continue. In production (DATABASE_URL set) we surface the error
+	// so operators can decide the correct recovery action.
+	version, dirty, verErr := manager.Version()
+	if verErr == nil && dirty {
+		// We're in a dirty state. If DATABASE_URL is not set we treat this
+		// as a development environment and attempt to force the version to
+		// clear the dirty flag and re-run migrations. In production we
+		// return an error to avoid accidentally masking problems.
+		if os.Getenv("DATABASE_URL") == "" {
+			log.Printf("[MIGRATION] Detected dirty migration at version %d — attempting safe recovery (development only)", version)
+			// Force to the reported version to clear the dirty flag.
+			if err := manager.Force(int(version)); err != nil {
+				return fmt.Errorf("failed to force migration version during recovery: %w", err)
+			}
+			// Try running migrations again after forcing.
+			if err := manager.Up(); err != nil {
+				return fmt.Errorf("failed to run migrations after forcing version: %w", err)
+			}
+			return nil
+		}
+		return fmt.Errorf("dirty database version %d detected; fix and force version manually", version)
+	}
+
 	return manager.Up()
 }

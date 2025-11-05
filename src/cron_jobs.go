@@ -37,7 +37,7 @@ func RegisterCronJobs() *cron.Cron {
 	}
 
 	// Job 2: URL ping job based on environment variables
-	setupPingJob(c)
+	// setupPingJob(c)
 
 	// Start the cron scheduler
 	c.Start()

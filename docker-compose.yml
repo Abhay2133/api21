@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: api21_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: api21
+      POSTGRES_PASSWORD: api21_password
+      POSTGRES_DB: api21_dev
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      # If you want the Postgres container to run SQL files on first startup,
+      # mount the `migrations/` directory (up files) into the initdb dir.
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U api21 -d api21_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
+    name: api21_db_data
