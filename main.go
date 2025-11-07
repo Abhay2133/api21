@@ -37,9 +37,35 @@ func main() {
 	// Run database migrations
 	db := config.GetDB()
 	if err := migrations.RunMigrations(db); err != nil {
-		log.Fatalf("[MAIN] Failed to run database migrations: %v", err)
+		// If we're running in development (no DATABASE_URL) try a safe recovery:
+		// close the SQLite DB file, remove it, reinitialize and re-run migrations.
+		if os.Getenv("DATABASE_URL") == "" {
+			log.Printf("[MAIN] Migration error in development: %v", err)
+			log.Println("[MAIN] Attempting safe dev recovery: recreating local SQLite DB and re-running migrations")
+
+			// Close DB connection so file can be removed
+			config.CloseDatabase()
+
+			// Remove the sqlite file (dev only)
+			sqlitePath := "./tmp/api21.db"
+			if removeErr := os.Remove(sqlitePath); removeErr != nil {
+				log.Printf("[MAIN] Warning: failed to remove sqlite file %s: %v", sqlitePath, removeErr)
+			} else {
+				log.Printf("[MAIN] Removed sqlite file %s", sqlitePath)
+			}
+
+			// Reinitialize database and re-run migrations
+			config.InitDatabase()
+			if err2 := migrations.RunMigrations(config.GetDB()); err2 != nil {
+				log.Fatalf("[MAIN] Failed to run database migrations after recovery: %v", err2)
+			}
+			log.Println("[MAIN] Database migrations completed after recovery")
+		} else {
+			log.Fatalf("[MAIN] Failed to run database migrations: %v", err)
+		}
+	} else {
+		log.Println("[MAIN] Database migrations completed")
 	}
-	log.Println("[MAIN] Database migrations completed")
 
 	// Initialize cron jobs
 	cronScheduler := src.RegisterCronJobs()
