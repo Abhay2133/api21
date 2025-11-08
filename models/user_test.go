@@ -7,10 +7,10 @@ import (
 func (ms *ModelSuite) Test_User() {
 	// Create a new user
 	u := &User{
-		ID:                uuid.Must(uuid.NewV4()),
-		Name:              "Test User",
-		Email:             "test@example.com",
-		EncryptedPassword: "hashedpassword123",
+		ID:           uuid.Must(uuid.NewV4()),
+		Name:         "Test User",
+		Email:        "test@example.com",
+		PasswordHash: "hashedpassword123",
 	}
 
 	// Test Create
