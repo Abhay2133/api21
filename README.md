@@ -111,19 +111,19 @@ buffalo pop migrate up
 buffalo dev
 ```
 
-The server will start on `http://localhost:3000` with hot-reload enabled. Any changes you make will automatically rebuild the application.
+The server will start on `http://localhost:5000` with hot-reload enabled. Any changes you make will automatically rebuild the application.
 
 ### 7. Test the API
 
 ```bash
 # Health check endpoint
-curl http://localhost:3000/
+curl http://localhost:5000/
 
 # Get all users
-curl http://localhost:3000/api/users
+curl http://localhost:5000/api/users
 
 # Create a new user
-curl -X POST http://localhost:3000/api/users \
+curl -X POST http://localhost:5000/api/users \
   -H "Content-Type: application/json" \
   -d '{"name":"John Doe","email":"john@example.com","encrypted_password":"hashed_password"}'
 ```
@@ -183,7 +183,7 @@ api21/
 
 ```bash
 # Server
-PORT=3000
+PORT=5000
 GO_ENV=development
 
 # Database
@@ -384,7 +384,7 @@ buffalo pop drop -a
 ### Health Check
 
 ```bash
-curl http://localhost:3000/
+curl http://localhost:5000/
 
 # Response:
 # {"message":"Welcome to Buffalo!"}
@@ -393,7 +393,7 @@ curl http://localhost:3000/
 ### List All Users
 
 ```bash
-curl http://localhost:3000/api/users
+curl http://localhost:5000/api/users
 
 # Response:
 # [
@@ -411,7 +411,7 @@ curl http://localhost:3000/api/users
 ### Create a User
 
 ```bash
-curl -X POST http://localhost:3000/api/users \
+curl -X POST http://localhost:5000/api/users \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Jane Smith",
@@ -433,7 +433,7 @@ curl -X POST http://localhost:3000/api/users \
 ### Get a Specific User
 
 ```bash
-curl http://localhost:3000/api/users/550e8400-e29b-41d4-a716-446655440001
+curl http://localhost:5000/api/users/550e8400-e29b-41d4-a716-446655440001
 
 # Response (200 OK):
 # {
@@ -449,7 +449,7 @@ curl http://localhost:3000/api/users/550e8400-e29b-41d4-a716-446655440001
 ### Update a User
 
 ```bash
-curl -X PUT http://localhost:3000/api/users/550e8400-e29b-41d4-a716-446655440001 \
+curl -X PUT http://localhost:5000/api/users/550e8400-e29b-41d4-a716-446655440001 \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Jane Doe",
@@ -462,7 +462,7 @@ curl -X PUT http://localhost:3000/api/users/550e8400-e29b-41d4-a716-446655440001
 ### Delete a User
 
 ```bash
-curl -X DELETE http://localhost:3000/api/users/550e8400-e29b-41d4-a716-446655440001
+curl -X DELETE http://localhost:5000/api/users/550e8400-e29b-41d4-a716-446655440001
 
 # Response (204 No Content)
 ```
@@ -519,10 +519,10 @@ func App() *buffalo.App {
 
 ```bash
 # List all posts
-curl http://localhost:3000/api/posts
+curl http://localhost:5000/api/posts
 
 # Create a post
-curl -X POST http://localhost:3000/api/posts \
+curl -X POST http://localhost:5000/api/posts \
   -H "Content-Type: application/json" \
   -d '{"title":"My Post","content":"Content here","user_id":"<user-uuid>"}'
 ```
@@ -591,7 +591,7 @@ buffalo build
 docker build -t api21:latest .
 
 # Run container
-docker run -p 3000:3000 \
+docker run -p 5000:5000 \
   -e DATABASE_URL="postgres://user:pass@db:5432/api21_prod" \
   -e GO_ENV=production \
   api21:latest
@@ -605,7 +605,7 @@ docker-compose up -d
 ```bash
 export GO_ENV=production
 export DATABASE_URL=postgres://user:password@prod-db.example.com:5432/api21_prod
-export PORT=3000
+export PORT=5000
 ./bin/api21
 ```
 
@@ -648,7 +648,7 @@ buffalo dev
 ### Issue: Port Already in Use
 
 ```
-Error: listen tcp :3000: bind: address already in use
+Error: listen tcp :5000: bind: address already in use
 ```
 
 **Solution:**
@@ -656,8 +656,8 @@ Error: listen tcp :3000: bind: address already in use
 # Use a different port
 PORT=8080 buffalo dev
 
-# Or kill the process using port 3000
-lsof -i :3000
+# Or kill the process using port 5000
+lsof -i :5000
 kill -9 <PID>
 ```
 

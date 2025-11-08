@@ -2,7 +2,7 @@
 
 # Variables
 BINARY_NAME=api21
-PORT?=3000
+PORT?=5000
 
 help:
 	@echo "Available commands:"
