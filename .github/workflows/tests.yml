@@ -1,0 +1,74 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: api21
+          POSTGRES_PASSWORD: api21_password
+          POSTGRES_DB: api21_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24.5'
+        cache: 'go'
+
+    - name: Download dependencies
+      run: |
+        go mod download
+        go mod tidy
+
+    - name: Install Buffalo CLI
+      run: go install github.com/gobuffalo/cli/v2@latest
+
+    - name: Wait for PostgreSQL
+      run: |
+        until pg_isready -h localhost -p 5432 -U api21; do
+          echo 'Waiting for PostgreSQL...'
+          sleep 1
+        done
+      env:
+        PGPASSWORD: api21_password
+
+    - name: Create test database
+      run: |
+        psql -h localhost -U api21 -c "CREATE DATABASE api21_test;" || true
+      env:
+        PGPASSWORD: api21_password
+
+    - name: Run migrations
+      run: buffalo pop migrate up
+      env:
+        DATABASE_URL: postgres://api21:api21_password@localhost:5432/api21_test?sslmode=disable
+
+    - name: Run tests
+      run: buffalo test -v
+      env:
+        DATABASE_URL: postgres://api21:api21_password@localhost:5432/api21_test?sslmode=disable
+
+    - name: Run tests with coverage
+      run: buffalo test -cover
+      env:
+        DATABASE_URL: postgres://api21:api21_password@localhost:5432/api21_test?sslmode=disable
