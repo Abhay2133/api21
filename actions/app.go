@@ -66,6 +66,7 @@ func App() *buffalo.App {
 		// Remove to disable this.
 		app.Use(popmw.Transaction(models.DB))
 		app.GET("/", HomeHandler)
+		app.GET("/api/memory", MemoryHandler)
 	})
 
 	return app

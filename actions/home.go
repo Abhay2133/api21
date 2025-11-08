@@ -11,12 +11,19 @@ import (
 // HomeHandler is a default handler to serve up
 // a home page.
 func HomeHandler(c buffalo.Context) error {
+	response := map[string]interface{}{
+		"status": "UP",
+	}
+
+	return c.Render(http.StatusOK, r.JSON(response))
+}
+
+// MemoryHandler returns detailed memory usage statistics
+func MemoryHandler(c buffalo.Context) error {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 
 	response := map[string]interface{}{
-		"status":     "UP",
-		"version":    "0.0.1",
 		"ram_usage":  formatBytes(m.Alloc),
 		"ram_total":  formatBytes(m.TotalAlloc),
 		"ram_sys":    formatBytes(m.Sys),
