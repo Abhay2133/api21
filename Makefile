@@ -8,7 +8,6 @@ help:
 	@echo "Available commands:"
 	@echo "  make install      - Install dependencies"
 	@echo "  make migrate-up   - Run database migrations"
-	@echo "  make create-prod-db - Create production database if it doesn't exist"
 	@echo "  make build        - Build production binary"
 	@echo "  make start        - Install deps, migrate, create db, and run in production mode"
 	@echo "  make start-prod   - Run already built binary in production mode"
@@ -27,24 +26,13 @@ migrate-up:
 	@echo "Running database migrations..."
 	buffalo task db:migrate
 
-# Create production database if it doesn't exist
-create-prod-db:
-	@echo "Creating production database if it doesn't exist..."
-	@if [ -z "$$DATABASE_URL" ]; then \
-		echo "DATABASE_URL not set, using default PostgreSQL connection..."; \
-		psql -h localhost -U postgres -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'api21_production'" | grep -q 1 || \
-		psql -h localhost -U postgres -d postgres -c "CREATE DATABASE api21_production OWNER api21"; \
-	else \
-		echo "Using custom DATABASE_URL"; \
-	fi
-
 # Build production binary
 build: install
 	@echo "Building production binary..."
 	buffalo build -o bin/$(BINARY_NAME)
 
 # Complete start command: install deps, migrate, and run in production mode
-start: install migrate-up build create-prod-db
+start: install migrate-up build
 	@echo "Starting $(BINARY_NAME) in production mode on port $(PORT)..."
 	export GO_ENV=production && \
 	export ADDR=0.0.0.0 && \
