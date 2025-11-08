@@ -50,7 +50,7 @@ start-prod:
 # Development server with hot-reload
 dev:
 	@echo "Starting development server..."
-	./dev.sh
+	buffalo dev
 
 # Clean build artifacts
 clean:

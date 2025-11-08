@@ -1,138 +1,296 @@
-# AI Coding Agent Instructions for API21
+# Copilot Instructions for API21
+
+This document provides guidelines for GitHub Copilot when working on the **API21** project - a Buffalo-based REST API built with Go.
 
 ## Project Overview
-API21 is a Go REST API built with Fiber framework following MVC architecture. It features database migrations with golang-migrate, background cron jobs, graceful shutdown, and environment-configurable health monitoring.
 
-## Architecture & Key Patterns
+- **Type**: Go REST API using Buffalo web framework
+- **Database**: PostgreSQL (primary) with SQLite support
+- **ORM**: Pop (built-in Buffalo ORM)
+- **Key Features**: MVC architecture, database migrations, CORS support, Docker ready, hot-reload development
+- **Go Version**: 1.24.5+
 
-### MVC Structure
-- **Models** (`src/models/`): GORM-based data structures with database methods (see `user.go`)
-- **Controllers** (`src/controllers/`): HTTP handlers returning JSON with consistent response format
-- **Routes** (`src/routes/`): Fiber route definitions with grouped endpoints
-- **Migrations** (`migrations/`): Database schema management using golang-migrate
+## Project Structure & Key Files
 
-### Database Architecture
-- **Development**: SQLite database (`tmp/api21.db`)
-- **Production**: PostgreSQL (via `DATABASE_URL` environment variable)
-- **Migrations**: Managed by golang-migrate with automatic startup execution
-- **ORM**: GORM for database operations and model management
+```
+api21/
+├── actions/              # HTTP handlers (controllers)
+│   ├── app.go          # Main app config & middleware setup
+│   ├── home.go         # Health check endpoint
+│   └── render.go       # Response rendering utilities
+│
+├── models/             # Data models (ORM entities)
+│   ├── models.go       # DB connection & connection pool setup
+│   ├── user.go         # User model with validation
+│   └── *_test.go       # Model tests
+│
+├── migrations/         # Database schema migrations (Fizz DSL)
+│   ├── *.up.fizz       # Create/alter schema scripts
+│   └── *.down.fizz     # Rollback scripts
+│
+├── cmd/app/main.go     # Application entry point
+├── config/             # Configuration files (TOML format)
+├── grifts/             # Task runners (like Rake tasks)
+├── locales/            # i18n translations (YAML format)
+└── database.yml        # Database configuration for different environments
+```
 
-### Migration System
-- **Location**: `migrations/` directory with sequential numbered files
-- **Format**: `{version}_{name}.{up|down}.sql` (e.g., `000001_create_users_table.up.sql`)
-- **Management**: Use `make migration-create name=<name>` to create new migrations
-- **Execution**: Automatic on application startup via `src/migrations/manager.go`
-- **Commands**: Full CLI support via Makefile (up, down, version, reset, etc.)
+## Code Style & Conventions
 
-### Response Format Convention
-All API responses follow this structure:
+### Go Code Standards
+- Follow Go idioms and best practices
+- Use meaningful variable names (avoid single letters except in loops)
+- Always handle errors explicitly; never ignore returned errors
+- Keep functions small and focused (max ~50 lines)
+- Use the `err` pattern for error returns: `if err != nil { return err }`
+
+### File Naming
+- Model files: `<resource>.go` (e.g., `user.go`, `post.go`)
+- Test files: `<resource>_test.go` (e.g., `user_test.go`)
+- Action files: `<resource>.go` in actions folder
+- Migration files: `TIMESTAMP_<description>.<up|down>.fizz`
+
+### Models
+- Always include UUID as primary key: `ID uuid.UUID`
+- Always include timestamps: `CreatedAt` and `UpdatedAt`
+- Implement `Validate()` method for model validation
+- Use json tags for JSON serialization: `` `json:"field_name"` ``
+- Use db tags for database mapping: `` `db:"column_name"` ``
+
+### Actions (Controllers)
+- Handle HTTP requests and return buffalo.Context responses
+- Use middleware from `actions/app.go` for transaction wrapping
+- Always use `c.Value("tx").(*pop.Connection)` to access database
+- Return appropriate HTTP status codes (200, 201, 204, 400, 404, 422, 500)
+
+### Middleware & CORS
+- CORS is pre-configured in `actions/app.go` with `cors.Default()`
+- Content-Type is set to "application/json" automatically
+- Requests are wrapped in database transactions automatically
+- SSL redirection is enabled in production mode
+
+## Database Management
+
+### Adding a New Model/Table
+1. Use buffalo generate: `buffalo pop generate model <name> field:type ...`
+2. Review generated migration in `migrations/`
+3. Run: `buffalo pop migrate up`
+4. Create model tests in `models/<name>_test.go`
+
+### Migrations
+- Use Fizz DSL for migrations (PostgreSQL-compatible)
+- Always create matching `.up.fizz` and `.down.fizz` files
+- Make migrations idempotent when possible
+- Test rollbacks: `buffalo pop migrate down` then `up` again
+- Examples:
+  ```fizz
+  # Create table
+  create_table("users") {
+    t.Column("id", "uuid", {primary: true})
+    t.Column("name", "string", {})
+    t.Timestamps()
+  }
+  
+  # Add column
+  add_column("users", "phone", "string", {nullable: true})
+  
+  # Add index
+  add_index("users", ["email"], {unique: true})
+  ```
+
+### Running Migrations
+- Development: `buffalo pop migrate up`
+- Production: Handled by `make start` command
+- Check status: `buffalo pop migrate status`
+
+## API Endpoints & Routing
+
+### Current Endpoints
+- `GET /` - Health check (returns welcome message)
+- `GET /api/users` - List all users
+- `POST /api/users` - Create new user
+- `GET /api/users/{id}` - Get specific user by UUID
+- `PUT /api/users/{id}` - Update user
+- `DELETE /api/users/{id}` - Delete user
+
+### Adding New Endpoints
+1. Create action in `actions/<resource>.go`
+2. Add route in `actions/app.go`: `app.Resource("<resource>", <Resource>{})`
+3. Implement handlers: `List`, `Show`, `Create`, `Update`, `Destroy`
+4. Use proper HTTP status codes
+
+### Request/Response Format
+- All APIs use JSON format (Content-Type: application/json)
+- Request body validation happens in model's `Validate()` method
+- Return validation errors with 422 status
+- Return 404 for not found
+- Return 500 for server errors with error message
+
+## Testing
+
+### Running Tests
+- All tests: `buffalo test` or `make test`
+- Specific package: `buffalo test ./models`
+- With coverage: `buffalo test -cover`
+- Verbose: `buffalo test -v`
+
+### Test Conventions
+- Model tests: `models/*_test.go`
+- Integration tests: `actions/*_test.go`
+- Use testify for assertions: `require.NoError()`, `require.Equal()`, etc.
+- Set up test database using models_test.go helpers
+- Test both success and error cases
+
+### Example Test Structure
 ```go
-fiber.Map{
-    "success": true/false,
-    "message": "Descriptive message",
-    "data":    actualData,      // For successful responses
-    "error":   errorDetails,    // For error responses
-    "count":   len(data),       // For collection responses
+func TestUserValidation(t *testing.T) {
+    u := &models.User{
+        Name:         "John Doe",
+        Email:        "john@example.com",
+        PasswordHash: "hashed",
+    }
+    verrs, _ := u.Validate(nil)
+    require.NoError(t, verrs.Error())
 }
 ```
 
-### Cron Jobs Architecture
-- `src/cron_jobs.go` manages background tasks with graceful shutdown
-- Memory monitoring runs every minute using `runtime.MemStats`
-- URL ping jobs are environment-configurable (`PING_URL`, `PING_INTERVAL`)
-- All cron logs use `[CRON]` prefix for easy filtering
-
 ## Development Workflow
 
-### Building & Running
+### Local Setup
+1. Install: `go mod download && go mod tidy`
+2. Create DB: `buffalo pop create -a`
+3. Migrate: `buffalo pop migrate up`
+4. Run dev: `buffalo dev` (hot-reload enabled)
+5. Server runs on `http://localhost:5000`
+
+### Build & Production
+- Build: `make build` or `buffalo build`
+- Start prod: `make start` (installs, migrates, builds, runs)
+- Binary location: `bin/api21`
+- Production uses env vars (GO_ENV=production)
+
+### Common Commands
 ```bash
-make run                    # Development mode
-make run-with-ping         # With example ping job enabled
-make build                 # Build binary to bin/api21
-make dev                   # Auto-reload with air
+# Development
+buffalo dev                           # Run with hot-reload
+buffalo build                         # Build binary
+buffalo test                          # Run tests
+buffalo routes                        # Show all routes
+
+# Database
+buffalo pop create -a                 # Create databases
+buffalo pop migrate up                # Apply migrations
+buffalo pop migrate down              # Rollback
+buffalo pop migrate status            # Check status
+buffalo pop generate migration <name> # Create migration
+
+# Generation
+buffalo generate model <name>         # Create model + migration
+buffalo generate action <name>        # Create action handler
+buffalo pop generate model <name>     # Pop model + migration
 ```
 
-### Migration Commands
+## Key Dependencies
+
+### Framework & Core
+- `github.com/gobuffalo/buffalo` - Web framework
+- `github.com/gobuffalo/buffalo-pop/v3` - Buffalo + Pop integration
+- `github.com/gobuffalo/pop/v6` - ORM
+
+### Database & Validation
+- `github.com/gobuffalo/validate/v3` - Validation framework
+- `github.com/gofrs/uuid` - UUID generation
+
+### Middleware & Utilities
+- `github.com/gobuffalo/middleware` - Built-in middleware
+- `github.com/gobuffalo/envy` - Environment variable handling
+- `github.com/rs/cors` - CORS support
+- `github.com/unrolled/secure` - Security middleware
+
+### Testing
+- `github.com/gobuffalo/suite/v4` - Test suite
+- `github.com/stretchr/testify` - Testing assertions
+
+## Environment Variables
+
+### Development (.env)
 ```bash
-make migration-create name=<name>   # Create new migration
-make migrate-up                     # Apply pending migrations
-make migrate-down                   # Rollback last migration
-make migrate-version                # Check migration status
-make migrate-install                # Install golang-migrate CLI
+PORT=5000
+GO_ENV=development
+DATABASE_URL=postgres://api21:api21_password@localhost:5432/api21_dev
 ```
 
-**Important**: Migration commands automatically detect the database URL in this order:
-1. `DATABASE_URL` from `.env` file (if exists)
-2. `DATABASE_URL` environment variable
-3. Fallback to `sqlite3://tmp/api21.db` for development
+### Production
+```bash
+GO_ENV=production
+PORT=5000 (or 8080, etc.)
+DATABASE_URL=postgres://user:pass@prod-db:5432/api21_prod
+```
 
-### Key Environment Variables
-- `DATABASE_URL`: PostgreSQL connection string for production (auto-switches from SQLite)
-- `PING_URL`: Target URL for health check pings
-- `PING_INTERVAL`: Ping interval in minutes (positive integer)
+## Common Patterns
 
-### Project Conventions
-- **Logging**: Use consistent prefixes `[MAIN]`, `[CRON]`, `[MIGRATION]` for different components
-- **Port**: Application runs on `:3000` by default
-- **Graceful Shutdown**: 10-second timeout for cleanup
-- **Error Handling**: Always return appropriate HTTP status codes with error details
-
-## Critical Integration Points
-
-### Application Lifecycle
-1. `main.go` initializes database connection and runs migrations
-2. `main.go` initializes cron jobs before starting Fiber server
-3. Signal handling (`SIGTERM`, `SIGINT`) triggers graceful shutdown
-4. Cron scheduler stops before HTTP server shutdown
-5. Database connections are properly closed during shutdown
-
-### Middleware Stack (order matters)
-1. Logger middleware (logs all requests)
-2. Recover middleware (panic recovery)
-3. CORS middleware (allows all origins)
-4. Static file middleware (serves from `./public` directory)
-
-### Static File Serving
-- Files in `public/` directory are served at root path (`/`)
-- Example: `public/css/style.css` accessible at `http://localhost:3000/css/style.css`
-- Static middleware configured before API routes to avoid conflicts
-
-### Route Grouping Pattern
+### Database Transaction Access
 ```go
-api := app.Group("/api")
-userRoutes := api.Group("/users")
-// Results in /api/users/* endpoints
+func SomeHandler(c buffalo.Context) error {
+    tx := c.Value("tx").(*pop.Connection)
+    var user models.User
+    err := tx.Find(&user, userID)
+    // ...
+}
 ```
 
-## Testing & Debugging
-- Database operations use GORM with SQLite for development
-- Health check endpoint: `GET /api/health`
-- Memory monitoring logs help debug performance issues
-- Migration status can be checked with `make migrate-version`
-- Use `make test` for running tests
-
-### Database Connection Debugging
-If you encounter "sql: database is closed" errors in API endpoints:
-
-1. **Test Database Standalone**: Create a test script to verify database operations work in isolation
-2. **Test Simplified Server**: Run server without migrations/cron jobs to isolate the issue
-3. **Check Migration Manager**: Ensure `RunMigrations()` doesn't close the database connection
-4. **Use Debug Endpoints**: Create temporary debug endpoints with detailed error logging
-
-**Example Debug Commands**:
-```bash
-# Test database operations directly
-go run tests/db_test_standalone.go
-
-# Test simplified server (skip migrations/cron)
-go run test_main.go  # Custom test server on different port
+### Model Validation
+```go
+func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
+    return validate.Validate(
+        &validators.StringIsPresent{Field: u.Name, Name: "Name"},
+        &validators.EmailIsPresent{Field: u.Email, Name: "Email"},
+    ), nil
+}
 ```
 
-## Common Pitfalls
-- Cron jobs skip silently if environment variables are invalid
-- Controllers must handle ID parameter conversion errors
-- Background processes need proper cleanup in shutdown sequence
-- Migration files should never be modified after being applied in production
-- Always test migrations in development before production deployment
-- **Migration Manager**: The `RunMigrations()` function intentionally doesn't call `manager.Close()` to avoid closing the underlying database connection that GORM uses
-- **Database URL Priority**: Makefile migration commands read from `.env` file first, then environment variables, then fallback to SQLite
+### JSON Response
+```go
+return c.Render(200, r.JSON(user))          // Single resource
+return c.Render(200, r.JSON(users))         // List of resources
+return c.Render(422, r.JSON(verrs.Error())) // Validation errors
+```
+
+### Creating/Updating Models
+```go
+tx := c.Value("tx").(*pop.Connection)
+user := &models.User{Name: "John", Email: "john@example.com"}
+verrs, err := tx.ValidateAndCreate(user)    // Create with validation
+```
+
+## Important Notes
+
+- **Always test migrations** - They should be idempotent and reversible
+- **UUID for IDs** - Use `gofrs/uuid` for all primary keys
+- **Transactions enabled** - All requests are wrapped in DB transactions
+- **CORS enabled** - No CORS configuration needed for local testing
+- **Hot-reload in dev** - Use `buffalo dev` for automatic rebuilds
+- **Docker support** - Dockerfile and docker-compose.yml included
+- **Environment-aware** - Use `GO_ENV` to switch between dev/test/prod
+- **No hardcoded DB creds** - Use environment variables and database.yml
+
+## Resources
+
+- [Buffalo Docs](https://gobuffalo.io/en/docs)
+- [Pop ORM Docs](https://gobuffalo.io/en/docs/db/getting-started)
+- [Fizz DSL Reference](https://gobuffalo.io/en/docs/db/fizz)
+- [Go Documentation](https://golang.org/doc/)
+
+## When Adding Features
+
+When implementing new features, ensure:
+1. ✅ Create model with validation rules
+2. ✅ Create database migration (up/down)
+3. ✅ Create action handlers (CRUD operations)
+4. ✅ Add routes to `actions/app.go`
+5. ✅ Write unit tests for models
+6. ✅ Write integration tests for actions
+7. ✅ Test migrations up and down
+8. ✅ Update this document if patterns change
+9. ✅ Run `buffalo test` before committing
+10. ✅ Follow Go conventions and code style
