@@ -4,6 +4,9 @@ import (
 	"log"
 
 	"api21/actions"
+
+	"github.com/gobuffalo/envy"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 // main is the starting point for your Buffalo application.
@@ -13,6 +16,9 @@ import (
 // call `app.Serve()`, unless you don't want to start your
 // application that is. :)
 func main() {
+	// Load .env file automatically
+	_ = envy.Load()
+
 	app := actions.App()
 	if err := app.Serve(); err != nil {
 		log.Fatal(err)
