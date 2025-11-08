@@ -41,7 +41,7 @@ jobs:
         go mod tidy
 
     - name: Install Buffalo CLI
-      run: go install github.com/gobuffalo/cli/v2@latest
+      run: go install github.com/gobuffalo/cli@latest
 
     - name: Wait for PostgreSQL
       run: |
