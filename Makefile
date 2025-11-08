@@ -24,8 +24,7 @@ install:
 # Run database migrations
 migrate-up:
 	@echo "Running database migrations..."
-	@command -v soda >/dev/null 2>&1 || (echo "Installing soda CLI..." && go install github.com/gobuffalo/pop/v6/cmd/soda@latest)
-	soda migrate up
+	buffalo task db:migrate
 
 # Build production binary
 build: install
