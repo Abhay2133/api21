@@ -97,6 +97,8 @@ sudo systemctl start postgresql
 
 ### 5. Create and Migrate Database
 
+#### Development Mode
+
 ```bash
 # Create development and test databases
 buffalo pop create -a
@@ -104,6 +106,33 @@ buffalo pop create -a
 # Run all pending migrations
 buffalo pop migrate up
 ```
+
+#### Production Mode
+
+Before running `make start` for production, you must manually create the production database:
+
+```bash
+# Login to PostgreSQL
+psql -U postgres
+
+# In psql prompt, run:
+CREATE DATABASE api21_production OWNER api21;
+
+# Exit psql
+\q
+```
+
+Alternatively, create the database in one command:
+```bash
+psql -U postgres -d postgres -c "CREATE DATABASE api21_production OWNER api21;"
+```
+
+Then run the production build and start:
+```bash
+make start
+```
+
+This will automatically run migrations on the production database.
 
 ### 6. Run the Development Server
 
@@ -582,6 +611,48 @@ func TestUser(t *testing.T) {
 buffalo build
 
 # Output: bin/api21
+```
+
+### Local Production Run
+
+```bash
+make start
+```
+
+This will:
+1. Install dependencies
+2. Build the binary
+3. Create the production database (if it doesn't exist)
+4. Run migrations
+5. Start the server in production mode on port 5000
+
+### Exposing Local Server with ngrok
+
+To expose your local development/production server to the internet using ngrok:
+
+```bash
+# Install ngrok (if not already installed)
+# See: https://ngrok.com/download
+
+# Expose port 5000 to the internet
+ngrok http 5000
+
+# You'll get a URL like: https://96b0db1e6f2b.ngrok-free.app/
+# Share this URL to access your API from anywhere
+```
+
+**Example API calls via ngrok:**
+```bash
+# Health check
+curl https://96b0db1e6f2b.ngrok-free.app/
+
+# List users
+curl https://96b0db1e6f2b.ngrok-free.app/api/users
+
+# Create user
+curl -X POST https://96b0db1e6f2b.ngrok-free.app/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Doe","email":"john@example.com","encrypted_password":"password"}'
 ```
 
 ### Docker Deployment
