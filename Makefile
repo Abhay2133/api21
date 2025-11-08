@@ -29,7 +29,7 @@ migrate-up:
 # Build production binary
 build: install
 	@echo "Building production binary..."
-	buffalo build --static -o bin/$(BINARY_NAME)
+	buffalo build -o bin/$(BINARY_NAME)
 
 # Complete start command: install deps, migrate, and run in production mode
 start: install migrate-up build
