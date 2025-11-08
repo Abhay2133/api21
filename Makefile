@@ -24,7 +24,7 @@ install:
 # Run database migrations
 migrate-up:
 	@echo "Running database migrations..."
-	@command -v pop >/dev/null 2>&1 || (echo "Installing pop CLI..." && go install github.com/gobuffalo/pop/v6/cmd/pop@latest)
+	@command -v pop >/dev/null 2>&1 || (echo "Installing pop CLI..." && go install github.com/gobuffalo/pop/v6@latest)
 	pop migrate up
 
 # Build production binary
