@@ -32,8 +32,8 @@ create-prod-db:
 	@echo "Creating production database if it doesn't exist..."
 	@if [ -z "$$DATABASE_URL" ]; then \
 		echo "DATABASE_URL not set, using default PostgreSQL connection..."; \
-		PGPASSWORD=api21_password psql -h localhost -U api21 -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'api21_production'" | grep -q 1 || \
-		PGPASSWORD=api21_password psql -h localhost -U api21 -d postgres -c "CREATE DATABASE api21_production"; \
+		psql -h localhost -U postgres -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'api21_production'" | grep -q 1 || \
+		psql -h localhost -U postgres -d postgres -c "CREATE DATABASE api21_production OWNER api21"; \
 	else \
 		echo "Using custom DATABASE_URL"; \
 	fi
