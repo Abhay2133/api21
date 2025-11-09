@@ -1,4 +1,4 @@
-.PHONY: help install migrate-up build start start-prod dev clean test
+.PHONY: help install migrate-up build start start-smart start-prod dev clean test
 
 # Variables
 BINARY_NAME=api21
@@ -10,6 +10,7 @@ help:
 	@echo "  make migrate-up   - Run database migrations"
 	@echo "  make build        - Build production binary"
 	@echo "  make start        - Install deps, migrate, create db, and run in production mode"
+	@echo "  make start-smart  - Smart startup: run migrations, check .buildversion, rebuild if needed"
 	@echo "  make start-prod   - Run already built binary in production mode"
 	@echo "  make dev          - Run development server with hot-reload"
 	@echo "  make clean        - Clean build artifacts"
@@ -29,7 +30,15 @@ migrate-up:
 # Build production binary
 build: install
 	@echo "Building production binary..."
-	buffalo build -o bin/$(BINARY_NAME)
+	@mkdir -p bin
+	@buffalo build -o bin/$(BINARY_NAME)
+	@if [ -f .buildversion ]; then \
+		VERSION=$$(cat .buildversion | tr -d ' \n'); \
+		if [ -n "$$VERSION" ]; then \
+			cp bin/$(BINARY_NAME) bin/$(BINARY_NAME)-v$$VERSION; \
+			echo "Built versioned binary: bin/$(BINARY_NAME)-v$$VERSION"; \
+		fi; \
+	fi
 
 # Complete start command: install deps, migrate, and run in production mode
 start: install migrate-up build
@@ -38,6 +47,42 @@ start: install migrate-up build
 	export ADDR=0.0.0.0 && \
 	export PORT=$(PORT) && \
 	./bin/$(BINARY_NAME)
+
+# Smart start: run migrations, check .buildversion, rebuild if needed
+start-smart:
+	@echo "Smart startup: running migrations..."
+	@buffalo task db:migrate
+	@echo "Checking for .buildversion file..."
+	@if [ -f .buildversion ]; then \
+		VERSION=$$(cat .buildversion | tr -d ' \n'); \
+		if [ -n "$$VERSION" ]; then \
+			BINARY_PATH="bin/$(BINARY_NAME)-v$$VERSION"; \
+			if [ -f "$$BINARY_PATH" ] && [ -x "$$BINARY_PATH" ]; then \
+				echo "Found existing binary: $$BINARY_PATH"; \
+				export GO_ENV=production && \
+				export ADDR=0.0.0.0 && \
+				export PORT=$(PORT) && \
+				exec $$BINARY_PATH; \
+			else \
+				echo "Binary not found at $$BINARY_PATH, rebuilding..."; \
+				make build && \
+				echo "$$VERSION" > .buildversion && \
+				export GO_ENV=production && \
+				export ADDR=0.0.0.0 && \
+				export PORT=$(PORT) && \
+				exec bin/$(BINARY_NAME)-v$$VERSION; \
+			fi; \
+		fi; \
+	fi
+	@echo "No build version found, building initial binary (v0)..."
+	@make build
+	@mkdir -p bin
+	@cp bin/$(BINARY_NAME) bin/$(BINARY_NAME)-v0
+	@echo "0" > .buildversion
+	@export GO_ENV=production && \
+	export ADDR=0.0.0.0 && \
+	export PORT=$(PORT) && \
+	exec bin/$(BINARY_NAME)-v0
 
 # Start already built binary in production mode
 start-prod:

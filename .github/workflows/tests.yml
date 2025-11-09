@@ -43,6 +43,9 @@ jobs:
     - name: Install Buffalo CLI
       run: go install github.com/gobuffalo/cli/cmd/buffalo@latest
 
+    - name: Install PostgreSQL Client
+      run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
     - name: Wait for PostgreSQL
       run: |
         until pg_isready -h localhost -p 5432 -U api21; do

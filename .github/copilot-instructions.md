@@ -154,14 +154,54 @@ func TestUserValidation(t *testing.T) {
 }
 ```
 
+## Docker Compose Database Setup
+
+### Starting PostgreSQL Database
+When working on tasks that require database connections (testing, migrations, development), start the PostgreSQL container:
+
+```bash
+# Start the database container
+docker-compose up -d db
+
+# Verify database is running and healthy
+docker-compose ps db
+
+# View database logs
+docker-compose logs db
+
+# Connect to database (optional)
+docker-compose exec db psql -U api21 -d api21_dev
+
+# Stop the database
+docker-compose down
+
+# Stop and remove database volume (clean slate)
+docker-compose down -v
+```
+
+### Database Connection Details
+- **Host**: `localhost`
+- **Port**: `5432`
+- **User**: `api21`
+- **Password**: `api21_password`
+- **Database**: `api21_dev`
+- **Connection String**: `postgres://api21:api21_password@localhost:5432/api21_dev`
+
+### Health Check
+The database container includes a health check. Wait for it to be healthy before running tests or migrations:
+```bash
+docker-compose exec db pg_isready -U api21 -d api21_dev
+```
+
 ## Development Workflow
 
 ### Local Setup
 1. Install: `go mod download && go mod tidy`
-2. Create DB: `buffalo pop create -a`
-3. Migrate: `buffalo pop migrate up`
-4. Run dev: `buffalo dev` (hot-reload enabled)
-5. Server runs on `http://localhost:5000`
+2. Start Docker database: `docker-compose up -d db`
+3. Create DB: `buffalo pop create -a`
+4. Migrate: `buffalo pop migrate up`
+5. Run dev: `buffalo dev` (hot-reload enabled)
+6. Server runs on `http://localhost:5000`
 
 ### Build & Production
 - Build: `make build` or `buffalo build`
@@ -281,6 +321,146 @@ verrs, err := tx.ValidateAndCreate(user)    // Create with validation
 - [Fizz DSL Reference](https://gobuffalo.io/en/docs/db/fizz)
 - [Go Documentation](https://golang.org/doc/)
 
+## Documentation Management
+
+### Overview
+Documentation is maintained in two places:
+1. **Feature-specific docs**: `/docs/*.md` files for individual features/tasks
+2. **Main reference**: `README.md` for project-wide information and quick reference
+
+### When Working on Tasks/Features
+
+#### Check for Existing Documentation
+Before creating or updating documentation:
+1. Check if a directory already exists in `/docs/<feature>/` for your task/feature
+2. If it exists → **refactor and update** the existing files (don't create new ones)
+3. If it doesn't exist → create a new feature documentation directory
+
+#### Documentation Directory Structure
+
+For better organization, create subdirectories in `/docs/` for each major feature:
+
+```
+docs/
+├── users/                           # User management feature
+│   ├── README.md                   # Main user documentation
+│   └── authentication.md            # User authentication details
+│
+├── webhooks/                        # Webhook feature
+│   ├── README.md                   # Main webhook documentation
+│   ├── setup.md                    # Webhook setup instructions
+│   ├── examples.md                 # Webhook examples and payloads
+│   └── troubleshooting.md          # Webhook troubleshooting
+│
+├── deployment/                      # Deployment feature
+│   ├── README.md                   # Main deployment documentation
+│   ├── docker.md                   # Docker deployment
+│   ├── production.md               # Production deployment
+│   └── ngrok.md                    # ngrok setup for local testing
+│
+├── database/                        # Database feature
+│   ├── README.md                   # Main database documentation
+│   ├── migrations.md               # Migration guides
+│   └── setup.md                    # Database setup instructions
+│
+└── development/                     # Development setup feature
+    ├── README.md                   # Main development documentation
+    └── local-setup.md              # Local development setup
+```
+
+#### Documentation File Mapping
+
+| Feature | Main Doc | README Section | Related Docs |
+|---------|----------|----------------|--------------|
+| User Management | `docs/users/README.md` | [API Examples](#api-examples) / [Creating New Resources](#creating-new-resources) | `docs/users/authentication.md` |
+| Webhooks | `docs/webhooks/README.md` | [API Examples](#api-examples) | `docs/webhooks/setup.md`, `docs/webhooks/examples.md` |
+| Database | `docs/database/README.md` | [Database Migrations](#database-migrations) | `docs/database/migrations.md`, `docs/database/setup.md` |
+| Deployment | `docs/deployment/README.md` | [Deployment](#deployment) | `docs/deployment/docker.md`, `docs/deployment/production.md` |
+| Development | `docs/development/README.md` | [Development Guide](#development-guide) | `docs/development/local-setup.md` |
+
+#### Creating New Feature Documentation
+
+**File Structure** (`docs/<feature>/README.md`):
+```markdown
+# Feature Name
+
+## Overview
+Brief description of the feature and its purpose.
+
+## Setup/Installation
+Step-by-step setup instructions.
+
+## Usage
+How to use this feature with examples.
+
+## API Endpoints
+If applicable, list and document all endpoints for this feature.
+
+## Configuration
+Any configuration options or environment variables.
+
+## Examples
+Code examples and curl commands.
+
+## Troubleshooting
+Common issues and solutions.
+
+## Related Documentation
+- See `docs/<feature>/setup.md` for detailed setup instructions
+- See `docs/<feature>/examples.md` for more code examples
+- See `docs/<feature>/troubleshooting.md` for common issues
+
+## Related Resources
+Links to related docs or resources.
+```
+
+#### Updating README.md
+
+For each new task/feature implemented:
+
+1. **Create a feature subdirectory** in `/docs/<feature>/` with related documentation files
+2. **Create a main README** in `/docs/<feature>/README.md` for the feature
+3. **Add a new section** to README.md (if creating a new feature area)
+4. **Update Table of Contents** at the top of README.md
+5. **Link to the feature documentation** in README.md (e.g., "See [detailed documentation](docs/<feature>/README.md)")
+6. **Keep README concise** - use brief summaries and link to feature docs for details
+7. **Update relevant existing sections**:
+   - Project Overview features list
+   - API Examples
+   - Creating New Resources
+   - Configuration sections
+
+#### Documentation Checklist
+
+When implementing any task/feature, ensure:
+- ✅ Create feature subdirectory in `/docs/<feature>/` for related documentation
+- ✅ Create main README in `/docs/<feature>/README.md` for the feature
+- ✅ Create related documentation files (setup.md, examples.md, troubleshooting.md, etc.)
+- ✅ README.md includes relevant section(s) with links to feature docs
+- ✅ README.md Table of Contents updated (if new section added)
+- ✅ API examples documented (if feature has endpoints)
+- ✅ Configuration documented (if new environment variables/settings)
+- ✅ Troubleshooting section in feature docs (if applicable)
+- ✅ Clear links between README.md and detailed docs
+- ✅ All code examples tested and working
+- ✅ No orphaned or outdated documentation files
+
+### Existing Documentation
+
+Currently maintained documentation:
+- **docs/webhooks/** - Webhook configuration, setup, examples, and troubleshooting
+- **README.md** - Project overview and quick reference guide
+
+### Best Practices
+
+1. **Keep README.md focused** - Use it for quick reference and navigation
+2. **Use feature docs for details** - Detailed guides belong in `/docs/<feature>.md`
+3. **Cross-reference** - Link between README and feature docs
+4. **Update documentation with code** - Don't skip docs during implementation
+5. **Test examples** - Ensure all code examples in docs actually work
+6. **Version consistency** - Keep docs in sync with actual code
+7. **Clear organization** - Use headers, code blocks, and lists for clarity
+
 ## When Adding Features
 
 When implementing new features, ensure:
@@ -291,6 +471,7 @@ When implementing new features, ensure:
 5. ✅ Write unit tests for models
 6. ✅ Write integration tests for actions
 7. ✅ Test migrations up and down
-8. ✅ Update this document if patterns change
-9. ✅ Run `buffalo test` before committing
-10. ✅ Follow Go conventions and code style
+8. ✅ Create/refactor feature documentation in `/docs/<feature>/`
+9. ✅ Update README.md with new section and links to feature docs
+10. ✅ Run `buffalo test` before committing
+11. ✅ Follow Go conventions and code style

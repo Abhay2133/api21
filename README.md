@@ -9,6 +9,8 @@ A modern, production-ready REST API built with [Buffalo](https://gobuffalo.io/) 
 - [Quick Start](#quick-start)
 - [Project Structure](#project-structure)
 - [Configuration](#configuration)
+- [GitHub Webhooks](#github-webhooks) ⭐
+- [Redeploy Feature](#redeploy-feature) ⭐ **NEW**
 - [Development Guide](#development-guide)
 - [Database Migrations](#database-migrations)
 - [API Examples](#api-examples)
@@ -245,7 +247,191 @@ production:
 
 **Note:** In production, use environment variables via `DATABASE_URL` instead of hardcoding credentials.
 
-## 💻 Development Guide
+## 🪝 GitHub Webhooks
+
+API21 includes built-in GitHub webhook support for handling pull request merges and push events on your main branch.
+
+### Quick Start
+
+```bash
+# 1. Generate a webhook secret
+WEBHOOK_SECRET=$(openssl rand -hex 32)
+
+# 2. Add to .env
+echo "GITHUB_WEBHOOK_SECRET=$WEBHOOK_SECRET" >> .env
+
+# 3. Configure GitHub webhook
+# Settings → Webhooks → Add webhook
+# URL: https://your-api.example.com/webhooks/github
+# Secret: Your $WEBHOOK_SECRET
+# Events: Pull requests, Pushes
+
+# 4. Test locally
+curl -X POST http://localhost:5000/webhooks/github \
+  -H "X-GitHub-Event: push" \
+  -H "Content-Type: application/json" \
+  -d @fixtures/webhook-push-payload.json
+```
+
+### Features
+
+- ✅ **HMAC-SHA256 Signature Verification** - Secure webhook validation
+- ✅ **PR Merge Detection** - Automatically identifies merged PRs
+- ✅ **Branch Filtering** - Only processes main/master events
+- ✅ **Commit Tracking** - Captures commit details for pushes
+- ✅ **Event Logging** - Audit trail of all webhook events
+- ✅ **Production Ready** - Constant-time signature comparison
+
+### Webhook Endpoints
+
+```
+POST /webhooks/github
+```
+
+**Supported Events:**
+- `pull_request` - PR opened, closed, merged, etc.
+- `push` - Commits pushed to branches
+
+**Response:**
+```json
+{
+  "status": "received",
+  "event_type": "pull_request|push",
+  "action": "merged|pushed|...",
+  "pr_number": 42,
+  "branch": "main",
+  "repository": "owner/repo"
+}
+```
+
+### Full Documentation
+
+See **[Webhook Documentation](./docs/webhook.md)** for complete details including:
+- **Quick Start** (5 minutes) - Get up and running quickly
+- **Architecture & Data Flow** - System design and event processing
+- **Event Types** - Pull requests and push events
+- **Setup & Configuration** - GitHub and API21 configuration
+- **Webhook Payloads** - Complete JSON payload structures
+- **Security** - HMAC-SHA256 signature verification
+- **Testing** - Manual and automated testing procedures
+- **Troubleshooting** - Common issues and solutions
+- **Real-World Examples** - Deployments, notifications, integrations
+- **Advanced Topics** - Database storage, rate limiting, async processing
+
+## � Redeploy Feature
+
+API21 includes an automated redeploy system that manages version-controlled deployments with full tracking and visibility through GitHub Actions CI/CD workflows.
+
+### Features
+
+- ✅ **Automated Deployments** - Trigger via REST API from GitHub Actions
+- ✅ **Version Management** - Automatic sequential versioning of builds
+- ✅ **Binary Versioning** - Store multiple versions (`api21-v0`, `api21-v1`, etc.)
+- ✅ **Deployment Tracking** - Database records for each deployment attempt
+- ✅ **Status Polling** - GitHub Actions can monitor deployment progress
+- ✅ **Smart Startup** - Auto-detect and manage binary versions on restart
+- ✅ **Async Processing** - Non-blocking deployment with status webhooks
+
+### Quick Start
+
+```bash
+# 1. Run database migrations (creates redeployments table)
+buffalo pop migrate up
+
+# 2. Trigger a redeploy
+curl -X POST http://localhost:5000/api/redeploy \
+  -H "Content-Type: application/json"
+
+# Response (202 Accepted):
+# {
+#   "id": "550e8400-e29b-41d4-a716-446655440000",
+#   "version": 1,
+#   "status": "pending",
+#   "message": "Redeployment initiated"
+# }
+
+# 3. Check deployment status
+curl http://localhost:5000/api/redeploy/1
+
+# 4. Configure GitHub Actions
+# Add REDEPLOY_URL secret in repository settings
+# GitHub → Settings → Secrets and variables → Actions
+# Name: REDEPLOY_URL
+# Value: https://your-api-server.com
+```
+
+### API Endpoints
+
+**Trigger Redeploy**
+```
+POST /api/redeploy
+Response: 202 Accepted
+```
+
+**Check Deployment Status**
+```
+GET /api/redeploy/:version
+Response: 200 OK
+```
+
+### Deployment Flow
+
+```
+GitHub Workflow (push/PR merge)
+    ↓
+    → Run tests
+    ↓
+    → POST /api/redeploy (trigger)
+    ↓
+    → Pull latest code (git pull origin main)
+    ↓
+    → Rebuild binary (buffalo build -o bin/api21-v{VERSION})
+    ↓
+    → Store version in .buildversion file
+    ↓
+    → Update deployment status in database
+    ↓
+    → Workflow polls /api/redeploy/:version
+    ↓
+    → Status: pending → in_progress → completed/failed
+```
+
+### Server Startup with Version Tracking
+
+```bash
+# Smart startup - automatically handles version management
+make start-smart
+
+# Features:
+# - Runs database migrations
+# - Checks .buildversion file
+# - Validates binary exists in bin/ directory
+# - Rebuilds if binary missing
+# - Starts server with versioned binary
+```
+
+### Production Server Restart
+
+After deployment, the server can be restarted with:
+1. Process manager (systemd, supervisor)
+2. Container restart (Docker/Kubernetes)
+3. Manual restart with `make start-smart`
+
+The system ensures the correct versioned binary runs based on `.buildversion` file.
+
+### Full Documentation
+
+See **[Redeploy Documentation](./docs/redeploy/README.md)** for complete details including:
+- **Setup & Configuration** - Getting started with redeploy
+- **API Reference** - Endpoint details and responses
+- **Database Schema** - Redeployments table structure
+- **Workflow Integration** - GitHub Actions CI/CD setup
+- **Examples** - cURL, JavaScript, Python, Bash examples
+- **Troubleshooting** - Common issues and solutions
+- **Monitoring** - Database queries and dashboards
+- **Security** - Authentication and best practices
+
+## �💻 Development Guide
 
 ### Running the Development Server
 
@@ -494,6 +680,40 @@ curl -X PUT http://localhost:5000/api/users/550e8400-e29b-41d4-a716-446655440001
 curl -X DELETE http://localhost:5000/api/users/550e8400-e29b-41d4-a716-446655440001
 
 # Response (204 No Content)
+```
+
+### Trigger Redeploy
+
+```bash
+curl -X POST http://localhost:5000/api/redeploy \
+  -H "Content-Type: application/json"
+
+# Response (202 Accepted):
+# {
+#   "id": "550e8400-e29b-41d4-a716-446655440000",
+#   "version": 1,
+#   "status": "pending",
+#   "message": "Redeployment initiated"
+# }
+```
+
+### Check Deployment Status
+
+```bash
+curl http://localhost:5000/api/redeploy/1
+
+# Response (200 OK):
+# {
+#   "id": "550e8400-e29b-41d4-a716-446655440000",
+#   "version": 1,
+#   "status": "completed",
+#   "message": "Build version file updated",
+#   "error": null,
+#   "started_at": "2025-11-09T12:30:45Z",
+#   "completed_at": "2025-11-09T12:35:20Z",
+#   "created_at": "2025-11-09T12:30:40Z",
+#   "updated_at": "2025-11-09T12:35:20Z"
+# }
 ```
 
 ## 🆕 Creating New Resources
