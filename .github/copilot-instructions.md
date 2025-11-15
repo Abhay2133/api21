@@ -475,3 +475,15 @@ When implementing new features, ensure:
 9. ✅ Update README.md with new section and links to feature docs
 10. ✅ Run `buffalo test` before committing
 11. ✅ Follow Go conventions and code style
+12. ✅ **Senior-level refactoring and codebase cleanup**:
+    - **Code Quality Review**: Review all new/modified code for Go best practices, error handling, and performance
+    - **Remove Dead Code**: Eliminate unused imports, variables, functions, and commented-out code
+    - **Improve Naming**: Ensure all variables, functions, and files follow clear, descriptive naming conventions
+    - **Code Organization**: Reorganize code structure for better readability and maintainability
+    - **Documentation Cleanup**: Update and consolidate MD files, remove outdated docs, ensure proper cross-references
+    - **Test Coverage**: Verify all new code has appropriate test coverage and tests are passing
+    - **Code Formatting**: Run `go fmt` and ensure consistent formatting across all Go files
+    - **Dependency Management**: Clean up `go.mod` and `go.sum`, remove unused dependencies
+    - **Security Review**: Check for any security vulnerabilities or best practice violations
+    - **Performance Optimization**: Review for any obvious performance bottlenecks or inefficiencies
+    - **Final Integration Test**: Run full test suite and verify all features work together correctly

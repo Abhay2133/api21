@@ -1,5 +1,5 @@
 name = "api21"
-bin = "bin"
+bin = "bin/api21"
 vcs = "git"
 with_pop = true
 with_sqlite = false

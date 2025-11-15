@@ -66,17 +66,6 @@ func App() *buffalo.App {
 		// Remove to disable this.
 		app.Use(popmw.Transaction(models.DB))
 		app.GET("/", HomeHandler)
-		app.GET("/api/memory", MemoryHandler)
-
-		// Redeploy endpoints with authentication
-		redeployGroup := app.Group("/api/redeploy")
-		redeployGroup.Use(RedeployAuthMiddleware())
-		redeployGroup.POST("/", RedeployHandler)
-		redeployGroup.GET("/:version", GetRedeployStatusHandler)
-
-		// Webhook endpoint (no transaction needed)
-		webhookGroup := app.Group("/webhooks")
-		webhookGroup.POST("/github", WebhookHandler)
 	})
 
 	return app

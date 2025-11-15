@@ -4,8 +4,8 @@ FROM gobuffalo/buffalo:v0.18.14 as builder
 
 ENV GOPROXY http://proxy.golang.org
 
-RUN mkdir -p /src/api21
-WORKDIR /src/api21
+RUN mkdir -p /src/workspaces
+WORKDIR /src/workspaces
 
 # Copy the Go Modules manifests
 COPY go.mod go.mod
@@ -26,7 +26,7 @@ WORKDIR /bin/
 COPY --from=builder /bin/app .
 
 # Uncomment to run the binary in "production" mode:
-ENV GO_ENV=production
+# ENV GO_ENV=production
 
 # Bind the app to 0.0.0.0 so it can be seen from outside the container
 ENV ADDR=0.0.0.0
