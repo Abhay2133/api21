@@ -22,6 +22,26 @@ services:
       timeout: 5s
       retries: 5
 
+  db-test:
+    image: postgres:15
+    container_name: api21_db_test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: api21
+      POSTGRES_PASSWORD: api21_password
+      POSTGRES_DB: api21_test
+    volumes:
+      - db_test_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U api21 -d api21_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   db_data:
     name: api21_db_data
+  db_test_data:
+    name: api21_db_test_data
