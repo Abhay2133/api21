@@ -2,8 +2,6 @@
 
 A general purpose backend for my side-projects
 
-server url : ```https://serum-impacts-cave-oct.trycloudflare.com/```
-
 ## Environment Variables
 
 Copy `.env.example` to `.env` and update the values:
