@@ -45,6 +45,8 @@ main_loop() {
   while true; do
     start_at=$(date +%s)
 
+    run_cmd "git pull" "Updating code from git..." || break
+
     run_cmd "npm install" "Installing dependencies..." || break
     run_cmd "npm run db:migrate" "Running database migrations..." || break
     
