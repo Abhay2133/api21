@@ -7,7 +7,9 @@ export class LoggerMiddleware implements NestMiddleware {
     const hr = new Date().getHours();
     const min = new Date().getMinutes();
     const sec = new Date().getSeconds();
-    console.log(`${res.statusCode} ${req.url} ${hr}:${min}:${sec}`);
+    console.log(
+      `${res.statusCode} ${req.method} ${req.url} ${hr}:${min}:${sec}`,
+    );
     next();
   }
 }
