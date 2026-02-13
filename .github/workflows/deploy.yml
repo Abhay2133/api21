@@ -19,10 +19,10 @@ jobs:
           bun-version: latest
 
       - name: Install Dependencies
-        uses: bun install
+        run: bun install
 
       - name: Test Cases
-        uses: bun Test
+        run: bun Test
 
       - name: Deploy to Render
-        uses: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
