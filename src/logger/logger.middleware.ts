@@ -4,13 +4,12 @@ import { Request, Response, NextFunction } from 'express';
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    const hr = new Date().getHours();
-    const min = new Date().getMinutes();
-    const ms = new Date().getMilliseconds();
-    const sec = new Date().getSeconds() + ms / 1000;
-    console.log(
-      `${res.statusCode} ${req.method} ${req.url} ${hr}:${min}:${sec}`,
-    );
+    const it = Date.now();
+    res.on('close', () => {
+      console.debug(
+        `[${new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Kolkata' })}] ${res.statusCode} ${req.method} ${req.url} ${Date.now() - it}ms`,
+      );
+    });
     next();
   }
 }

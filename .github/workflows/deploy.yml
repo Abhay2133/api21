@@ -1,86 +1,28 @@
-name: Test and Deploy
+name: Deploy
 
 on:
   push:
-    branches:
+    branch:
       - main
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: '20'
-          cache: 'npm'
+          bun-version: latest
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Dependencies
+        uses: bun install
 
-      - name: Run tests
-        run: npm run test
+      - name: Test Cases
+        uses: bun Test
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-    
-    steps:
-      - name: Trigger server restart
-        run: |
-          response=$(curl -s -w "\n%{http_code}" -X POST \
-            -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
-            "${{ vars.SERVER_URL }}/admin/kill")
-          
-          http_code=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | sed '$d')
-          
-          echo "Response: $body"
-          echo "HTTP Code: $http_code"
-          
-          if [ "$http_code" -ne 200 ] && [ "$http_code" -ne 201 ]; then
-            echo "Failed to trigger server restart"
-            exit 1
-          fi
-          
-          echo "Server restart triggered successfully"
-
-  health-check:
-    runs-on: ubuntu-latest
-    needs: deploy
-    
-    steps:
-      - name: Wait for server to be healthy
-        run: |
-          echo "Waiting for server to become healthy..."
-          
-          timeout=60
-          interval=5
-          elapsed=0
-          
-          while [ $elapsed -lt $timeout ]; do
-            http_code=$(curl -s -o /dev/null -w "%{http_code}" "${{ vars.SERVER_URL }}/")
-            
-            echo "Health check attempt (${elapsed}s): HTTP $http_code"
-            
-            if [ "$http_code" -eq 200 ]; then
-              echo "Server is healthy!"
-              exit 0
-            fi
-            
-            sleep $interval
-            elapsed=$((elapsed + interval))
-          done
-          
-          echo "Health check failed: Server did not become healthy within ${timeout}s"
-          exit 1
+      - name: Deploy to Render
+        uses: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
