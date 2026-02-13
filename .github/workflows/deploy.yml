@@ -22,7 +22,7 @@ jobs:
         run: bun install
 
       - name: Test Cases
-        run: bun Test
+        run: bun test
 
       - name: Deploy to Render
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
