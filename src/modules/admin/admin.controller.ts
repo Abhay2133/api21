@@ -4,7 +4,7 @@ import {
   Post,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ERROR_CODES } from '../constants';
+import { ERROR_CODES } from '../../commons/constants';
 import { exit } from 'node:process';
 
 @Controller('admin')

@@ -1,11 +1,13 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AdminModule } from './admin/admin.module';
-import { LoggerMiddleware } from './logger/logger.middleware';
+import { AdminModule } from './modules/admin/admin.module';
+import { LoggerMiddleware } from './commons/logger/logger.middleware';
+import { JobModule } from './jobs/jobs.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [AdminModule],
+  imports: [AdminModule, JobModule, ConfigModule.forRoot({ isGlobal: true })],
   controllers: [AppController],
   providers: [AppService],
 })
