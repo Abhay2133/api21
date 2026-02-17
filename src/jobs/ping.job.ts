@@ -35,4 +35,9 @@ export class PingJob {
       `PING JOB ADDED URL (${url}) with (${cronJobExpression})`,
     );
   }
+
+  onModuleDestroy() {
+    const job = this.schedulerRegistry.getCronJob('ping-job');
+    job.stop()?.catch((e) => this.logger.error(e));
+  }
 }
