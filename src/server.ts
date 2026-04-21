@@ -4,10 +4,12 @@ import { connectRedis, disconnectRedis } from "./config/redis";
 import { env } from "./config/env";
 import { registerJobs, stopAllJobs } from "./jobs";
 import { pingJob } from "./jobs/ping.job";
+import { initRateLimiters } from "./middlewares/rate-limit.middleware";
 
 async function bootstrap() {
   await connectDB();
   await connectRedis();
+  initRateLimiters();
 
   registerJobs([pingJob]);
 
