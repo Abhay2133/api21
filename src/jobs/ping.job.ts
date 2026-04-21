@@ -1,43 +1,16 @@
-import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CronJob } from 'cron';
+import type { CronJob } from "./index";
 
-@Injectable()
-export class PingJob {
-  private readonly logger = new Logger(PingJob.name);
+// Pings PING_URL every 14 minutes to keep free-tier instances alive.
+// Set PING_URL in .env to your deployed server URL.
+const PING_URL = process.env.PING_URL;
 
-  constructor(
-    private configService: ConfigService,
-    private schedulerRegistry: SchedulerRegistry,
-  ) {}
+export const pingJob: CronJob = {
+  name: "ping-server",
+  schedule: "*/1 * * * *",
+  handler: async () => {
+    if (!PING_URL) return;
 
-  onModuleInit() {
-    const url = this.configService.get<string>('PING_URL') || '';
-    const cronJobExpression =
-      this.configService.get<string>('PING_INTERVAL_EXPRESSION') ||
-      CronExpression.EVERY_5_MINUTES;
-    if (!url) {
-      this.logger.warn('No PING_URL is defined !');
-    }
-
-    const job = new CronJob(cronJobExpression, () => {
-      fetch(url)
-        .then((res) => res.text())
-        .then((text) => this.logger.debug(text))
-        .catch((error) => this.logger.error(error));
-    });
-    this.schedulerRegistry.addCronJob('ping-job', job);
-
-    job.start();
-
-    this.logger.debug(
-      `PING JOB ADDED URL (${url}) with (${cronJobExpression})`,
-    );
-  }
-
-  onModuleDestroy() {
-    const job = this.schedulerRegistry.getCronJob('ping-job');
-    job.stop()?.catch((e) => this.logger.error(e));
-  }
-}
+    const res = await fetch(PING_URL);
+    console.log(`[cron:ping-server] ${PING_URL} → ${res.status}`);
+  },
+};
