@@ -1,4 +1,4 @@
-name: Deploy
+name: CI/CD Production Deployment
 
 on:
   push:
@@ -6,23 +6,34 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Deploy to GCP VM via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Type check
-        run: bun run typecheck
-
-      - name: Deploy to Render
-        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            # 1. Load system binaries and shell profiles (so bun/pm2 are in scope)
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            export BUN_INSTALL="$HOME/.bun"
+            export PATH="$BUN_INSTALL/bin:$PATH"
+            
+            # 2. Navigate to project repository
+            cd ~/api21
+            
+            # 3. Pull latest changes
+            git reset --hard origin/main
+            git pull origin main
+            
+            # 4. Install production dependencies, migrate, build, and restart PM2
+            npm install
+            npm run start
