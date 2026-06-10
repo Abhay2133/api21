@@ -48,4 +48,25 @@ test.describe("Vue SSR & Hydration E2E", () => {
     const linkedinLink = page.locator('nav a[aria-label="LinkedIn"]');
     await expect(linkedinLink).toHaveAttribute("href", "https://www.linkedin.com/in/abhay-21m");
   });
+
+  test("should return 404 status and not found page for non-existent routes", async ({ page, request }) => {
+    // 1. Check response status code directly using request
+    const response = await request.get("/non-existent-page-url");
+    expect(response.status()).toBe(404);
+
+    // 2. Load page and verify it shows our custom "Page Not Found" page
+    await page.goto("/non-existent-page-url");
+    await expect(page.locator("h1")).toContainText("404");
+    await expect(page.locator("h2")).toContainText("Page Not Found");
+    
+    // Check "Back to Home" button presence
+    const homeBtn = page.locator('a:has-text("Back to Home")');
+    await expect(homeBtn).toBeVisible();
+  });
+
+  test("should check that the resume link points to the copied PDF file", async ({ page }) => {
+    await page.goto("/");
+    const resumeLink = page.locator('a:has-text("Resume")');
+    await expect(resumeLink).toHaveAttribute("href", "/Resume_Abhay-Bisht.pdf");
+  });
 });

@@ -13,6 +13,11 @@ export function createRouter() {
         name: "home",
         component: () => import("./pages/Home.vue"),
       },
+      {
+        path: "/:pathMatch(.*)*",
+        name: "not-found",
+        component: () => import("./pages/NotFound.vue"),
+      },
     ],
   });
 }

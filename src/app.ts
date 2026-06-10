@@ -3,6 +3,7 @@ import { loggerMiddleware } from "./middlewares/logger.middleware";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import { globalLimiter } from "./middlewares/rate-limit.middleware";
 import routes from "./routes";
+import { AppError } from "./middlewares/error.middleware";
 
 const app = express();
 
@@ -18,5 +19,10 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/v1", routes);
+
+// Catch-all for API routes not found
+app.use("/api/*", (req, res, next) => {
+  next(new AppError(404, "API route not found"));
+});
 
 export default app;

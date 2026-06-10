@@ -65,14 +65,14 @@ export async function setupSSR(app: express.Application) {
       }
 
       // 4. Render application HTML
-      const { html } = await render(url);
+      const { html, isNotFound } = await render(url);
 
       // 5. Replace placeholder
       const htmlOutput = template.replace("<!--ssr-outlet-->", html);
 
       // 6. Return response
       res
-        .status(200)
+        .status(isNotFound ? 404 : 200)
         .set({ "Content-Type": "text/html" })
         .end(htmlOutput);
     } catch (e: any) {

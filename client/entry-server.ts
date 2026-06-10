@@ -12,5 +12,7 @@ export async function render(url: string) {
   const ctx = {};
   const html = await renderToString(app, ctx);
 
-  return { html };
+  const isNotFound = router.currentRoute.value.name === "not-found";
+
+  return { html, isNotFound };
 }
