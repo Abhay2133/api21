@@ -4,6 +4,8 @@
   "description": "Express + TypeScript + Bun API with MVC, Knex (PostgreSQL), Redis",
   "scripts": {
     "dev": "bun --watch src/server.ts",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
     "start": "pm2 delete api21 ; pm2 start dist/server.js --name \"api21\" --interpreter $(which bun)",
     "prestart": "bun db:migrate && bun run build",
     "start:prod": "bun dist/server.js",
