@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./config/dotenv";
 import repl from "node:repl";
 import { connectDB, disconnectDB } from "./config/db";
 import { connectRedis, disconnectRedis, getRedisClient } from "./config/redis";
