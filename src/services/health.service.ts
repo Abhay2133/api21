@@ -1,8 +1,14 @@
-import mongoose from "mongoose";
+import { db } from "../config/db";
 import { getRedisClient } from "../config/redis";
 
 export async function getHealthStatus() {
-  const mongo = mongoose.connection.readyState === 1 ? "up" : "down";
+  let postgres = "down";
+  try {
+    await db.raw("SELECT 1");
+    postgres = "up";
+  } catch {
+    // db not connected or error
+  }
 
   let redis = "down";
   try {
@@ -12,5 +18,5 @@ export async function getHealthStatus() {
     // client not connected
   }
 
-  return { status: "ok", mongo, redis };
+  return { status: "ok", postgres, redis };
 }

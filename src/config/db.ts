@@ -1,20 +1,29 @@
-import mongoose from "mongoose";
+import knex from "knex";
 import { env } from "./env";
 
-export async function connectDB(): Promise<void> {
-  mongoose.connection.on("connected", () =>
-    console.log("[mongo] connected:", env.mongoUri)
-  );
-  mongoose.connection.on("error", (err) =>
-    console.error("[mongo] error:", err)
-  );
-  mongoose.connection.on("disconnected", () =>
-    console.warn("[mongo] disconnected")
-  );
+const config = {
+  client: "pg",
+  connection: env.databaseUrl,
+  pool: {
+    min: 2,
+    max: 10,
+  },
+};
 
-  await mongoose.connect(env.mongoUri);
+export const db = knex(config);
+
+export async function connectDB(): Promise<void> {
+  try {
+    await db.raw("SELECT 1");
+    // Hide password in logged connection string
+    const sanitizedUrl = env.databaseUrl.replace(/:[^:@\n]+@/, ':***@');
+    console.log("[pg] connected:", sanitizedUrl);
+  } catch (err) {
+    console.error("[pg] connection error:", err);
+    throw err;
+  }
 }
 
 export async function disconnectDB(): Promise<void> {
-  await mongoose.disconnect();
+  await db.destroy();
 }

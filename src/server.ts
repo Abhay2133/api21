@@ -6,6 +6,12 @@ import { registerJobs, stopAllJobs } from "./jobs";
 import { pingJob } from "./jobs/ping.job";
 import { initRateLimiters } from "./middlewares/rate-limit.middleware";
 
+if (env.nodeEnv !== "production") {
+  // @ts-ignore
+  import("../.env", { with: { type: "text" } }).catch(() => {});
+}
+
+
 async function bootstrap() {
   await connectDB();
   await connectRedis();
