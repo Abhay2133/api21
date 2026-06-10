@@ -9,11 +9,14 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(loggerMiddleware);
-// Delegate to globalLimiter at request time (assigned after Redis connects)
-app.use((req, res, next) => globalLimiter(req, res, next));
+// Delegate to globalLimiter at request time for API routes
+app.use((req, res, next) => {
+  if (req.originalUrl.startsWith("/api/")) {
+    return globalLimiter(req, res, next);
+  }
+  next();
+});
 
 app.use("/api/v1", routes);
-
-app.use(errorMiddleware);
 
 export default app;
