@@ -5,6 +5,8 @@ import { env } from "./config/env";
 import { registerJobs, stopAllJobs } from "./jobs";
 import { pingJob } from "./jobs/ping.job";
 import { initRateLimiters } from "./middlewares/rate-limit.middleware";
+import { setupSSR } from "./ssr";
+import { errorMiddleware } from "./middlewares/error.middleware";
 
 if (env.nodeEnv !== "production") {
   // @ts-ignore
@@ -18,6 +20,12 @@ async function bootstrap() {
   initRateLimiters();
 
   registerJobs([pingJob]);
+
+  // Setup Vue SSR routing (and Vite Dev middleware in development)
+  await setupSSR(app);
+
+  // Register catch-all error handling at the very end
+  app.use(errorMiddleware);
 
   const server = app.listen(env.port, () => {
     console.log(`[server] running on port ${env.port} (${env.nodeEnv})`);

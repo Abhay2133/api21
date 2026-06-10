@@ -6,10 +6,15 @@
     "dev": "bun --watch src/server.ts",
     "test": "bun test",
     "test:coverage": "bun test --coverage",
+    "test:e2e": "playwright test",
+    "posttest": "bun run test:e2e",
     "start": "pm2 delete api21 ; pm2 start dist/server.js --name \"api21\" --interpreter $(which bun)",
     "prestart": "bun db:migrate && bun run build",
     "start:prod": "bun dist/server.js",
-    "build": "bun build src/server.ts --outdir dist --target bun --external knex --external pg --external ../.env",
+    "build:client": "vite build --outDir dist/client",
+    "build:server": "vite build --ssr client/entry-server.ts --outDir dist/server",
+    "build:backend": "bun build src/server.ts --outdir dist --target bun --external knex --external pg --external ../.env --external vite",
+    "build": "bun run build:client && bun run build:server && bun run build:backend",
     "typecheck": "tsc --noEmit",
     "console": "bun src/console.ts",
     "db:migrate": "bun --bun x knex migrate:latest",
@@ -30,14 +35,23 @@
     "node-cron": "^4.2.1",
     "pg": "^8.21.0",
     "rate-limit-redis": "^4.3.1",
-    "redis": "^4.6.14"
+    "redis": "^4.6.14",
+    "vue": "^3.5.35",
+    "vue-router": "^5.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@tailwindcss/vite": "^4.3.0",
     "@types/bun": "latest",
     "@types/express": "^4.17.21",
     "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.20.0",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "autoprefixer": "^10.5.0",
     "pm2": "^7.0.1",
-    "typescript": "^5.4.5"
+    "postcss": "^8.5.15",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^5.4.5",
+    "vite": "^8.0.16"
   }
 }
