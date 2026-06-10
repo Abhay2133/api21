@@ -4,7 +4,7 @@
   "description": "Express + TypeScript + Bun API with MVC, Knex (PostgreSQL), Redis",
   "scripts": {
     "dev": "bun --watch src/server.ts",
-    "start": "pm2 delete api21 ; pm2 start -f dist/server.js --name \"api21\"",
+    "start": "pm2 delete api21 ; pm2 start dist/server.js --name \"api21\" --interpreter $(which bun)",
     "prestart": "bun db:migrate && bun run build",
     "start:prod": "bun dist/server.js",
     "build": "bun build src/server.ts --outdir dist --target bun --external knex --external pg --external ../.env",
