@@ -105,5 +105,6 @@ jobs:
             git pull origin main
 
             # 4. Install deps, migrate, build, and restart via PM2
+            rm -rf node_modules
             bun install --frozen-lockfile
             bun run start
