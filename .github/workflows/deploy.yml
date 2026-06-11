@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/api21
+      REDIS_URL: redis://localhost:6379
 
     services:
       postgres:
@@ -51,6 +53,12 @@ jobs:
       - name: Run Migrations
         run: bun db:migrate
 
+      - name: Run Unit Tests
+        run: bun run test:unit
+
+      - name: Build Nuxt App
+        run: bun run build
+
       - name: Cache Playwright Browsers
         id: playwright-cache
         uses: actions/cache@v4
@@ -63,8 +71,17 @@ jobs:
       - name: Install Playwright Browsers & Deps
         run: bunx playwright install chromium --with-deps
 
-      - name: Run Tests
-        run: bun run test
+      - name: Start Server for E2E Tests
+        run: bun .output/server/index.mjs &
+        env:
+          NODE_ENV: test
+          PORT: 3000
+
+      - name: Wait for Server to be Ready
+        run: bunx wait-on http://localhost:3000 --timeout 30000
+
+      - name: Run E2E Tests
+        run: bun run test:e2e
 
       - name: Deploy to GCP VM via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -79,14 +96,14 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             export BUN_INSTALL="$HOME/.bun"
             export PATH="$BUN_INSTALL/bin:$PATH"
-            
+
             # 2. Navigate to project repository
             cd ~/api21
-            
+
             # 3. Pull latest changes
             git reset --hard origin/main
             git pull origin main
-            
-            # 4. Install production dependencies, migrate, build, and restart PM2
-            npm install
-            npm run start
+
+            # 4. Install deps, migrate, build, and restart via PM2
+            bun install --frozen-lockfile
+            bun run start

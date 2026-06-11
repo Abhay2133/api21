@@ -69,4 +69,14 @@ test.describe("Vue SSR & Hydration E2E", () => {
     const resumeLink = page.locator('a:has-text("Resume")');
     await expect(resumeLink).toHaveAttribute("href", "/Resume_Abhay-Bisht.pdf");
   });
+
+  test("should return health status data from API", async ({ request }) => {
+    const response = await request.get("/api/v1/health");
+    expect(response.status()).toBe(200);
+    const data = await response.json();
+    expect(data.success).toBe(true);
+    expect(data.data.status).toBe("ok");
+    expect(["up", "down"]).toContain(data.data.postgres);
+    expect(["up", "down"]).toContain(data.data.redis);
+  });
 });

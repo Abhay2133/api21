@@ -48,6 +48,10 @@ useHead({
   title: '404 – Page Not Found'
 })
 
+if (import.meta.server) {
+  setResponseStatus(404)
+}
+
 onMounted(() => {
   // Sync dark mode class with documentElement from localStorage
   const isDark = document.documentElement.classList.contains('dark') || 

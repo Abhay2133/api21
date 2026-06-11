@@ -13,6 +13,7 @@
     "db:rollback": "bun --bun x knex migrate:rollback",
     "db:make-migration": "bun --bun x knex migrate:make",
     "test:e2e": "playwright test",
+    "test:unit": "vitest run",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop ecosystem.config.js",
     "pm2:restart": "pm2 restart ecosystem.config.js",
@@ -29,14 +30,19 @@
     "vue": "^3.5.38"
   },
   "devDependencies": {
+    "@nuxt/test-utils": "^4.0.3",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/vite": "^4.3.0",
     "@types/bun": "latest",
     "@types/pg": "^8.20.0",
+    "@vue/test-utils": "^2.4.11",
     "autoprefixer": "^10.5.0",
+    "happy-dom": "^20.10.2",
     "pm2": "^7.0.1",
     "postcss": "^8.5.15",
     "tailwindcss": "^4.3.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.8",
+    "wait-on": "^9.0.10"
   }
 }

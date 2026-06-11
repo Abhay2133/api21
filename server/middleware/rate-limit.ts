@@ -1,3 +1,4 @@
+import { defineEventHandler, setResponseHeader, createError } from "h3";
 import { getRedisClient } from "../utils/redis";
 
 // Rate limit config (mirrors the old express-rate-limit setup)

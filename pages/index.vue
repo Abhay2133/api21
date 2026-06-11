@@ -369,6 +369,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
+useHead({
+  title: "Abhay Bisht | Portfolio"
+})
+
 // Nuxt auto-imports components — no explicit imports needed
 const isCarVisible = ref(false)
 const isDarkMode = ref(false)

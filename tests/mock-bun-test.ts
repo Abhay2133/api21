@@ -1,0 +1,10 @@
+export const describe = () => {};
+export const expect = () => {};
+export const test = () => {};
+export const it = () => {};
+export const mock = () => {};
+export const spyOn = () => {};
+export const beforeEach = () => {};
+export const afterEach = () => {};
+export const beforeAll = () => {};
+export const afterAll = () => {};

@@ -1,61 +1,61 @@
-import { mock, describe, expect, test, beforeEach } from "bun:test";
-
-const mockDb = {
-  raw: mock(),
-};
+// @vitest-environment node
+import { vi, describe, expect, it, beforeEach } from "vitest";
 
 const mockRedisClient = {
-  ping: mock(),
+  ping: vi.fn(),
 };
 
-mock.module("../../src/config/db", () => ({
-  db: mockDb,
+vi.mock("../../server/utils/db", () => ({
+  db: {
+    raw: vi.fn(),
+  },
 }));
 
-mock.module("../../src/config/redis", () => ({
+vi.mock("../../server/utils/redis", () => ({
   getRedisClient: () => mockRedisClient,
 }));
 
-import { getHealthStatus } from "../../src/services/health.service";
+import { db } from "../../server/utils/db";
+import { getHealthStatus } from "../../server/services/health.service";
 
 describe("health.service", () => {
   beforeEach(() => {
-    mockDb.raw.mockClear();
-    mockRedisClient.ping.mockClear();
+    vi.mocked(db.raw).mockClear();
+    vi.mocked(mockRedisClient.ping).mockClear();
   });
 
-  test("should return up when both postgres and redis are online", async () => {
-    mockDb.raw.mockResolvedValue({});
-    mockRedisClient.ping.mockResolvedValue("PONG");
+  it("should return up when both postgres and redis are online", async () => {
+    vi.mocked(db.raw).mockResolvedValue({} as never);
+    vi.mocked(mockRedisClient.ping).mockResolvedValue("PONG" as never);
 
     const status = await getHealthStatus();
 
     expect(status).toEqual({ status: "ok", postgres: "up", redis: "up" });
-    expect(mockDb.raw).toHaveBeenCalledWith("SELECT 1");
+    expect(db.raw).toHaveBeenCalledWith("SELECT 1");
     expect(mockRedisClient.ping).toHaveBeenCalled();
   });
 
-  test("should handle postgres down and redis up", async () => {
-    mockDb.raw.mockRejectedValue(new Error("Database Down"));
-    mockRedisClient.ping.mockResolvedValue("PONG");
+  it("should handle postgres down and redis up", async () => {
+    vi.mocked(db.raw).mockRejectedValue(new Error("Database Down") as never);
+    vi.mocked(mockRedisClient.ping).mockResolvedValue("PONG" as never);
 
     const status = await getHealthStatus();
 
     expect(status).toEqual({ status: "ok", postgres: "down", redis: "up" });
   });
 
-  test("should handle postgres up and redis down", async () => {
-    mockDb.raw.mockResolvedValue({});
-    mockRedisClient.ping.mockRejectedValue(new Error("Redis Down"));
+  it("should handle postgres up and redis down", async () => {
+    vi.mocked(db.raw).mockResolvedValue({} as never);
+    vi.mocked(mockRedisClient.ping).mockRejectedValue(new Error("Redis Down") as never);
 
     const status = await getHealthStatus();
 
     expect(status).toEqual({ status: "ok", postgres: "up", redis: "down" });
   });
 
-  test("should handle both postgres and redis down", async () => {
-    mockDb.raw.mockRejectedValue(new Error("Database Down"));
-    mockRedisClient.ping.mockRejectedValue(new Error("Redis Down"));
+  it("should handle both postgres and redis down", async () => {
+    vi.mocked(db.raw).mockRejectedValue(new Error("Database Down") as never);
+    vi.mocked(mockRedisClient.ping).mockRejectedValue(new Error("Redis Down") as never);
 
     const status = await getHealthStatus();
 
