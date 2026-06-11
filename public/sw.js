@@ -41,12 +41,19 @@ self.addEventListener("fetch", (event) => {
   // Only handle GET navigation requests (page loads)
   if (event.request.method === "GET" && event.request.mode === "navigate") {
     const url = new URL(event.request.url);
+    console.log("[SW] Intercepted navigation request:", url.href);
 
     // If requesting the offline page itself, serve it from cache
     if (url.pathname === "/offline" || url.pathname === "/offline.html") {
+      console.log("[SW] Serving offline page from cache for:", url.href);
       event.respondWith(
         caches.match(OFFLINE_URL).then((cachedResponse) => {
-          return cachedResponse || fetch(event.request);
+          if (cachedResponse) {
+            console.log("[SW] Found cached offline page:", OFFLINE_URL);
+            return cachedResponse;
+          }
+          console.warn("[SW] Cached offline page not found, fetching...");
+          return fetch(event.request);
         })
       );
       return;
@@ -59,12 +66,14 @@ self.addEventListener("fetch", (event) => {
         `/offline?_next=${encodeURIComponent(targetUrl)}`,
         self.location.href
       ).href;
+      console.log("[SW] Offline: Redirecting directly to:", redirectAbsoluteUrl);
       event.respondWith(Promise.resolve(Response.redirect(redirectAbsoluteUrl, 302)));
       return;
     }
 
     // Try navigation from live SSR server first.
     // If it fails (offline), redirect to /offline?_next=<path>
+    console.log("[SW] Online: Attempting network fetch for:", url.href);
     event.respondWith(
       fetch(event.request).catch((error) => {
         const targetUrl = url.pathname + url.search;
@@ -72,6 +81,7 @@ self.addEventListener("fetch", (event) => {
           `/offline?_next=${encodeURIComponent(targetUrl)}`,
           self.location.href
         ).href;
+        console.log("[SW] Network fetch failed, redirecting to:", redirectAbsoluteUrl);
         return Response.redirect(redirectAbsoluteUrl, 302);
       })
     );

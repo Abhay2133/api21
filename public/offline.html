@@ -176,15 +176,62 @@
       const nextRoute = urlParams.get('_next') || '/';
 
       const retryBtn = document.getElementById('retry-btn');
-      
-      // Retry Button click navigation
+      let redirected = false;
+      let checkInProgress = false;
+
+      function redirectToTarget() {
+        if (redirected) return;
+        redirected = true;
+        clearInterval(pingInterval);
+        console.log("[Offline Page] Network recovered! Redirecting to:", nextRoute);
+        window.location.href = nextRoute;
+      }
+
+      // Periodically check actual connectivity by fetching our health endpoint.
+      // We append a timestamp to ensure it bypasses any caches.
+      async function checkConnectivity() {
+        if (redirected || checkInProgress) return;
+        checkInProgress = true;
+        
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 4000); // 4-second timeout
+          
+          const response = await fetch('/api/v1/health?t=' + Date.now(), {
+            method: 'GET',
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (response.ok) {
+            redirectToTarget();
+          } else {
+            console.log("[Offline Page] Ping returned status " + response.status + ", still offline.");
+          }
+        } catch (error) {
+          console.log("[Offline Page] Ping failed, still offline:", error.message || error);
+        } finally {
+          checkInProgress = false;
+        }
+      }
+
+      // Retry Button click navigation: attempts immediate redirect
       retryBtn.addEventListener('click', function() {
+        // Force navigate immediately to let browser try loading the page
         window.location.href = nextRoute;
       });
 
-      // Auto-redirect when coming online
+      // Check connectivity immediately on load
+      checkConnectivity();
+
+      // Set up a periodic check every 3 seconds for fast detection when returning online
+      const pingInterval = setInterval(checkConnectivity, 3000);
+
+      // Listen to the window 'online' event to trigger an instant check
       window.addEventListener('online', function() {
-        window.location.href = nextRoute;
+        console.log("[Offline Page] Window online event fired. Checking connectivity...");
+        checkConnectivity();
       });
     })();
   </script>
