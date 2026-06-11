@@ -7,7 +7,7 @@
     "build": "nuxt build",
     "start:prod": "bun .output/server/index.mjs",
     "start": "pm2 delete api21 ; pm2 start ecosystem.config.js",
-    "prestart": "bun db:migrate && bun run build",
+    "prestart": "bun db:migrate",
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck",
     "db:migrate": "bun --bun x knex migrate:latest",

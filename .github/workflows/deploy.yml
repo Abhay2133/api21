@@ -83,7 +83,30 @@ jobs:
       - name: Run E2E Tests
         run: bun run test:e2e
 
-      - name: Deploy to GCP VM via SSH
+      - name: Prepare VM for Deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/api21
+            git reset --hard origin/main
+            git pull origin main
+            rm -rf .output
+
+      - name: Copy .output to GCP VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          source: ".output"
+          target: "~/api21"
+
+      - name: Install Dependencies & Restart on GCP VM
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -100,11 +123,8 @@ jobs:
             # 2. Navigate to project repository
             cd ~/api21
 
-            # 3. Pull latest changes
-            git reset --hard origin/main
-            git pull origin main
-
-            # 4. Install deps, migrate, build, and restart via PM2
-            rm -rf node_modules
+            # 3. Install dependencies (fast because node_modules is cached)
             bun install --frozen-lockfile
+
+            # 4. Migrate and restart via PM2 (prestart will run bun db:migrate)
             bun run start
