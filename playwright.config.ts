@@ -1,4 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+import path from "path";
+
+// Read from ".env" file.
+dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -10,6 +15,7 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
+    headless: process.env.PLAYWRIGHT_HEADFUL === "true" ? false : true,
   },
   projects: [
     {
@@ -25,3 +31,4 @@ export default defineConfig({
     stderr: "pipe",
   },
 });
+
