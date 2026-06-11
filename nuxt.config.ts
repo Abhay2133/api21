@@ -6,6 +6,14 @@ export default defineNuxtConfig({
   // SSR enabled (default, explicit)
   ssr: true,
 
+  app: {
+    head: {
+      link: [
+        { rel: "icon", type: "image/x-icon", href: "/favicon.ico" }
+      ]
+    }
+  },
+
   // Global CSS
   css: ["~/assets/css/main.css"],
 
@@ -64,6 +72,9 @@ export default defineNuxtConfig({
   // Tailwind via Vite plugin (same as old vite.config.ts)
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      allowedHosts: [".trycloudflare.com"],
+    },
   },
 
   // Path aliases
