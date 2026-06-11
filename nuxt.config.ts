@@ -6,12 +6,75 @@ export default defineNuxtConfig({
   // SSR enabled (default, explicit)
   ssr: true,
 
+  app: {
+    head: {
+      link: [
+        { rel: "icon", type: "image/x-icon", href: "/favicon.ico" }
+      ]
+    }
+  },
+
   // Global CSS
   css: ["~/assets/css/main.css"],
+
+  // Nuxt Modules
+  modules: ["@vite-pwa/nuxt"],
+
+  // PWA configuration
+  pwa: {
+    strategies: "injectManifest",
+    srcDir: "public",
+    filename: "sw.js",
+    registerType: "prompt",
+    manifest: {
+      name: "Abhay Bisht | Portfolio & API",
+      short_name: "Abhay Bisht",
+      description: "Software Engineer specializing in Full Stack Web Applications",
+      theme_color: "#6366f1",
+      background_color: "#0a0a0a",
+      display: "standalone",
+      orientation: "any",
+      start_url: "/",
+      icons: [
+        {
+          src: "/icon-192x192.png",
+          sizes: "192x192",
+          type: "image/png"
+        },
+        {
+          src: "/icon-512x512.png",
+          sizes: "512x512",
+          type: "image/png"
+        },
+        {
+          src: "/icon-192x192-maskable.png",
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "maskable"
+        },
+        {
+          src: "/icon-512x512-maskable.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "maskable"
+        }
+      ]
+    },
+    injectManifest: {
+      globPatterns: ["**/*.{js,css,ico,png,svg,webmanifest}"]
+    },
+    devOptions: {
+      enabled: true,
+      type: "module"
+    }
+  },
 
   // Tailwind via Vite plugin (same as old vite.config.ts)
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      allowedHosts: [".trycloudflare.com"],
+    },
   },
 
   // Path aliases

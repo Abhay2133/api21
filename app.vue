@@ -1,3 +1,8 @@
 <template>
-  <NuxtPage />
+  <div>
+    <VitePwaManifest />
+    <NuxtPage />
+    <ConnectionStatus />
+    <PwaUpdatePrompt />
+  </div>
 </template>
