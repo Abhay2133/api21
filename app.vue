@@ -1,3 +1,7 @@
 <template>
-  <NuxtPage />
+  <div>
+    <NuxtPage />
+    <ConnectionStatus />
+    <PwaUpdatePrompt />
+  </div>
 </template>
