@@ -4,6 +4,10 @@ dist/
 *.log
 .DS_Store
 
+# Nuxt build artifacts
+.nuxt/
+.output/
+
 .antigravitycli
 .playwright-mcp
 tmp/

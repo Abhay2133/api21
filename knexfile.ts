@@ -1,43 +1,49 @@
 import type { Knex } from "knex";
-import { env } from "./src/config/env";
+import "dotenv/config";
+
+const databaseUrl =
+  process.env.DATABASE_URL && process.env.DATABASE_URL !== ""
+    ? process.env.DATABASE_URL
+    : "postgres://postgres:postgres@localhost:5432/api21";
 
 const config: { [key: string]: Knex.Config } = {
   development: {
     client: "pg",
-    connection: env.databaseUrl,
+    connection: databaseUrl,
     migrations: {
-      directory: "./src/db/migrations",
+      directory: "./server/db/migrations",
       extension: "ts",
     },
     seeds: {
-      directory: "./src/db/seeds",
+      directory: "./server/db/seeds",
     },
   },
   test: {
     client: "pg",
-    connection: env.databaseUrl,
+    connection: databaseUrl,
     migrations: {
-      directory: "./src/db/migrations",
+      directory: "./server/db/migrations",
       extension: "ts",
     },
     seeds: {
-      directory: "./src/db/seeds",
+      directory: "./server/db/seeds",
     },
   },
   production: {
     client: "pg",
     connection: {
-      connectionString: env.databaseUrl,
-      ssl: process.env.DATABASE_SSL === "true" || env.nodeEnv === "production"
-        ? { rejectUnauthorized: false }
-        : false,
+      connectionString: databaseUrl,
+      ssl:
+        process.env.DATABASE_SSL === "true" || process.env.NODE_ENV === "production"
+          ? { rejectUnauthorized: false }
+          : false,
     },
     migrations: {
-      directory: "./src/db/migrations",
+      directory: "./server/db/migrations",
       extension: "ts",
     },
     seeds: {
-      directory: "./src/db/seeds",
+      directory: "./server/db/seeds",
     },
   },
 };
