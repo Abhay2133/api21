@@ -3,7 +3,7 @@ import knex from "knex";
 const config = useRuntimeConfig();
 
 const db = knex({
-  client: "better-sqlite3",
+  client: "sqlite3",
   connection: {
     filename: config.databaseUrl || "./server/db/dev.sqlite3",
   },

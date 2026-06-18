@@ -8,7 +8,7 @@ const databaseUrl =
 
 const config: { [key: string]: Knex.Config } = {
   development: {
-    client: "better-sqlite3",
+    client: "sqlite3",
     connection: {
       filename: databaseUrl,
     },
@@ -22,7 +22,7 @@ const config: { [key: string]: Knex.Config } = {
     },
   },
   test: {
-    client: "better-sqlite3",
+    client: "sqlite3",
     connection: {
       filename: "./server/db/test.sqlite3",
     },
@@ -36,7 +36,7 @@ const config: { [key: string]: Knex.Config } = {
     },
   },
   production: {
-    client: "better-sqlite3",
+    client: "sqlite3",
     connection: {
       filename: databaseUrl,
     },
