@@ -150,7 +150,7 @@
           <div 
             v-for="(techs, category) in technologies" 
             :key="category"
-            class="tech-card flex flex-col p-5 sm:p-6 rounded-2xl bg-white dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 hover:shadow-md hover:-translate-y-0.5 transition-all"
+            class="tech-card flex flex-col p-5 sm:p-6 rounded-2xl bg-white dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 hover:shadow-md transition-[border-color,box-shadow] duration-300"
           >
             <h3 class="text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-4">
               {{ category }}
@@ -670,16 +670,24 @@ onMounted(() => {
     scrollTriggers.push(scrollReveal.scrollTrigger!)
   })
 
-  // 4. Stagger Technologies Section Cards
+  // 4. Stagger Technologies Section Cards (3D Swing-in Entrance + Mouse Hover Tilt)
   const techCards = document.querySelectorAll('.tech-card')
   if (techCards.length > 0) {
-    gsap.set(techCards, { opacity: 0, y: 40 })
+    gsap.set(techCards, { 
+      opacity: 0, 
+      y: 60,
+      rotateX: -20,
+      transformPerspective: 1000,
+      transformOrigin: "top center"
+    })
+    
     const techTrigger = gsap.to(techCards, {
       opacity: 1,
       y: 0,
-      duration: 0.8,
-      stagger: 0.12,
-      ease: "power3.out",
+      rotateX: 0,
+      duration: 1,
+      stagger: 0.15,
+      ease: "back.out(1.5)",
       scrollTrigger: {
         trigger: ".tech-card",
         start: "top 85%",
@@ -687,6 +695,38 @@ onMounted(() => {
       }
     })
     scrollTriggers.push(techTrigger.scrollTrigger!)
+
+    // Add 3D perspective tilt on mouse hover
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+    if (!isTouch) {
+      techCards.forEach((card) => {
+        const el = card as HTMLElement
+        el.addEventListener("mousemove", (e) => {
+          const rect = el.getBoundingClientRect()
+          const x = (e.clientX - rect.left) / rect.width - 0.5
+          const y = (e.clientY - rect.top) / rect.height - 0.5
+
+          gsap.to(el, {
+            rotationY: x * 10, // gentle horizontal rotation
+            rotationX: -y * 10, // gentle vertical rotation
+            y: -6, // lift card slightly
+            transformPerspective: 800,
+            ease: "power2.out",
+            duration: 0.4
+          })
+        })
+
+        el.addEventListener("mouseleave", () => {
+          gsap.to(el, {
+            rotationY: 0,
+            rotationX: 0,
+            y: 0,
+            ease: "power3.out",
+            duration: 0.6
+          })
+        })
+      })
+    }
   }
 
   // 5. Stagger Achievements
