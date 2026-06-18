@@ -1,0 +1,6 @@
+create_table("users") {
+	t.Column("name", "string", {})
+	t.Column("email", "string", {})
+	t.Index("email", {unique: true})
+	t.Timestamps()
+}

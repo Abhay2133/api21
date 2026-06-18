@@ -1,0 +1,4 @@
+package grifts
+
+func init() {
+}

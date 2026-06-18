@@ -1,4 +1,0 @@
-{
-  // Nuxt manages its own tsconfig — this file extends it
-  "extends": "./.nuxt/tsconfig.json"
-}

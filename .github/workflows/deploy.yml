@@ -9,8 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      NODE_ENV: test
-      DATABASE_URL: ./server/db/test.sqlite3
+      GO_ENV: test
       REDIS_URL: redis://localhost:6379
 
     services:
@@ -33,18 +32,28 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install Dependencies
-        run: bun install --frozen-lockfile
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.x'
 
-      - name: Run Migrations
-        run: bun db:migrate
+      - name: Install Buffalo CLI
+        run: go install github.com/gobuffalo/cli/cmd/buffalo@latest
 
-      - name: Run Unit Tests
-        run: bun run test:unit
+      - name: Build Frontend
+        run: |
+          cd frontend
+          bun install --frozen-lockfile
+          bun run build
 
-      - name: Build Nuxt App
-        run: bun run build
+      - name: Run Go Tests
+        run: |
+          CGO_ENABLED=1 go test -p 1 -v -tags sqlite ./...
 
+      - name: Build Buffalo Backend
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          buffalo build --static -o bin/api21_buffalo
 
       - name: Prepare VM for Deployment
         uses: appleboy/ssh-action@v1.0.3
@@ -57,19 +66,19 @@ jobs:
             cd ~/api21
             git reset --hard origin/main
             git pull origin main
-            rm -rf .output
+            mkdir -p bin
 
-      - name: Copy .output to GCP VM
+      - name: Copy Binary and Configs to GCP VM
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: ".output"
+          source: "bin/api21_buffalo,database.yml,ecosystem.config.js"
           target: "~/api21"
 
-      - name: Install Dependencies & Restart on GCP VM
+      - name: Run Migrations & Restart on VM
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -77,17 +86,17 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # 1. Load system binaries and shell profiles (so bun/pm2 are in scope)
+            # Load system profiles (for pm2)
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            export BUN_INSTALL="$HOME/.bun"
-            export PATH="$BUN_INSTALL/bin:$PATH"
 
-            # 2. Navigate to project repository
             cd ~/api21
+            # Make the binary executable
+            chmod +x bin/api21_buffalo
+            
+            # Run migrations
+            ./bin/api21_buffalo migrate
 
-            # 3. Install dependencies (fast because node_modules is cached)
-            bun install --frozen-lockfile
-
-            # 4. Migrate and restart via PM2 (prestart will run bun db:migrate)
-            bun run start
+            # Restart app via PM2
+            pm2 delete api21 || true
+            pm2 start ecosystem.config.js
