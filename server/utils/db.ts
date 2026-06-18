@@ -3,12 +3,11 @@ import knex from "knex";
 const config = useRuntimeConfig();
 
 const db = knex({
-  client: "pg",
-  connection: config.databaseUrl,
-  pool: {
-    min: 2,
-    max: 10,
+  client: "better-sqlite3",
+  connection: {
+    filename: config.databaseUrl || "./server/db/dev.sqlite3",
   },
+  useNullAsDefault: true,
 });
 
 export { db };
@@ -16,11 +15,9 @@ export { db };
 export async function connectDB(): Promise<void> {
   try {
     await db.raw("SELECT 1");
-    // Hide password in logged connection string
-    const sanitizedUrl = config.databaseUrl.replace(/:[^:@\n]+@/, ":***@");
-    console.log("[pg] connected:", sanitizedUrl);
+    console.log("[sqlite] connected to:", config.databaseUrl || "./server/db/dev.sqlite3");
   } catch (err) {
-    console.error("[pg] connection error:", err);
+    console.error("[sqlite] connection error:", err);
     throw err;
   }
 }

@@ -23,19 +23,18 @@
     "pm2:delete": "pm2 delete api21"
   },
   "dependencies": {
+    "better-sqlite3": "^12.11.1",
     "dotenv": "^16.4.5",
+    "gsap": "^3.12.5",
     "knex": "^3.2.10",
     "nuxt": "^4.4.8",
-    "pg": "^8.21.0",
     "redis": "^4.6.14",
-    "vue": "^3.5.38",
-    "gsap": "^3.12.5"
+    "vue": "^3.5.38"
   },
   "devDependencies": {
     "@nuxt/test-utils": "^4.0.3",
     "@tailwindcss/vite": "^4.3.0",
     "@types/bun": "latest",
-    "@types/pg": "^8.20.0",
     "@vite-pwa/nuxt": "^1.1.1",
     "@vue/test-utils": "^2.4.11",
     "autoprefixer": "^10.5.0",
