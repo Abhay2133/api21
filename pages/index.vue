@@ -6,6 +6,17 @@
       <div ref="cursorRing" class="fixed top-0 left-0 w-8 h-8 border border-neutral-955/30 dark:border-white/30 rounded-full pointer-events-none z-50"></div>
     </div>
 
+    <!-- Intro Overlay / Preloader -->
+    <div 
+      v-if="showIntro" 
+      ref="introOverlay" 
+      class="fixed inset-0 bg-neutral-950 flex flex-col items-center justify-center z-[999] pointer-events-auto overflow-hidden"
+    >
+      <h1 ref="introName" class="text-5xl sm:text-7xl font-bold tracking-tight text-white select-none overflow-hidden py-3">
+        Abhay Bisht
+      </h1>
+    </div>
+
     <!-- Grid and decorative floating background shapes -->
     <GridBackground />
 
@@ -121,7 +132,7 @@
           Hi, I'm Abhay Bisht.
         </h1>
         <p ref="heroSubtitle" class="text-neutral-600 dark:text-neutral-400 leading-relaxed text-balance sm:text-lg max-w-xl opacity-0 translate-y-4">
-          Software Engineer specializing in Full Stack &amp; AI Systems. I build production SaaS platforms, design robust APIs, and integrate AI models to create scalable and high-performance digital products.
+          <span class="text-neutral-950 dark:text-white font-semibold border-b-2 border-purple-500/40 pb-0.5">Software Engineer</span> specializing in Full Stack &amp; AI Systems. I build production SaaS platforms, design robust APIs, and integrate AI models to create scalable and high-performance digital products.
         </p>
         <div ref="heroButtons" class="mt-10 flex flex-wrap gap-4 opacity-0 translate-y-4">
           <a 
@@ -393,6 +404,11 @@ const isCarVisible = ref(false)
 const isDarkMode = ref(false)
 const currentYear = new Date().getFullYear()
 
+// Intro preloader state & refs
+const showIntro = ref(true)
+const introOverlay = ref<HTMLElement | null>(null)
+const introName = ref<HTMLElement | null>(null)
+
 // Desktop Custom Cursor state
 const showCustomCursor = ref(false)
 
@@ -595,57 +611,98 @@ onMounted(() => {
     }, 100)
   }
 
-  // 2. Main Title Split-Text Reveal
-  if (splitTitle.value) {
-    const rawText = splitTitle.value.textContent?.trim() || ""
-    splitTitle.value.innerHTML = "" // Clear standard text
+  // 2. Intro Preloader & Staggered Entrance Timeline
+  if (introName.value && introOverlay.value) {
+    const rawName = introName.value.textContent?.trim() || ""
+    introName.value.innerHTML = "" // Clear standard text
     
-    // Construct word and character spans
-    const words = rawText.split(" ")
+    // Construct word and character spans for preloader
+    const words = rawName.split(" ")
     words.forEach((word) => {
       const wordSpan = document.createElement("span")
-      wordSpan.className = "inline-block whitespace-nowrap mr-2"
+      wordSpan.className = "inline-block whitespace-nowrap mr-3"
       
       const characters = word.split("")
       characters.forEach((char) => {
         const charSpan = document.createElement("span")
-        charSpan.className = "char-span inline-block opacity-0 translate-y-[110%] rotate-6"
+        charSpan.className = "intro-char inline-block opacity-0 translate-y-[110%] rotate-6"
         charSpan.textContent = char
         wordSpan.appendChild(charSpan)
       })
       
-      splitTitle.value?.appendChild(wordSpan)
+      introName.value?.appendChild(wordSpan)
     })
 
-    // Character entrance animation
-    gsap.to(".char-span", {
+    const tl = gsap.timeline({
+      onComplete: () => {
+        showIntro.value = false
+      }
+    })
+
+    // Animate preloader characters in
+    tl.to(".intro-char", {
       opacity: 1,
       y: 0,
       rotate: 0,
-      duration: 1,
+      duration: 0.9,
       ease: "power4.out",
-      stagger: 0.03,
-      delay: 0.1
+      stagger: 0.04
     })
-  }
-
-  // Hero Subtitle & CTA buttons cascade
-  if (heroSubtitle.value && heroButtons.value) {
-    gsap.to(heroSubtitle.value, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      ease: "power3.out",
-      delay: 0.6
+    // Slide preloader overlay up and out of viewport
+    .to(introOverlay.value, {
+      yPercent: -100,
+      duration: 1.1,
+      ease: "expo.inOut",
+      delay: 0.3
     })
 
-    gsap.to(heroButtons.value, {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      ease: "power3.out",
-      delay: 0.75
-    })
+    // Programmatically split and reveal the main hero title
+    if (splitTitle.value) {
+      const rawText = splitTitle.value.textContent?.trim() || ""
+      splitTitle.value.innerHTML = ""
+      
+      const heroWords = rawText.split(" ")
+      heroWords.forEach((word) => {
+        const wordSpan = document.createElement("span")
+        wordSpan.className = "inline-block whitespace-nowrap mr-2"
+        
+        const characters = word.split("")
+        characters.forEach((char) => {
+          const charSpan = document.createElement("span")
+          charSpan.className = "char-span inline-block opacity-0 translate-y-[110%] rotate-6"
+          charSpan.textContent = char
+          wordSpan.appendChild(charSpan)
+        })
+        
+        splitTitle.value?.appendChild(wordSpan)
+      })
+
+      // Stagger main heading characters (overlapping with overlay slide-out)
+      tl.to(".char-span", {
+        opacity: 1,
+        y: 0,
+        rotate: 0,
+        duration: 0.9,
+        ease: "power4.out",
+        stagger: 0.03
+      }, "-=0.8")
+    }
+
+    // Cascade subtitle and buttons
+    if (heroSubtitle.value && heroButtons.value) {
+      tl.to(heroSubtitle.value, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power3.out"
+      }, "-=0.6")
+      .to(heroButtons.value, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power3.out"
+      }, "-=0.6")
+    }
   }
 
   // 3. ScrollTrigger reveals for sections
