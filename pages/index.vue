@@ -1,5 +1,11 @@
 <template>
-  <div class="min-h-screen flex flex-col items-center px-6 sm:px-12 relative">
+  <div class="min-h-screen flex flex-col items-center px-6 sm:px-12 relative overflow-x-hidden">
+    <!-- Custom Cursor (Desktop Only) -->
+    <div v-if="showCustomCursor" class="hidden md:block">
+      <div ref="cursorDot" class="fixed top-0 left-0 w-2 h-2 bg-neutral-900 dark:bg-white rounded-full pointer-events-none z-50 mix-blend-difference"></div>
+      <div ref="cursorRing" class="fixed top-0 left-0 w-8 h-8 border border-neutral-955/30 dark:border-white/30 rounded-full pointer-events-none z-50"></div>
+    </div>
+
     <!-- Grid and decorative floating background shapes -->
     <GridBackground />
 
@@ -10,7 +16,7 @@
     <div class="w-full max-w-2xl flex flex-col gap-12 sm:gap-20 relative z-10 pt-6 pb-12">
       <!-- Navbar -->
       <nav class="flex justify-between items-center w-full sticky top-6 z-50 bg-white/40 dark:bg-neutral-900/40 backdrop-blur-md border border-white/60 dark:border-neutral-800/60 p-3 sm:px-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
-        <div class="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 px-2 cursor-pointer">
+        <div class="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 px-2 cursor-pointer magnetic-target">
           Abhay Bisht
         </div>
         
@@ -19,7 +25,7 @@
           <div class="relative group flex items-center justify-center">
             <button 
               @click="toggleCar"
-              :class="['transition-all p-1 rounded-md cursor-pointer', isCarVisible ? 'text-blue-500 bg-blue-500/10' : 'text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100']"
+              :class="['transition-all p-1 rounded-md cursor-pointer magnetic-target', isCarVisible ? 'text-blue-500 bg-blue-500/10' : 'text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100']"
               aria-label="Toggle Car Follower"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5">
@@ -42,7 +48,7 @@
           <div class="relative group flex items-center justify-center">
             <button 
               @click="toggleDarkMode"
-              class="text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-all p-1 cursor-pointer"
+              class="text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-all p-1 cursor-pointer magnetic-target"
               aria-label="Toggle Dark Mode"
             >
               <!-- Sun Icon (if dark mode active) -->
@@ -69,7 +75,7 @@
               href="https://github.com/abhay2133" 
               target="_blank" 
               rel="noreferrer" 
-              class="text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:scale-110 transition-all p-1"
+              class="text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 hover:scale-110 transition-all p-1 magnetic-target"
               aria-label="GitHub"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5">
@@ -91,7 +97,7 @@
               href="https://www.linkedin.com/in/abhay-21m" 
               target="_blank" 
               rel="noreferrer" 
-              class="text-neutral-500 hover:text-blue-600 dark:text-neutral-400 dark:hover:text-blue-400 hover:scale-110 transition-all p-1"
+              class="text-neutral-500 hover:text-blue-600 dark:text-neutral-400 dark:hover:text-blue-400 hover:scale-110 transition-all p-1 magnetic-target"
               aria-label="LinkedIn"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5">
@@ -111,23 +117,23 @@
 
       <!-- Hero Section -->
       <section class="pt-4 sm:pt-8 scroll-animate">
-        <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 mb-5">
+        <h1 ref="splitTitle" class="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 mb-5 overflow-hidden">
           Hi, I'm Abhay Bisht.
         </h1>
-        <p class="text-neutral-600 dark:text-neutral-400 leading-relaxed text-balance sm:text-lg max-w-xl">
+        <p ref="heroSubtitle" class="text-neutral-600 dark:text-neutral-400 leading-relaxed text-balance sm:text-lg max-w-xl opacity-0 translate-y-4">
           Software Engineer specializing in Full Stack &amp; AI Systems. I build production SaaS platforms, design robust APIs, and integrate AI models to create scalable and high-performance digital products.
         </p>
-        <div class="mt-10 flex flex-wrap gap-4">
+        <div ref="heroButtons" class="mt-10 flex flex-wrap gap-4 opacity-0 translate-y-4">
           <a 
             href="#projects" 
-            class="text-sm font-medium bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 px-6 py-2.5 rounded-full shadow-md hover:bg-neutral-800 dark:hover:bg-white hover:shadow-lg hover:-translate-y-0.5 transition-all"
+            class="text-sm font-medium bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 px-6 py-2.5 rounded-full shadow-md hover:bg-neutral-800 dark:hover:bg-white hover:shadow-lg hover:-translate-y-0.5 transition-all magnetic-target"
           >
             View Projects
           </a>
           <a 
             href="/Resume_Abhay-Bisht.pdf" 
             target="_blank" 
-            class="text-sm font-medium bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 px-6 py-2.5 rounded-full shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-md hover:-translate-y-0.5 transition-all text-neutral-800 dark:text-neutral-200"
+            class="text-sm font-medium bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 px-6 py-2.5 rounded-full shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-md hover:-translate-y-0.5 transition-all text-neutral-800 dark:text-neutral-200 magnetic-target"
           >
             Resume
           </a>
@@ -144,7 +150,7 @@
           <div 
             v-for="(techs, category) in technologies" 
             :key="category"
-            class="flex flex-col p-5 sm:p-6 rounded-2xl bg-white dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 hover:shadow-md hover:-translate-y-0.5 transition-all"
+            class="tech-card flex flex-col p-5 sm:p-6 rounded-2xl bg-white dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 hover:shadow-md hover:-translate-y-0.5 transition-all"
           >
             <h3 class="text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-4">
               {{ category }}
@@ -185,7 +191,7 @@
           <div 
             v-for="achievement in achievements" 
             :key="achievement.title"
-            class="flex gap-4 p-5 rounded-2xl bg-white dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 transition-all"
+            class="achievement-card flex gap-4 p-5 rounded-2xl bg-white dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 transition-all"
           >
             <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
               <!-- Trophy Icon -->
@@ -220,16 +226,16 @@
           Career Journey
         </h2>
         <div class="flex flex-col gap-0 relative px-1">
-          <!-- Center line -->
-          <div class="absolute left-[15px] top-4 bottom-4 w-[2px] bg-neutral-200 dark:bg-neutral-800"></div>
+          <!-- Center line (animated grow in script) -->
+          <div ref="journeyLine" class="absolute left-[15px] top-4 bottom-4 w-[2px] bg-neutral-200 dark:bg-neutral-800 origin-top scale-y-0"></div>
           
           <div 
             v-for="job in journey" 
             :key="job.role + job.organization"
-            class="flex gap-5 sm:gap-6 relative z-10 pb-10 last:pb-0 group"
+            class="journey-item flex gap-5 sm:gap-6 relative z-10 pb-10 last:pb-0 group"
           >
             <!-- Timeline dot -->
-            <div class="relative mt-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#fafafa] dark:bg-[#0a0a0a] ring-1 ring-neutral-200 dark:ring-neutral-800 shadow-sm transition-all group-hover:ring-neutral-300 dark:group-hover:ring-neutral-700">
+            <div class="timeline-dot relative mt-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#fafafa] dark:bg-[#0a0a0a] ring-1 ring-neutral-200 dark:ring-neutral-800 shadow-sm transition-all group-hover:ring-neutral-300 dark:group-hover:ring-neutral-700">
               <div class="h-2 w-2 rounded-full bg-neutral-400 dark:bg-neutral-500 transition-colors group-hover:bg-neutral-600 dark:group-hover:bg-neutral-300"></div>
             </div>
             
@@ -258,16 +264,18 @@
           <div 
             v-for="project in projects" 
             :key="project.title"
-            class="group relative flex flex-col p-3 rounded-2xl border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 hover:shadow-md hover:-translate-y-0.5 transition-all gap-4 bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm"
+            class="project-card group relative flex flex-col p-3 rounded-2xl border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 hover:shadow-md hover:-translate-y-0.5 transition-all gap-4 bg-white/50 dark:bg-neutral-900/50 backdrop-blur-sm"
           >
+            <!-- Immersive masked reveal image -->
             <a 
               :href="project.link" 
-              class="w-full h-40 shrink-0 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 block relative"
+              class="project-img-wrap w-full h-40 shrink-0 rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800 block relative magnetic-target"
+              style="clip-path: inset(0 100% 0 0)"
             >
               <img 
                 :src="project.image" 
                 :alt="project.title" 
-                class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                class="project-img w-full h-full object-cover object-center scale-125 group-hover:scale-110 transition-transform duration-700 ease-out"
               />
             </a>
             
@@ -275,7 +283,7 @@
               <div>
                 <a 
                   :href="project.link"
-                  class="inline-flex items-center gap-1 font-medium text-neutral-900 dark:text-neutral-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-base tracking-tight"
+                  class="inline-flex items-center gap-1 font-medium text-neutral-900 dark:text-neutral-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-base tracking-tight magnetic-target"
                 >
                   {{ project.title }}
                   <!-- Arrow Icon -->
@@ -308,37 +316,43 @@
       </section>
 
       <!-- Get in Touch Section -->
-      <section 
-        id="contact" 
-        class="p-8 sm:p-10 rounded-3xl bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:shadow-md hover:border-neutral-200 dark:hover:border-neutral-700 transition-all mt-4 relative overflow-hidden group scroll-animate"
-      >
-        <div class="relative z-10">
-          <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-3 tracking-tight">
-            Get in touch
-          </h2>
-          <p class="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 mb-8 max-w-md leading-relaxed">
-            I'm currently available for freelance projects and open to full-time roles. Feel free to reach out if you want to collaborate or just say hi.
-          </p>
-          <a 
-            href="mailto:abhaybishthestudent@gmail.com" 
-            class="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-white dark:bg-neutral-800 border border-white/80 dark:border-white/10 shadow-sm text-sm font-medium text-neutral-900 dark:text-neutral-100 hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:shadow-md hover:-translate-y-0.5"
-          >
-            <!-- Mail Icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-neutral-400 dark:text-neutral-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-              <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/>
+      <div class="perspective-container w-full mt-4">
+        <section 
+          id="contact" 
+          ref="contactCard"
+          class="p-8 sm:p-10 rounded-3xl bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:shadow-md hover:border-neutral-200 dark:hover:border-neutral-700 transition-all relative overflow-hidden group scroll-animate"
+        >
+          <!-- Dynamic Glare Overlay -->
+          <div ref="contactGlare" class="absolute inset-0 pointer-events-none opacity-0 z-20 transition-opacity duration-300"></div>
+
+          <div class="relative z-10">
+            <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-3 tracking-tight">
+              Get in touch
+            </h2>
+            <p class="text-sm sm:text-base text-neutral-600 dark:text-neutral-400 mb-8 max-w-md leading-relaxed">
+              I'm currently available for freelance projects and open to full-time roles. Feel free to reach out if you want to collaborate or just say hi.
+            </p>
+            <a 
+              href="mailto:abhaybishthestudent@gmail.com" 
+              class="inline-flex items-center gap-2.5 px-6 py-3 rounded-full bg-white dark:bg-neutral-800 border border-white/80 dark:border-white/10 shadow-sm text-sm font-medium text-neutral-900 dark:text-neutral-100 hover:text-blue-600 dark:hover:text-blue-400 transition-all hover:shadow-md hover:-translate-y-0.5 magnetic-target"
+            >
+              <!-- Mail Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-neutral-400 dark:text-neutral-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/>
+              </svg>
+              Say Hello
+            </a>
+          </div>
+          
+          <!-- Graphic circle in background -->
+          <div class="absolute -bottom-24 -right-24 text-neutral-100 dark:text-neutral-800 group-hover:text-neutral-200 dark:group-hover:text-neutral-700 transition-colors duration-700 pointer-events-none">
+            <svg width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="5"/>
             </svg>
-            Say Hello
-          </a>
-        </div>
-        
-        <!-- Graphic circle in background -->
-        <div class="absolute -bottom-24 -right-24 text-neutral-100 dark:text-neutral-800 group-hover:text-neutral-200 dark:group-hover:text-neutral-700 transition-colors duration-700 pointer-events-none">
-          <svg width="300" height="300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5">
-            <circle cx="12" cy="12" r="10"/>
-            <circle cx="12" cy="12" r="5"/>
-          </svg>
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
 
       <!-- Footer -->
       <footer class="pb-8 pt-4 text-sm text-neutral-500 dark:text-neutral-400 flex flex-col sm:flex-row justify-between items-center sm:items-end w-full">
@@ -348,7 +362,7 @@
             href="https://github.com/abhay2133" 
             target="_blank" 
             rel="noreferrer" 
-            class="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+            class="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors magnetic-target"
           >
             GitHub
           </a>
@@ -356,7 +370,7 @@
             href="https://www.linkedin.com/in/abhay-21m" 
             target="_blank" 
             rel="noreferrer" 
-            class="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
+            class="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors magnetic-target"
           >
             LinkedIn
           </a>
@@ -367,16 +381,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 useHead({
   title: "Abhay Bisht | Portfolio"
 })
 
-// Nuxt auto-imports components — no explicit imports needed
 const isCarVisible = ref(false)
 const isDarkMode = ref(false)
 const currentYear = new Date().getFullYear()
+
+// Desktop Custom Cursor state
+const showCustomCursor = ref(false)
+
+// DOM Refs
+const cursorDot = ref<HTMLElement | null>(null)
+const cursorRing = ref<HTMLElement | null>(null)
+const splitTitle = ref<HTMLElement | null>(null)
+const heroSubtitle = ref<HTMLElement | null>(null)
+const heroButtons = ref<HTMLElement | null>(null)
+const journeyLine = ref<HTMLElement | null>(null)
+const contactCard = ref<HTMLElement | null>(null)
+const contactGlare = ref<HTMLElement | null>(null)
 
 // Technologies Data
 const technologies = {
@@ -473,8 +501,12 @@ const toggleDarkMode = () => {
   }
 }
 
-// Client-side initialization and intersection observers
+let scrollTriggers: ScrollTrigger[] = []
+
+// Client-side initialization and GSAP setup
 onMounted(() => {
+  if (!process.client) return
+
   // Theme check
   const isDark = document.documentElement.classList.contains('dark') || 
                  (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
@@ -485,24 +517,336 @@ onMounted(() => {
     document.documentElement.classList.remove('dark')
   }
 
-  // Scroll animations observer setup
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.remove('opacity-0', 'translate-y-4')
-        entry.target.classList.add('opacity-100', 'translate-y-0')
-        observer.unobserve(entry.target)
+  // Register ScrollTrigger plugin
+  gsap.registerPlugin(ScrollTrigger)
+
+  // 1. Detect Desktop for Custom Cursor
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+  if (!isTouchDevice) {
+    showCustomCursor.value = true
+    
+    // Smooth cursor follow
+    setTimeout(() => {
+      if (!cursorDot.value || !cursorRing.value) return
+
+      gsap.set(cursorDot.value, { xPercent: -50, yPercent: -50 })
+      gsap.set(cursorRing.value, { xPercent: -50, yPercent: -50 })
+
+      const xToDot = gsap.quickTo(cursorDot.value, "x", { duration: 0.1, ease: "power3" })
+      const yToDot = gsap.quickTo(cursorDot.value, "y", { duration: 0.1, ease: "power3" })
+      const xToRing = gsap.quickTo(cursorRing.value, "x", { duration: 0.35, ease: "power3" })
+      const yToRing = gsap.quickTo(cursorRing.value, "y", { duration: 0.35, ease: "power3" })
+
+      window.addEventListener("mousemove", (e) => {
+        xToDot(e.clientX)
+        yToDot(e.clientY)
+        xToRing(e.clientX)
+        yToRing(e.clientY)
+      })
+
+      // Hover snaps & Magnet effects
+      const magneticTargets = document.querySelectorAll(".magnetic-target")
+      
+      magneticTargets.forEach((target) => {
+        const el = target as HTMLElement
+
+        el.addEventListener("mouseenter", () => {
+          gsap.to(cursorRing.value, {
+            scale: 1.5,
+            backgroundColor: "rgba(168, 85, 247, 0.05)",
+            borderColor: "#a855f7",
+            duration: 0.3
+          })
+          gsap.to(cursorDot.value, {
+            scale: 1.5,
+            backgroundColor: "#a855f7",
+            duration: 0.3
+          })
+        })
+
+        el.addEventListener("mouseleave", () => {
+          gsap.to(cursorRing.value, {
+            scale: 1,
+            backgroundColor: "transparent",
+            borderColor: isDarkMode.value ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.3)",
+            duration: 0.3
+          })
+          gsap.to(cursorDot.value, {
+            scale: 1,
+            backgroundColor: isDarkMode.value ? "#ffffff" : "#171717",
+            duration: 0.3
+          })
+          gsap.to(el, { x: 0, y: 0, ease: "power3.out", duration: 0.5 })
+        })
+
+        el.addEventListener("mousemove", (e) => {
+          const rect = el.getBoundingClientRect()
+          const x = e.clientX - rect.left - rect.width / 2
+          const y = e.clientY - rect.top - rect.height / 2
+
+          gsap.to(el, {
+            x: x * 0.3,
+            y: y * 0.3,
+            ease: "power2.out",
+            duration: 0.3
+          })
+        })
+      })
+    }, 100)
+  }
+
+  // 2. Main Title Split-Text Reveal
+  if (splitTitle.value) {
+    const rawText = splitTitle.value.textContent?.trim() || ""
+    splitTitle.value.innerHTML = "" // Clear standard text
+    
+    // Construct word and character spans
+    const words = rawText.split(" ")
+    words.forEach((word) => {
+      const wordSpan = document.createElement("span")
+      wordSpan.className = "inline-block whitespace-nowrap mr-2"
+      
+      const characters = word.split("")
+      characters.forEach((char) => {
+        const charSpan = document.createElement("span")
+        charSpan.className = "char-span inline-block opacity-0 translate-y-[110%] rotate-6"
+        charSpan.textContent = char
+        wordSpan.appendChild(charSpan)
+      })
+      
+      splitTitle.value?.appendChild(wordSpan)
+    })
+
+    // Character entrance animation
+    gsap.to(".char-span", {
+      opacity: 1,
+      y: 0,
+      rotate: 0,
+      duration: 1,
+      ease: "power4.out",
+      stagger: 0.03,
+      delay: 0.1
+    })
+  }
+
+  // Hero Subtitle & CTA buttons cascade
+  if (heroSubtitle.value && heroButtons.value) {
+    gsap.to(heroSubtitle.value, {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: "power3.out",
+      delay: 0.6
+    })
+
+    gsap.to(heroButtons.value, {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: "power3.out",
+      delay: 0.75
+    })
+  }
+
+  // 3. ScrollTrigger reveals for sections
+  document.querySelectorAll('.scroll-animate').forEach(section => {
+    // Skip sections with custom child stagger triggers
+    if (section.querySelector('.tech-card') || section.querySelector('.achievement-card') || section.querySelector('.journey-item') || section.querySelector('.project-card')) {
+      return
+    }
+
+    gsap.set(section, { opacity: 0, y: 30 })
+    const scrollReveal = gsap.to(section, {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: section,
+        start: "top 85%",
+        once: true
       }
     })
-  }, {
-    threshold: 0.05,
-    rootMargin: '-30px'
+    scrollTriggers.push(scrollReveal.scrollTrigger!)
   })
 
-  // Apply hidden state styles initially, then observe (prevents flashes on non-JS clients)
-  document.querySelectorAll('.scroll-animate').forEach(section => {
-    section.classList.add('opacity-0', 'translate-y-4', 'transition-all', 'duration-700', 'ease-out')
-    observer.observe(section)
-  })
+  // 4. Stagger Technologies Section Cards
+  const techCards = document.querySelectorAll('.tech-card')
+  if (techCards.length > 0) {
+    gsap.set(techCards, { opacity: 0, y: 40 })
+    const techTrigger = gsap.to(techCards, {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      stagger: 0.12,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: ".tech-card",
+        start: "top 85%",
+        once: true
+      }
+    })
+    scrollTriggers.push(techTrigger.scrollTrigger!)
+  }
+
+  // 5. Stagger Achievements
+  const achieveCards = document.querySelectorAll('.achievement-card')
+  if (achieveCards.length > 0) {
+    gsap.set(achieveCards, { opacity: 0, y: 30 })
+    const achieveTrigger = gsap.to(achieveCards, {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      stagger: 0.15,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: ".achievement-card",
+        start: "top 85%",
+        once: true
+      }
+    })
+    scrollTriggers.push(achieveTrigger.scrollTrigger!)
+  }
+
+  // 6. Career Journey grow vertical line + node reveals
+  if (journeyLine.value) {
+    const growTrigger = gsap.to(journeyLine.value, {
+      scaleY: 1,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#journey",
+        start: "top 75%",
+        end: "bottom 70%",
+        scrub: 1
+      }
+    })
+    scrollTriggers.push(growTrigger.scrollTrigger!)
+  }
+
+  const journeyItems = document.querySelectorAll('.journey-item')
+  if (journeyItems.length > 0) {
+    journeyItems.forEach((item) => {
+      const dot = item.querySelector('.timeline-dot')
+      const content = item.querySelector('div:last-child')
+      
+      if (dot && content) {
+        gsap.set(dot, { scale: 0, opacity: 0 })
+        gsap.set(content, { opacity: 0, x: 20 })
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: item,
+            start: "top 80%",
+            once: true
+          }
+        })
+
+        tl.to(dot, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" })
+          .to(content, { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" }, "-=0.3")
+
+        scrollTriggers.push(tl.scrollTrigger!)
+      }
+    })
+  }
+
+  // 7. Selected Work Project Cards Reveal (Clip-Path & Image Parallax)
+  const projectCards = document.querySelectorAll('.project-card')
+  if (projectCards.length > 0) {
+    projectCards.forEach((card) => {
+      const wrap = card.querySelector('.project-img-wrap')
+      const img = card.querySelector('.project-img')
+      const content = card.querySelector('.grow')
+
+      if (wrap && img && content) {
+        gsap.set(content, { opacity: 0, y: 15 })
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: card,
+            start: "top 85%",
+            once: true
+          }
+        })
+
+        tl.to(wrap, {
+          clipPath: "inset(0 0% 0 0)", // Slide reveal horizontal wipe
+          duration: 1,
+          ease: "power3.inOut"
+        })
+        .to(img, {
+          scale: 1, // Smoothly scale down from 1.25 to 1.1/1
+          duration: 1,
+          ease: "power3.inOut"
+        }, "<")
+        .to(content, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power2.out"
+        }, "-=0.4")
+
+        scrollTriggers.push(tl.scrollTrigger!)
+      }
+    })
+  }
+
+  // 8. Interactive 3D Glare Tilt for Get In Touch Card
+  if (contactCard.value && contactGlare.value) {
+    const card = contactCard.value
+    const glare = contactGlare.value
+
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect()
+      const x = (e.clientX - rect.left) / rect.width - 0.5
+      const y = (e.clientY - rect.top) / rect.height - 0.5
+
+      gsap.to(card, {
+        rotationY: x * 15,
+        rotationX: -y * 15,
+        transformPerspective: 1000,
+        ease: "power2.out",
+        duration: 0.5
+      })
+
+      gsap.to(glare, {
+        opacity: 1,
+        background: `radial-gradient(circle at ${(x + 0.5) * 100}% ${(y + 0.5) * 100}%, rgba(168, 85, 247, 0.18) 0%, transparent 60%)`,
+        ease: "power2.out",
+        duration: 0.5
+      })
+    })
+
+    card.addEventListener("mouseleave", () => {
+      gsap.to(card, {
+        rotationY: 0,
+        rotationX: 0,
+        ease: "power3.out",
+        duration: 0.8
+      })
+      gsap.to(glare, {
+        opacity: 0,
+        ease: "power3.out",
+        duration: 0.8
+      })
+    })
+  }
+})
+
+onUnmounted(() => {
+  // Clear all instances of ScrollTrigger to avoid memory leaks
+  scrollTriggers.forEach((trigger) => trigger.kill())
+  ScrollTrigger.getAll().forEach((trigger: any) => trigger.kill())
 })
 </script>
+
+<style scoped>
+/* Base styling for splitting characters to avoid layout shifts */
+.char-span {
+  display: inline-block;
+  transform-origin: bottom center;
+}
+
+.perspective-container {
+  perspective: 1200px;
+}
+</style>
