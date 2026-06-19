@@ -2,7 +2,7 @@ import { createSSRApp } from 'vue'
 import App from './App.vue'
 import './style.css'
 
-export function createApp() {
-  const app = createSSRApp(App)
+export function createApp(props?: Record<string, any>) {
+  const app = createSSRApp(App, props)
   return { app }
 }

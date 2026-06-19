@@ -14,8 +14,29 @@
     <!-- Car follower client-side interaction -->
     <CarFollower :isVisible="isCarVisible" />
 
+    <!-- 404 View -->
+    <div v-if="isNotFound" class="w-full max-w-2xl flex-1 flex flex-col justify-center items-center gap-6 relative z-10 pt-12 pb-12">
+      <div class="text-center space-y-6 my-auto py-12">
+        <h1 class="text-8xl font-extrabold tracking-tighter text-gradient select-none">404</h1>
+        <div class="space-y-2">
+          <h2 class="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Page Not Found</h2>
+          <p class="text-neutral-500 dark:text-neutral-400">
+            The path <code class="px-1.5 py-0.5 rounded bg-neutral-200/50 dark:bg-neutral-800/50 border border-neutral-300/40 dark:border-neutral-700/40 text-xs font-mono">{{ currentPath }}</code> does not exist.
+          </p>
+        </div>
+        <div class="pt-4">
+          <a 
+            href="/" 
+            class="text-sm font-medium bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 px-6 py-2.5 rounded-full shadow-md hover:bg-neutral-800 dark:hover:bg-white hover:shadow-lg hover:-translate-y-0.5 transition-all magnetic-target inline-block"
+          >
+            Go Back Home
+          </a>
+        </div>
+      </div>
+    </div>
+
     <!-- Main Content Container -->
-    <div class="w-full max-w-2xl flex flex-col gap-12 sm:gap-20 relative z-10 pt-6 pb-12">
+    <div v-else class="w-full max-w-2xl flex flex-col gap-12 sm:gap-20 relative z-10 pt-6 pb-12">
       <!-- Navbar -->
       <nav ref="navbar" class="flex justify-between items-center w-full sticky top-6 z-50 bg-white/40 dark:bg-neutral-900/40 backdrop-blur-md border border-white/60 dark:border-neutral-800/60 p-3 sm:px-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-hidden">
         <div class="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 px-2 cursor-pointer magnetic-target">
@@ -391,11 +412,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import GridBackground from './components/GridBackground.vue'
 import CarFollower from './components/CarFollower.vue'
+
+const props = withDefaults(defineProps<{
+  path?: string
+}>(), {
+  path: '/'
+})
+
+const currentPath = ref(props.path)
+
+const isNotFound = computed(() => {
+  const p = currentPath.value || '/'
+  return p !== '/' && p !== '/index.html' && p !== '/offline.html'
+})
 
 const isCarVisible = ref(false)
 const isDarkMode = ref(false)

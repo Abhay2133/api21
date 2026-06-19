@@ -80,6 +80,15 @@ func ServeAssetsOrSSR(ssrURL string) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		path := c.Request.URL.Path
+
+		// If the request starts with /api/ and wasn't matched by other routes, return a 404 JSON response
+		if strings.HasPrefix(path, "/api/") {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": "API route not found",
+			})
+			return
+		}
+
 		env := os.Getenv("GO_ENV")
 		if env == "" {
 			env = "development"

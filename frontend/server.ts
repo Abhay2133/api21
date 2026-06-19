@@ -36,6 +36,11 @@ async function startServer() {
     const url = req.originalUrl || '/'
 
     try {
+      // Parse URL to extract the pathname (e.g. ignore query string / hash)
+      const parsedUrl = new URL(url, `http://${req.headers.host || 'localhost'}`)
+      const pathname = parsedUrl.pathname
+      const is404 = pathname !== '/' && pathname !== '/index.html' && pathname !== '/offline.html'
+
       let template: string
       let render: (url: string) => Promise<{ html: string }>
 
@@ -55,13 +60,13 @@ async function startServer() {
         render = module.render
       }
 
-      // Render the app HTML
-      const { html: appHtml } = await render(url)
+      // Render the app HTML passing the pathname component
+      const { html: appHtml } = await render(pathname)
 
       // Inject rendered HTML into template
       const html = template.replace('<!--ssr-outlet-->', appHtml)
 
-      res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
+      res.status(is404 ? 404 : 200).set({ 'Content-Type': 'text/html' }).end(html)
     } catch (e: any) {
       if (!isProd && vite) {
         vite.ssrFixStacktrace(e)
