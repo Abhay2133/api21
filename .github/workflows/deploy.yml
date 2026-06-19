@@ -95,7 +95,7 @@ jobs:
             chmod +x bin/api21_buffalo
             
             # Run migrations
-            ./bin/api21_buffalo migrate
+            GO_ENV=production ./bin/api21_buffalo migrate
 
             # Restart app via PM2
             pm2 delete api21 || true
