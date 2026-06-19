@@ -37,9 +37,6 @@ jobs:
         with:
           go-version: '1.25.x'
 
-      - name: Install Buffalo CLI
-        run: go install github.com/gobuffalo/cli/cmd/buffalo@latest
-
       - name: Build Frontend
         run: |
           cd frontend
@@ -48,12 +45,11 @@ jobs:
 
       - name: Run Go Tests
         run: |
-          CGO_ENABLED=1 go test -p 1 -v -tags sqlite ./...
+          CGO_ENABLED=1 go test -p 1 -v ./...
 
-      - name: Build Buffalo Backend
+      - name: Build Backend
         run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          buffalo build --static -o bin/api21_buffalo
+          CGO_ENABLED=1 go build -o bin/api21_server cmd/app/main.go
 
       - name: Prepare VM for Deployment
         uses: appleboy/ssh-action@v1.0.3
@@ -66,7 +62,7 @@ jobs:
             cd ~/api21
             git reset --hard origin/main
             git pull origin main
-            mkdir -p bin server/db
+            mkdir -p bin server/db frontend
 
       - name: Copy Binary and Configs to GCP VM
         uses: appleboy/scp-action@v0.1.7
@@ -75,7 +71,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: "bin/api21_buffalo,database.yml,ecosystem.config.js"
+          source: "bin/api21_server,ecosystem.config.js,frontend/dist/**"
           target: "~/api21"
 
       - name: Run Migrations & Restart on VM
@@ -90,13 +86,16 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
+            # Make sure bun path is loaded (PM2 will need bun)
+            export PATH=$PATH:$HOME/.bun/bin
+
             cd ~/api21
             # Make the binary executable
-            chmod +x bin/api21_buffalo
+            chmod +x bin/api21_server
             
             # Run migrations
-            GO_ENV=production ./bin/api21_buffalo migrate
+            GO_ENV=production ./bin/api21_server migrate
 
             # Restart app via PM2
-            pm2 delete api21 || true
+            pm2 delete api21-backend api21-ssr || true
             pm2 start ecosystem.config.js
