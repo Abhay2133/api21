@@ -26,7 +26,7 @@
     <!-- Main Content Container -->
     <div class="w-full max-w-2xl flex flex-col gap-12 sm:gap-20 relative z-10 pt-6 pb-12">
       <!-- Navbar -->
-      <nav class="flex justify-between items-center w-full sticky top-6 z-50 bg-white/40 dark:bg-neutral-900/40 backdrop-blur-md border border-white/60 dark:border-neutral-800/60 p-3 sm:px-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
+      <nav ref="navbar" class="flex justify-between items-center w-full sticky top-6 z-50 bg-white/40 dark:bg-neutral-900/40 backdrop-blur-md border border-white/60 dark:border-neutral-800/60 p-3 sm:px-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] overflow-hidden">
         <div class="text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 px-2 cursor-pointer magnetic-target">
           Abhay Bisht
         </div>
@@ -123,6 +123,10 @@
               <div class="w-2.5 h-2.5 -mt-1.5 border-[5px] border-transparent border-t-neutral-900 dark:border-t-white"></div>
             </div>
           </div>
+        </div>
+        <!-- Scroll Progress Bar -->
+        <div class="absolute bottom-0 left-6 right-6 h-[2px] bg-neutral-200/20 dark:bg-neutral-800/20 rounded-full overflow-hidden">
+          <div ref="scrollProgress" class="h-full w-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 origin-left scale-x-0"></div>
         </div>
       </nav>
 
@@ -419,6 +423,8 @@ const heroButtons = ref<HTMLElement | null>(null)
 const journeyLine = ref<HTMLElement | null>(null)
 const contactCard = ref<HTMLElement | null>(null)
 const contactGlare = ref<HTMLElement | null>(null)
+const navbar = ref<HTMLElement | null>(null)
+const scrollProgress = ref<HTMLElement | null>(null)
 
 // Technologies Data
 const technologies = {
@@ -607,6 +613,11 @@ onMounted(() => {
     }, 100)
   }
 
+  // Set initial state for navbar
+  if (navbar.value) {
+    gsap.set(navbar.value, { y: -50, opacity: 0 })
+  }
+
   // 2. Intro Preloader & Staggered Entrance Timeline
   if (introName.value && introOverlay.value) {
     const rawName = introName.value.textContent?.trim() || ""
@@ -632,6 +643,52 @@ onMounted(() => {
     const tl = gsap.timeline({
       onComplete: () => {
         showIntro.value = false
+
+        // 9. Navbar Scroll animations
+        if (navbar.value) {
+          // Hide/Show on scroll
+          const navScrollTrigger = ScrollTrigger.create({
+            start: "top top",
+            onUpdate: (self) => {
+              // Hide navbar on scroll down past 80px, show on scroll up
+              if (self.direction === 1 && self.scroll() > 80) {
+                gsap.to(navbar.value, { 
+                  y: -100, 
+                  opacity: 0, 
+                  duration: 0.4, 
+                  ease: "power2.out" 
+                })
+              } else {
+                gsap.to(navbar.value, { 
+                  y: 0, 
+                  opacity: 1, 
+                  duration: 0.4, 
+                  ease: "power2.out" 
+                })
+              }
+            }
+          })
+          scrollTriggers.push(navScrollTrigger)
+        }
+
+        // Scroll Progress indicator inside the navbar
+        if (scrollProgress.value) {
+          const progressScrollTrigger = ScrollTrigger.create({
+            trigger: "body",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: true,
+            onUpdate: (self) => {
+              gsap.to(scrollProgress.value, {
+                scaleX: self.progress,
+                duration: 0.1,
+                ease: "none",
+                overwrite: "auto"
+              })
+            }
+          })
+          scrollTriggers.push(progressScrollTrigger)
+        }
       }
     })
 
@@ -651,6 +708,15 @@ onMounted(() => {
       ease: "expo.inOut",
       delay: 0.3
     })
+
+    if (navbar.value) {
+      tl.to(navbar.value, {
+        y: 0,
+        opacity: 1,
+        duration: 1.0,
+        ease: "power3.out"
+      }, "-=0.8")
+    }
 
     // Programmatically split and reveal the main hero title
     if (splitTitle.value) {
