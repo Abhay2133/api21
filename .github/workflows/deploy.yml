@@ -96,6 +96,14 @@ jobs:
             # Run migrations
             GO_ENV=production ./bin/api21_server migrate
 
+            # Install frontend dependencies on the VM
+            cd frontend
+            bun install --frozen-lockfile
+            cd ..
+
+            # Delete old api21 process if running
+            pm2 delete api21 || true
+
             # Restart app via PM2
             pm2 delete api21-backend api21-ssr || true
             pm2 start ecosystem.config.js
