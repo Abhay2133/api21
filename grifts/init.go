@@ -1,4 +1,0 @@
-package grifts
-
-func init() {
-}

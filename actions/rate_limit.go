@@ -8,22 +8,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gobuffalo/buffalo"
+	"github.com/gin-gonic/gin"
 )
 
 // RateLimiterMiddleware limits requests to API endpoints to 200 req / 15 min using Redis
-func RateLimiterMiddleware(next buffalo.Handler) buffalo.Handler {
-	return func(c buffalo.Context) error {
-		req := c.Request()
+func RateLimiterMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		req := c.Request
 		url := req.URL.Path
 
 		// Only rate-limit API routes
 		if !strings.HasPrefix(url, "/api/") {
-			return next(c)
+			c.Next()
+			return
 		}
 
 		// Get IP address
-		ip := req.Header.Get("X-Forwarded-For")
+		ip := c.GetHeader("X-Forwarded-For")
 		if ip != "" {
 			ip = strings.Split(ip, ",")[0]
 			ip = strings.TrimSpace(ip)
@@ -39,11 +40,11 @@ func RateLimiterMiddleware(next buffalo.Handler) buffalo.Handler {
 		limit := int64(200)
 		window := 15 * time.Minute
 
-		ctx := req.Context()
 		allowed := true
 		remaining := limit
 
 		if RedisClient != nil {
+			ctx := req.Context()
 			current, err := RedisClient.Incr(ctx, key).Result()
 			if err == nil {
 				if current == 1 {
@@ -61,16 +62,17 @@ func RateLimiterMiddleware(next buffalo.Handler) buffalo.Handler {
 		}
 
 		// Set rate-limit headers
-		res := c.Response()
-		res.Header().Set("X-RateLimit-Limit", strconv.FormatInt(limit, 10))
-		res.Header().Set("X-RateLimit-Remaining", strconv.FormatInt(remaining, 10))
+		c.Header("X-RateLimit-Limit", strconv.FormatInt(limit, 10))
+		c.Header("X-RateLimit-Remaining", strconv.FormatInt(remaining, 10))
 
 		if !allowed {
-			return c.Render(http.StatusTooManyRequests, r.JSON(map[string]string{
+			c.JSON(http.StatusTooManyRequests, gin.H{
 				"error": "Too many requests, please slow down.",
-			}))
+			})
+			c.Abort()
+			return
 		}
 
-		return next(c)
+		c.Next()
 	}
 }

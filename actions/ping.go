@@ -3,13 +3,12 @@ package actions
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
-
-	"github.com/gobuffalo/envy"
 )
 
 func init() {
-	pingURL := envy.Get("PING_URL", "")
+	pingURL := os.Getenv("PING_URL")
 	if pingURL == "" {
 		log.Println("[ping:server] skipped: PING_URL not set")
 		return

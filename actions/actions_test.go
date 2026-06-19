@@ -1,37 +1,39 @@
 package actions
 
 import (
+	"log"
 	"os"
+	"path/filepath"
 	"testing"
 
-	"github.com/abhay2133/api21"
 	"github.com/abhay2133/api21/models"
-	"github.com/gobuffalo/pop/v6"
-	"github.com/gobuffalo/suite/v4"
 )
 
-type ActionSuite struct {
-	*suite.Action
-}
+func TestMain(m *testing.M) {
+	// Set test environment
+	os.Setenv("GO_ENV", "test")
 
-func Test_ActionSuite(t *testing.T) {
-	os.Remove("/tmp/test.sqlite3")
-	action, err := suite.NewActionWithFixtures(App(), os.DirFS("../fixtures"))
-	if err != nil {
-		t.Fatal(err)
+	// Change working directory to project root so database path resolutions are consistent
+	if err := os.Chdir(".."); err != nil {
+		log.Fatalf("failed to change directory to project root: %s", err)
 	}
 
-	// Run migrations programmatically for test DB
-	migrator, err := pop.NewMigrationBox(api21.MigrationsFS(), models.DB)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := migrator.Up(); err != nil {
-		t.Fatal(err)
+	// Delete test sqlite file if it exists to start fresh
+	dbPath := filepath.Join("server", "db", "test.sqlite3")
+	os.Remove(dbPath)
+
+	// Initialize the test DB
+	models.InitDB()
+
+	// Auto-migrate tables
+	if err := models.DB.AutoMigrate(&models.User{}); err != nil {
+		log.Fatalf("failed to auto-migrate database for tests: %s", err)
 	}
 
-	as := &ActionSuite{
-		Action: action,
-	}
-	suite.Run(t, as)
+	code := m.Run()
+
+	// Clean up test DB
+	os.Remove(dbPath)
+
+	os.Exit(code)
 }

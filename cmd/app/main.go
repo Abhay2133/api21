@@ -4,40 +4,50 @@ import (
 	"log"
 	"os"
 
-	"github.com/abhay2133/api21"
 	"github.com/abhay2133/api21/actions"
 	"github.com/abhay2133/api21/models"
-	"github.com/gobuffalo/pop/v6"
+	"github.com/joho/godotenv"
 )
 
-// main is the starting point for your Buffalo application.
 func main() {
-	// If the command is "migrate", we run migrations and exit
+	// Load environment variables from .env file if it exists
+	if err := godotenv.Load(); err != nil {
+		log.Println("[main] info: no .env file found, using system environment variables")
+	}
+
+	// Initialize database (GORM)
+	models.InitDB()
+
+	// If command line argument is "migrate", we just auto-migrate and exit
 	if len(os.Args) > 1 && os.Args[1] == "migrate" {
-		log.Println("[db] running migrations...")
+		log.Println("[db] running auto-migration...")
 		if err := runMigrations(); err != nil {
 			log.Fatalf("[db] migration failed: %s", err)
 		}
-		log.Println("[db] migrations completed successfully.")
+		log.Println("[db] migration completed successfully.")
 		return
 	}
 
-	// Default behavior: run migrations on boot, then start the server
-	log.Println("[db] auto-migrating on boot...")
+	// Otherwise, run migration on boot and start server
+	log.Println("[db] running auto-migration on boot...")
 	if err := runMigrations(); err != nil {
-		log.Printf("[db] warning: auto-migration failed: %s", err)
+		log.Printf("[db] warning: auto-migration on boot failed: %s", err)
 	}
 
-	app := actions.App()
-	if err := app.Serve(); err != nil {
-		log.Fatal(err)
+	// Setup and run Gin server
+	r := actions.SetupRouter()
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+
+	log.Printf("[main] starting Gin server on port %s", port)
+	if err := r.Run(":" + port); err != nil {
+		log.Fatalf("[main] server run failed: %s", err)
 	}
 }
 
 func runMigrations() error {
-	migrator, err := pop.NewMigrationBox(api21.MigrationsFS(), models.DB)
-	if err != nil {
-		return err
-	}
-	return migrator.Up()
+	return models.DB.AutoMigrate(&models.User{})
 }

@@ -3,8 +3,8 @@ package actions
 import (
 	"context"
 	"log"
+	"os"
 
-	"github.com/gobuffalo/envy"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -12,7 +12,11 @@ import (
 var RedisClient *redis.Client
 
 func init() {
-	redisURL := envy.Get("REDIS_URL", "redis://localhost:6379")
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = "redis://localhost:6379"
+	}
+	
 	opt, err := redis.ParseURL(redisURL)
 	if err != nil {
 		log.Printf("[redis] failed to parse url %s: %s", redisURL, err)

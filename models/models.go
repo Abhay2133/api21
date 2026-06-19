@@ -2,21 +2,56 @@ package models
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 
-	"github.com/gobuffalo/envy"
-	"github.com/gobuffalo/pop/v6"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
-// DB is a connection to your database to be used
-// throughout your application.
-var DB *pop.Connection
+// DB is a GORM connection to the database.
+var DB *gorm.DB
 
 func init() {
+	InitDB()
+}
+
+// InitDB initializes the database connection. Exposed for testing.
+func InitDB() {
 	var err error
-	env := envy.Get("GO_ENV", "development")
-	DB, err = pop.Connect(env)
-	if err != nil {
-		log.Fatal(err)
+	env := os.Getenv("GO_ENV")
+	if env == "" {
+		env = "development"
 	}
-	pop.Debug = env == "development"
+
+	dbFile := "dev.sqlite3"
+	if env == "production" {
+		dbFile = "production.sqlite3"
+	} else if env == "test" {
+		dbFile = "test.sqlite3"
+	}
+
+	// The databases are located in server/db/
+	dbPath := filepath.Join("server", "db", dbFile)
+
+	// Ensure directory exists
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
+		log.Fatalf("[db] failed to create database directory: %s", err)
+	}
+
+	// GORM logger config
+	logLevel := logger.Error
+	if env == "development" {
+		logLevel = logger.Info
+	}
+
+	DB, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
+		Logger: logger.Default.LogMode(logLevel),
+	})
+	if err != nil {
+		log.Fatalf("[db] failed to connect database: %s", err)
+	}
+
+	log.Printf("[db] connected to sqlite database at %s", dbPath)
 }

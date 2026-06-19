@@ -4,31 +4,33 @@ import (
 	"net/http"
 
 	"github.com/abhay2133/api21/models"
-	"github.com/gobuffalo/buffalo"
+	"github.com/gin-gonic/gin"
 )
 
 // HealthHandler returns the health status of database and cache connections
-func HealthHandler(c buffalo.Context) error {
+func HealthHandler(c *gin.Context) {
 	dbStatus := "down"
-	err := models.DB.RawQuery("SELECT 1").Exec()
-	if err == nil {
-		dbStatus = "up"
+	if models.DB != nil {
+		err := models.DB.Exec("SELECT 1").Error
+		if err == nil {
+			dbStatus = "up"
+		}
 	}
 
 	redisStatus := "down"
 	if RedisClient != nil {
-		_, err := RedisClient.Ping(c.Request().Context()).Result()
+		_, err := RedisClient.Ping(c.Request.Context()).Result()
 		if err == nil {
 			redisStatus = "up"
 		}
 	}
 
-	return c.Render(http.StatusOK, r.JSON(map[string]interface{}{
+	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"data": map[string]interface{}{
+		"data": gin.H{
 			"status":   "ok",
 			"postgres": dbStatus, // compatible key mapping sqlite status
 			"redis":    redisStatus,
 		},
-	}))
+	})
 }

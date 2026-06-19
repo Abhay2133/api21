@@ -1,102 +1,115 @@
 package actions
 
 import (
+	"log"
 	"net/http"
-	"sync"
+	"net/http/httputil"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
 
-	"github.com/abhay2133/api21/locales"
-	"github.com/abhay2133/api21/models"
-	"github.com/abhay2133/api21/public"
-
-	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/buffalo-pop/v3/pop/popmw"
-	"github.com/gobuffalo/envy"
-	"github.com/gobuffalo/middleware/csrf"
-	"github.com/gobuffalo/middleware/forcessl"
-	"github.com/gobuffalo/middleware/i18n"
-	"github.com/gobuffalo/middleware/paramlogger"
-	"github.com/unrolled/secure"
+	"github.com/gin-gonic/gin"
 )
 
-// ENV is used to help switch settings based on where the
-// application is being run. Default is "development".
-var ENV = envy.Get("GO_ENV", "development")
-
-var (
-	app     *buffalo.App
-	appOnce sync.Once
-	T       *i18n.Translator
-)
-
-// App is where all routes and middleware for buffalo
-// should be defined. This is the nerve center of your
-// application.
-//
-// Routing, middleware, groups, etc... are declared TOP -> DOWN.
-// This means if you add a middleware to `app` *after* declaring a
-// group, that group will NOT have that new middleware. The same
-// is true of resource declarations as well.
-//
-// It also means that routes are checked in the order they are declared.
-// `ServeFiles` is a CATCH-ALL route, so it should always be
-// placed last in the route declarations, as it will prevent routes
-// declared after it to never be called.
-func App() *buffalo.App {
-	appOnce.Do(func() {
-		app = buffalo.New(buffalo.Options{
-			Env:         ENV,
-			SessionName: "_api21_buffalo_session",
-		})
-
-		// Automatically redirect to SSL
-		app.Use(forceSSL())
-
-		// Log request parameters (filters apply).
-		app.Use(paramlogger.ParameterLogger)
-
-		// Protect against CSRF attacks. https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
-		// Remove to disable this.
-		app.Use(csrf.New)
-
-		// Wraps each request in a transaction.
-		//   c.Value("tx").(*pop.Connection)
-		// Remove to disable this.
-		app.Use(popmw.Transaction(models.DB))
-		// Setup and use translations:
-		app.Use(translations())
-
-		// Custom rate limiting:
-		app.Use(RateLimiterMiddleware)
-
-		app.GET("/", HomeHandler)
-		app.GET("/api/v1/health", HealthHandler)
-
-		app.ServeFiles("/", http.FS(public.FS())) // serve files from the public directory
-	})
-
-	return app
-}
-
-// translations will load locale files, set up the translator `actions.T`,
-// and will return a middleware to use to load the correct locale for each
-// request.
-// for more information: https://gobuffalo.io/en/docs/localization
-func translations() buffalo.MiddlewareFunc {
-	var err error
-	if T, err = i18n.New(locales.FS(), "en-US"); err != nil {
-		app.Stop(err)
+// SetupRouter creates and configures the Gin engine.
+func SetupRouter() *gin.Engine {
+	env := os.Getenv("GO_ENV")
+	if env == "" {
+		env = "development"
 	}
-	return T.Middleware()
+
+	if env == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	r := gin.New()
+
+	// Default middlewares
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
+
+	// Force SSL in production
+	r.Use(ForceSSL())
+
+	// Custom Rate Limiting for APIs
+	r.Use(RateLimiterMiddleware())
+
+	// API Routes
+	r.GET("/api/v1/health", HealthHandler)
+
+	// Bun SSR Server URL
+	ssrURL := os.Getenv("SSR_SERVER_URL")
+	if ssrURL == "" {
+		ssrURL = "http://localhost:8081"
+	}
+
+	// Catch-all route to serve static assets or proxy to Bun SSR
+	r.NoRoute(ServeAssetsOrSSR(ssrURL))
+
+	return r
 }
 
-// forceSSL will return a middleware that will redirect an incoming request
-// if it is not HTTPS. "http://example.com" => "https://example.com".
-// This middleware does **not** enable SSL. for your application. To do that
-// we recommend using a proxy: https://gobuffalo.io/en/docs/proxy
-// for more information: https://github.com/unrolled/secure/
-func forceSSL() buffalo.MiddlewareFunc {
-	return forcessl.Middleware(secure.Options{
-		SSLRedirect:     ENV == "production",
-		SSLProxyHeaders: map[string]string{"X-Forwarded-Proto": "https"},
-	})
+// ForceSSL redirects HTTP requests to HTTPS in production.
+func ForceSSL() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		env := os.Getenv("GO_ENV")
+		if env == "production" {
+			// Check header injected by reverse proxy
+			proto := c.GetHeader("X-Forwarded-Proto")
+			if proto != "https" && c.Request.Header.Get("X-Forwarded-SSL") != "on" {
+				host := c.Request.Host
+				target := "https://" + host + c.Request.RequestURI
+				c.Redirect(http.StatusMovedPermanently, target)
+				c.Abort()
+				return
+			}
+		}
+		c.Next()
+	}
+}
+
+// ServeAssetsOrSSR checks if request is for a static file (production only)
+// and serves it, otherwise proxies the request to the Bun SSR server.
+func ServeAssetsOrSSR(ssrURL string) gin.HandlerFunc {
+	target, err := url.Parse(ssrURL)
+	if err != nil {
+		log.Fatalf("[proxy] invalid SSR target URL: %s", err)
+	}
+	proxy := httputil.NewSingleHostReverseProxy(target)
+
+	return func(c *gin.Context) {
+		path := c.Request.URL.Path
+		env := os.Getenv("GO_ENV")
+		if env == "" {
+			env = "development"
+		}
+
+		// In production, try to serve from local static assets first
+		if env == "production" {
+			// Clean path to prevent directory traversal
+			cleanPath := filepath.Clean(path)
+			
+			// We serve files from frontend/dist/client
+			localFile := filepath.Join("frontend", "dist", "client", cleanPath)
+			
+			// Check if file exists and is not a directory
+			info, err := os.Stat(localFile)
+			if err == nil && !info.IsDir() {
+				c.File(localFile)
+				return
+			}
+		}
+
+		// Proxy fallback for SSR pages (and client assets in development)
+		// Modify the request host header for reverse proxy compatibility
+		c.Request.Host = target.Host
+		
+		// If request is index.html, we don't want the raw template returned
+		if strings.HasSuffix(path, "index.html") {
+			c.Request.URL.Path = "/"
+		}
+
+		proxy.ServeHTTP(c.Writer, c.Request)
+	}
 }

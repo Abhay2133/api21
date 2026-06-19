@@ -2,54 +2,41 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
 	"time"
-
-	"github.com/gobuffalo/pop/v6"
-	"github.com/gobuffalo/validate/v3"
-	"github.com/gobuffalo/validate/v3/validators"
 )
 
-// User is used by pop to map your users database table to your go code.
+// User is a GORM model representing a user.
 type User struct {
-	ID        int       `json:"id" db:"id"`
-	Name      string    `json:"name" db:"name"`
-	Email     string    `json:"email" db:"email"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	ID        uint      `json:"id" gorm:"primaryKey;autoIncrement"`
+	Name      string    `json:"name" gorm:"not null"`
+	Email     string    `json:"email" gorm:"uniqueIndex;not null"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// String is not required by pop and may be deleted
+// String prints the user as JSON.
 func (u User) String() string {
 	ju, _ := json.Marshal(u)
 	return string(ju)
 }
 
-// Users is not required by pop and may be deleted
+// Users is a list of users.
 type Users []User
 
-// String is not required by pop and may be deleted
+// String prints users as JSON.
 func (u Users) String() string {
 	ju, _ := json.Marshal(u)
 	return string(ju)
 }
 
-// Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
-// This method is not required and may be deleted.
-func (u *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
-	return validate.Validate(
-		&validators.StringIsPresent{Field: u.Name, Name: "Name"},
-		&validators.StringIsPresent{Field: u.Email, Name: "Email"},
-	), nil
-}
-
-// ValidateCreate gets run every time you call "pop.ValidateAndCreate" method.
-// This method is not required and may be deleted.
-func (u *User) ValidateCreate(tx *pop.Connection) (*validate.Errors, error) {
-	return validate.NewErrors(), nil
-}
-
-// ValidateUpdate gets run every time you call "pop.ValidateAndUpdate" method.
-// This method is not required and may be deleted.
-func (u *User) ValidateUpdate(tx *pop.Connection) (*validate.Errors, error) {
-	return validate.NewErrors(), nil
+// Validate checks for valid fields on User.
+func (u *User) Validate() error {
+	if u.Name == "" {
+		return errors.New("name is required")
+	}
+	if u.Email == "" {
+		return errors.New("email is required")
+	}
+	return nil
 }
