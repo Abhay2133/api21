@@ -6,16 +6,7 @@
       <div ref="cursorRing" class="fixed top-0 left-0 w-8 h-8 border border-neutral-950/30 dark:border-white/30 rounded-full pointer-events-none z-50"></div>
     </div>
 
-    <!-- Intro Overlay / Preloader -->
-    <div 
-      v-if="showIntro" 
-      ref="introOverlay" 
-      class="fixed inset-0 bg-neutral-955 flex flex-col items-center justify-center z-[999] pointer-events-auto overflow-hidden"
-    >
-      <h1 ref="introName" class="text-5xl sm:text-7xl font-bold tracking-tight text-white select-none overflow-hidden py-3">
-        Abhay Bisht
-      </h1>
-    </div>
+
 
     <!-- Grid and decorative floating background shapes -->
     <GridBackground />
@@ -131,7 +122,7 @@
       </nav>
 
       <!-- Hero Section -->
-      <section class="pt-4 sm:pt-8 scroll-animate">
+      <section class="pt-4 sm:pt-8">
         <h1 ref="splitTitle" class="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 mb-5 overflow-hidden">
           Hi, I'm Abhay Bisht.
         </h1>
@@ -156,8 +147,8 @@
       </section>
 
       <!-- Technologies I Use Section -->
-      <section class="scroll-animate">
-        <h2 class="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-6 tracking-tight px-1">
+      <section class="scroll-animate-tech">
+        <h2 class="tech-section-title text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-6 tracking-tight px-1 opacity-0 translate-y-4">
           Technologies I Use
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
@@ -165,33 +156,37 @@
           <div 
             v-for="(techs, category) in technologies" 
             :key="category"
-            class="tech-card flex flex-col p-5 sm:p-6 rounded-2xl bg-white dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 hover:shadow-md transition-[border-color,box-shadow] duration-300"
+            class="tech-card flex flex-col p-5 sm:p-6 rounded-2xl bg-white dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 hover:shadow-md transition-[border-color,box-shadow] duration-300 opacity-0"
           >
-            <h3 class="text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-4">
+            <h3 class="tech-card-title text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-4 opacity-0 translate-y-2">
               {{ category }}
             </h3>
             <ul class="flex flex-col gap-2.5">
               <li 
                 v-for="tech in techs" 
                 :key="tech"
-                class="text-sm text-neutral-600 dark:text-neutral-400 flex items-center before:content-[''] before:w-1.5 before:h-1.5 before:bg-neutral-300 dark:before:bg-neutral-600 before:rounded-full before:mr-3"
+                class="tech-item text-sm text-neutral-600 dark:text-neutral-400 flex items-center cursor-default py-1 px-1.5 rounded-lg transition-colors duration-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/30 opacity-0 translate-x-[-10px]"
               >
-                {{ tech }}
+                <span class="tech-dot w-1.5 h-1.5 bg-neutral-300 dark:bg-neutral-600 rounded-full mr-3 flex-shrink-0 origin-center scale-0"></span>
+                <span class="tech-text transition-colors duration-300">{{ tech }}</span>
               </li>
             </ul>
           </div>
         </div>
         
         <!-- Certifications -->
-        <div class="mt-8 flex flex-wrap gap-x-6 gap-y-3 px-1">
-          <span class="text-[10px] items-center font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
+        <div class="mt-8 flex flex-wrap gap-x-6 gap-y-3 px-1 items-center">
+          <span class="cert-title text-[10px] items-center font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 opacity-0 translate-y-2">
             Certifications:
           </span>
           <span 
             v-for="cert in certifications" 
             :key="cert"
-            class="text-xs font-medium text-neutral-500 dark:text-neutral-400"
+            class="cert-item text-xs font-medium text-neutral-500 dark:text-neutral-400 px-3 py-1 bg-neutral-100/50 dark:bg-neutral-900/40 border border-neutral-200/50 dark:border-neutral-800/50 rounded-full flex items-center gap-1.5 hover:border-purple-500/30 hover:text-purple-500 dark:hover:text-purple-400 hover:shadow-sm transition-all duration-300 cursor-default opacity-0 scale-90"
           >
+            <svg class="w-3.5 h-3.5 text-neutral-400 dark:text-neutral-500 transition-colors duration-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
             {{ cert }}
           </span>
         </div>
@@ -206,7 +201,7 @@
           <div 
             v-for="achievement in achievements" 
             :key="achievement.title"
-            class="achievement-card flex gap-4 p-5 rounded-2xl bg-white dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 transition-all"
+            class="achievement-card flex gap-4 p-5 rounded-2xl bg-white dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:border-neutral-200 dark:hover:border-neutral-700 transition-all opacity-0"
           >
             <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
               <!-- Trophy Icon -->
@@ -250,11 +245,11 @@
             class="journey-item flex gap-5 sm:gap-6 relative z-10 pb-10 last:pb-0 group"
           >
             <!-- Timeline dot -->
-            <div class="timeline-dot relative mt-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#fafafa] dark:bg-[#0a0a0a] ring-1 ring-neutral-200 dark:ring-neutral-800 shadow-sm transition-all group-hover:ring-neutral-300 dark:group-hover:ring-neutral-700">
+            <div class="timeline-dot relative mt-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#fafafa] dark:bg-[#0a0a0a] ring-1 ring-neutral-200 dark:ring-neutral-800 shadow-sm transition-all group-hover:ring-neutral-300 dark:group-hover:ring-neutral-700 scale-0 opacity-0">
               <div class="h-2 w-2 rounded-full bg-neutral-400 dark:bg-neutral-500 transition-colors group-hover:bg-neutral-600 dark:group-hover:bg-neutral-300"></div>
             </div>
             
-            <div class="flex flex-col">
+            <div class="journey-content flex flex-col opacity-0">
               <h3 class="text-base tracking-tight font-medium text-neutral-900 dark:text-neutral-100">
                 {{ job.role }}
               </h3>
@@ -294,7 +289,7 @@
               />
             </a>
             
-            <div class="flex flex-col grow px-1">
+            <div class="flex flex-col grow px-1 opacity-0">
               <div>
                 <a 
                   :href="project.link"
@@ -335,7 +330,7 @@
         <section 
           id="contact" 
           ref="contactCard"
-          class="p-8 sm:p-10 rounded-3xl bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:shadow-md hover:border-neutral-200 dark:hover:border-neutral-700 transition-all relative overflow-hidden group scroll-animate"
+          class="p-8 sm:p-10 rounded-3xl bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 shadow-sm hover:shadow-md hover:border-neutral-200 dark:hover:border-neutral-700 transition-all relative overflow-hidden group scroll-animate opacity-0"
         >
           <!-- Dynamic Glare Overlay -->
           <div ref="contactGlare" class="absolute inset-0 pointer-events-none opacity-0 z-20 transition-opacity duration-300"></div>
@@ -406,10 +401,7 @@ const isCarVisible = ref(false)
 const isDarkMode = ref(false)
 const currentYear = new Date().getFullYear()
 
-// Intro preloader state & refs
-const showIntro = ref(true)
-const introOverlay = ref<HTMLElement | null>(null)
-const introName = ref<HTMLElement | null>(null)
+
 
 // Desktop Custom Cursor state
 const showCustomCursor = ref(false)
@@ -618,377 +610,521 @@ onMounted(() => {
     gsap.set(navbar.value, { y: -50, opacity: 0 })
   }
 
-  // 2. Intro Preloader & Staggered Entrance Timeline
-  if (introName.value && introOverlay.value) {
-    const rawName = introName.value.textContent?.trim() || ""
-    introName.value.innerHTML = "" // Clear standard text
+  // Helper to initialize all ScrollTrigger-based animations and hover listeners
+  const initScrollTriggerAnimations = () => {
+    // 3. ScrollTrigger reveals for sections
+    document.querySelectorAll('.scroll-animate').forEach(section => {
+      // Skip sections with custom child stagger triggers
+      if (section.querySelector('.tech-card') || section.querySelector('.achievement-card') || section.querySelector('.journey-item') || section.querySelector('.project-card')) {
+        return
+      }
+
+      gsap.set(section, { opacity: 0, y: 30 })
+      const scrollReveal = gsap.to(section, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: section,
+          start: "top 85%",
+          once: true
+        }
+      })
+      scrollTriggers.push(scrollReveal.scrollTrigger!)
+    })
+
+    // 4. Stagger Technologies Section Title, Cards, Items, and Certifications
+    const techSection = document.querySelector('.scroll-animate-tech')
+    if (techSection) {
+      const techTitle = techSection.querySelector('.tech-section-title')
+      const techCards = techSection.querySelectorAll('.tech-card')
+      const certTitle = techSection.querySelector('.cert-title')
+      const certItems = techSection.querySelectorAll('.cert-item')
+
+      // Create a main ScrollTrigger timeline for this section
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: techSection,
+          start: "top 80%",
+          once: true
+        }
+      })
+
+      // 1. Reveal Section Title
+      if (techTitle) {
+        tl.to(techTitle, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power3.out"
+        })
+      }
+
+      // 2. Initial state setup for cards and items to support GSAP animate-in
+      gsap.set(techCards, { 
+        opacity: 0, 
+        y: 50,
+        rotateX: -15,
+        transformPerspective: 1000,
+        transformOrigin: "top center"
+      })
+
+      // 3. Stagger reveal the cards
+      tl.to(techCards, {
+        opacity: 1,
+        y: 0,
+        rotateX: 0,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: "back.out(1.2)",
+      }, "-=0.3")
+
+      // 4. Reveal titles and stagger list items inside cards
+      techCards.forEach((card, cardIndex) => {
+        const cardTitle = card.querySelector('.tech-card-title')
+        const items = card.querySelectorAll('.tech-item')
+        const dots = card.querySelectorAll('.tech-dot')
+
+        if (cardTitle) {
+          tl.to(cardTitle, {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+            ease: "power2.out"
+          }, `-=${0.7 - cardIndex * 0.1}`)
+        }
+
+        if (items.length > 0) {
+          tl.to(items, {
+            opacity: 1,
+            x: 0,
+            duration: 0.5,
+            stagger: 0.05,
+            ease: "power2.out"
+          }, `<+=0.1`)
+
+          tl.to(dots, {
+            scale: 1,
+            duration: 0.4,
+            stagger: 0.05,
+            ease: "back.out(2)"
+          }, `<`)
+        }
+      })
+
+      // 5. Stagger reveal certifications
+      if (certTitle || certItems.length > 0) {
+        const certTimeline = gsap.timeline()
+        if (certTitle) {
+          certTimeline.to(certTitle, {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+            ease: "power2.out"
+          })
+        }
+        if (certItems.length > 0) {
+          certTimeline.to(certItems, {
+            opacity: 1,
+            scale: 1,
+            duration: 0.5,
+            stagger: 0.06,
+            ease: "back.out(1.5)"
+          }, "-=0.2")
+        }
+        tl.add(certTimeline, "-=0.2")
+      }
+
+      if (tl.scrollTrigger) {
+        scrollTriggers.push(tl.scrollTrigger)
+      }
+
+      // Add 3D perspective tilt on card hover
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+      if (!isTouch) {
+        techCards.forEach((card) => {
+          const el = card as HTMLElement
+          el.addEventListener("mousemove", (e) => {
+            const rect = el.getBoundingClientRect()
+            const x = (e.clientX - rect.left) / rect.width - 0.5
+            const y = (e.clientY - rect.top) / rect.height - 0.5
+
+            gsap.to(el, {
+              rotationY: x * 10,
+              rotationX: -y * 10,
+              y: -6,
+              transformPerspective: 800,
+              ease: "power2.out",
+              duration: 0.4
+            })
+          })
+
+          el.addEventListener("mouseleave", () => {
+            gsap.to(el, {
+              rotationY: 0,
+              rotationX: 0,
+              y: 0,
+              ease: "power3.out",
+              duration: 0.6
+            })
+          })
+        })
+
+        // Add magnetic target/highlight effect for individual tech items on hover
+        const techItems = techSection.querySelectorAll('.tech-item')
+        techItems.forEach((item) => {
+          const el = item as HTMLElement
+          const dot = el.querySelector('.tech-dot')
+          const text = el.querySelector('.tech-text')
+
+          el.addEventListener("mouseenter", () => {
+            gsap.to(el, {
+              x: 6,
+              duration: 0.3,
+              ease: "power2.out"
+            })
+            if (dot) {
+              gsap.to(dot, {
+                scale: 1.6,
+                backgroundColor: "#a855f7", // purple-500
+                duration: 0.3,
+                ease: "back.out(2)"
+              })
+            }
+            if (text) {
+              gsap.to(text, {
+                color: "#a855f7",
+                duration: 0.3,
+                ease: "power2.out"
+              })
+            }
+          })
+
+          el.addEventListener("mouseleave", () => {
+            gsap.to(el, {
+              x: 0,
+              duration: 0.4,
+              ease: "power3.out"
+            })
+            if (dot) {
+              gsap.to(dot, {
+                scale: 1,
+                backgroundColor: "", // revert
+                duration: 0.4,
+                ease: "power3.out"
+              })
+            }
+            if (text) {
+              gsap.to(text, {
+                color: "",
+                duration: 0.4,
+                ease: "power3.out"
+              })
+            }
+          })
+        })
+
+        // Also add hover effects to cert items
+        certItems.forEach((cert) => {
+          const el = cert as HTMLElement
+          const svg = el.querySelector('svg')
+
+          el.addEventListener("mouseenter", () => {
+            gsap.to(el, {
+              y: -2,
+              scale: 1.05,
+              borderColor: "rgba(168, 85, 247, 0.4)",
+              duration: 0.3,
+              ease: "power2.out"
+            })
+            if (svg) {
+              gsap.to(svg, {
+                color: "#a855f7",
+                rotate: 15,
+                scale: 1.1,
+                duration: 0.3,
+                ease: "power2.out"
+              })
+            }
+          })
+
+          el.addEventListener("mouseleave", () => {
+            gsap.to(el, {
+              y: 0,
+              scale: 1,
+              borderColor: "",
+              duration: 0.4,
+              ease: "power3.out"
+            })
+            if (svg) {
+              gsap.to(svg, {
+                color: "",
+                rotate: 0,
+                scale: 1,
+                duration: 0.4,
+                ease: "power3.out"
+              })
+            }
+          })
+        })
+      }
+    }
+
+    // 5. Stagger Achievements
+    const achieveCards = document.querySelectorAll('.achievement-card')
+    if (achieveCards.length > 0) {
+      gsap.set(achieveCards, { opacity: 0, y: 30 })
+      const achieveTrigger = gsap.to(achieveCards, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".achievement-card",
+          start: "top 85%",
+          once: true
+        }
+      })
+      scrollTriggers.push(achieveTrigger.scrollTrigger!)
+    }
+
+    // 6. Career Journey grow vertical line + node reveals
+    if (journeyLine.value) {
+      const growTrigger = gsap.to(journeyLine.value, {
+        scaleY: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#journey",
+          start: "top 75%",
+          end: "bottom 70%",
+          scrub: 1
+        }
+      })
+      scrollTriggers.push(growTrigger.scrollTrigger!)
+    }
+
+    const journeyItems = document.querySelectorAll('.journey-item')
+    if (journeyItems.length > 0) {
+      journeyItems.forEach((item) => {
+        const dot = item.querySelector('.timeline-dot')
+        const content = item.querySelector('.journey-content')
+        
+        if (dot && content) {
+          gsap.set(dot, { scale: 0, opacity: 0 })
+          gsap.set(content, { opacity: 0, x: 20 })
+
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: item,
+              start: "top 80%",
+              once: true
+            }
+          })
+
+          tl.to(dot, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" })
+            .to(content, { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" }, "-=0.3")
+
+          scrollTriggers.push(tl.scrollTrigger!)
+        }
+      })
+    }
+
+    // 7. Selected Work Project Cards Reveal (Clip-Path & Image Parallax)
+    const projectCards = document.querySelectorAll('.project-card')
+    if (projectCards.length > 0) {
+      projectCards.forEach((card) => {
+        const wrap = card.querySelector('.project-img-wrap')
+        const img = card.querySelector('.project-img')
+        const content = card.querySelector('.grow')
+
+        if (wrap && img && content) {
+          gsap.set(content, { opacity: 0, y: 15 })
+
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: card,
+              start: "top 85%",
+              once: true
+            }
+          })
+
+          tl.to(wrap, {
+            clipPath: "inset(0 0% 0 0)",
+            duration: 1,
+            ease: "power3.inOut"
+          })
+          .to(img, {
+            scale: 1,
+            duration: 1,
+            ease: "power3.inOut"
+          }, "<")
+          .to(content, {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out"
+          }, "-=0.4")
+
+          scrollTriggers.push(tl.scrollTrigger!)
+        }
+      })
+    }
+
+    // 8. Interactive 3D Glare Tilt for Get In Touch Card
+    if (contactCard.value && contactGlare.value) {
+      const card = contactCard.value
+      const glare = contactGlare.value
+
+      card.addEventListener("mousemove", (e) => {
+        const rect = card.getBoundingClientRect()
+        const x = (e.clientX - rect.left) / rect.width - 0.5
+        const y = (e.clientY - rect.top) / rect.height - 0.5
+
+        gsap.to(card, {
+          rotationY: x * 15,
+          rotationX: -y * 15,
+          transformPerspective: 1000,
+          ease: "power2.out",
+          duration: 0.5
+        })
+
+        gsap.to(glare, {
+          opacity: 1,
+          background: `radial-gradient(circle at ${(x + 0.5) * 100}% ${(y + 0.5) * 100}%, rgba(168, 85, 247, 0.18) 0%, transparent 60%)`,
+          ease: "power2.out",
+          duration: 0.5
+        })
+      })
+
+      card.addEventListener("mouseleave", () => {
+        gsap.to(card, {
+          rotationY: 0,
+          rotationX: 0,
+          ease: "power3.out",
+          duration: 0.8
+        })
+        gsap.to(glare, {
+          opacity: 0,
+          ease: "power3.out",
+          duration: 0.8
+        })
+      })
+    }
+  }
+
+  // 2. Entrance Timeline (no intro preloader)
+  const tl = gsap.timeline({
+    onComplete: () => {
+      // 9. Navbar Scroll animations
+      if (navbar.value) {
+        // Hide/Show on scroll
+        const navScrollTrigger = ScrollTrigger.create({
+          start: "top top",
+          onUpdate: (self) => {
+            // Hide navbar on scroll down past 80px, show on scroll up
+            if (self.direction === 1 && self.scroll() > 80) {
+              gsap.to(navbar.value, { 
+                y: -100, 
+                opacity: 0, 
+                duration: 0.4, 
+                ease: "power2.out" 
+              })
+            } else {
+              gsap.to(navbar.value, { 
+                y: 0, 
+                opacity: 1, 
+                duration: 0.4, 
+                ease: "power2.out" 
+              })
+            }
+          }
+        })
+        scrollTriggers.push(navScrollTrigger)
+      }
+
+      // Scroll Progress indicator inside the navbar
+      if (scrollProgress.value) {
+        const progressScrollTrigger = ScrollTrigger.create({
+          trigger: "body",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: true,
+          onUpdate: (self) => {
+            gsap.to(scrollProgress.value, {
+              scaleX: self.progress,
+              duration: 0.1,
+              ease: "none",
+              overwrite: "auto"
+            })
+          }
+        })
+        scrollTriggers.push(progressScrollTrigger)
+      }
+
+    }
+  })
+
+  if (navbar.value) {
+    tl.to(navbar.value, {
+      y: 0,
+      opacity: 1,
+      duration: 1.0,
+      ease: "power3.out"
+    })
+  }
+
+  // Programmatically split and reveal the main hero title
+  if (splitTitle.value) {
+    const rawText = splitTitle.value.textContent?.trim() || ""
+    splitTitle.value.innerHTML = ""
     
-    // Construct word and character spans for preloader
-    const words = rawName.split(" ")
-    words.forEach((word) => {
+    const heroWords = rawText.split(" ")
+    heroWords.forEach((word) => {
       const wordSpan = document.createElement("span")
-      wordSpan.className = "inline-block whitespace-nowrap mr-3"
+      wordSpan.className = "inline-block whitespace-nowrap mr-2"
       
       const characters = word.split("")
       characters.forEach((char) => {
         const charSpan = document.createElement("span")
-        charSpan.className = "intro-char inline-block opacity-0 translate-y-[110%] rotate-6"
+        charSpan.className = "char-span inline-block opacity-0 translate-y-[110%] rotate-6"
         charSpan.textContent = char
         wordSpan.appendChild(charSpan)
       })
       
-      introName.value?.appendChild(wordSpan)
+      splitTitle.value?.appendChild(wordSpan)
     })
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        showIntro.value = false
-
-        // 9. Navbar Scroll animations
-        if (navbar.value) {
-          // Hide/Show on scroll
-          const navScrollTrigger = ScrollTrigger.create({
-            start: "top top",
-            onUpdate: (self) => {
-              // Hide navbar on scroll down past 80px, show on scroll up
-              if (self.direction === 1 && self.scroll() > 80) {
-                gsap.to(navbar.value, { 
-                  y: -100, 
-                  opacity: 0, 
-                  duration: 0.4, 
-                  ease: "power2.out" 
-                })
-              } else {
-                gsap.to(navbar.value, { 
-                  y: 0, 
-                  opacity: 1, 
-                  duration: 0.4, 
-                  ease: "power2.out" 
-                })
-              }
-            }
-          })
-          scrollTriggers.push(navScrollTrigger)
-        }
-
-        // Scroll Progress indicator inside the navbar
-        if (scrollProgress.value) {
-          const progressScrollTrigger = ScrollTrigger.create({
-            trigger: "body",
-            start: "top top",
-            end: "bottom bottom",
-            scrub: true,
-            onUpdate: (self) => {
-              gsap.to(scrollProgress.value, {
-                scaleX: self.progress,
-                duration: 0.1,
-                ease: "none",
-                overwrite: "auto"
-              })
-            }
-          })
-          scrollTriggers.push(progressScrollTrigger)
-        }
-      }
-    })
-
-    // Animate preloader characters in
-    tl.to(".intro-char", {
+    // Stagger main heading characters (overlapping with navbar transition)
+    tl.to(".char-span", {
       opacity: 1,
       y: 0,
       rotate: 0,
       duration: 0.9,
       ease: "power4.out",
-      stagger: 0.04
-    })
-    // Slide preloader overlay up and out of viewport
-    .to(introOverlay.value, {
-      yPercent: -100,
-      duration: 1.1,
-      ease: "expo.inOut",
-      delay: 0.3
-    })
-
-    if (navbar.value) {
-      tl.to(navbar.value, {
-        y: 0,
-        opacity: 1,
-        duration: 1.0,
-        ease: "power3.out"
-      }, "-=0.8")
-    }
-
-    // Programmatically split and reveal the main hero title
-    if (splitTitle.value) {
-      const rawText = splitTitle.value.textContent?.trim() || ""
-      splitTitle.value.innerHTML = ""
-      
-      const heroWords = rawText.split(" ")
-      heroWords.forEach((word) => {
-        const wordSpan = document.createElement("span")
-        wordSpan.className = "inline-block whitespace-nowrap mr-2"
-        
-        const characters = word.split("")
-        characters.forEach((char) => {
-          const charSpan = document.createElement("span")
-          charSpan.className = "char-span inline-block opacity-0 translate-y-[110%] rotate-6"
-          charSpan.textContent = char
-          wordSpan.appendChild(charSpan)
-        })
-        
-        splitTitle.value?.appendChild(wordSpan)
-      })
-
-      // Stagger main heading characters (overlapping with overlay slide-out)
-      tl.to(".char-span", {
-        opacity: 1,
-        y: 0,
-        rotate: 0,
-        duration: 0.9,
-        ease: "power4.out",
-        stagger: 0.03
-      }, "-=0.8")
-    }
-
-    // Cascade subtitle and buttons
-    if (heroSubtitle.value && heroButtons.value) {
-      tl.to(heroSubtitle.value, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power3.out"
-      }, "-=0.6")
-      .to(heroButtons.value, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power3.out"
-      }, "-=0.6")
-    }
+      stagger: 0.03
+    }, "-=0.8")
   }
 
-  // 3. ScrollTrigger reveals for sections
-  document.querySelectorAll('.scroll-animate').forEach(section => {
-    // Skip sections with custom child stagger triggers
-    if (section.querySelector('.tech-card') || section.querySelector('.achievement-card') || section.querySelector('.journey-item') || section.querySelector('.project-card')) {
-      return
-    }
-
-    gsap.set(section, { opacity: 0, y: 30 })
-    const scrollReveal = gsap.to(section, {
+  // Cascade subtitle and buttons
+  if (heroSubtitle.value && heroButtons.value) {
+    tl.to(heroSubtitle.value, {
       opacity: 1,
       y: 0,
       duration: 0.8,
-      ease: "power2.out",
-      scrollTrigger: {
-        trigger: section,
-        start: "top 85%",
-        once: true
-      }
-    })
-    scrollTriggers.push(scrollReveal.scrollTrigger!)
-  })
-
-  // 4. Stagger Technologies Section Cards (3D Swing-in Entrance + Mouse Hover Tilt)
-  const techCards = document.querySelectorAll('.tech-card')
-  if (techCards.length > 0) {
-    gsap.set(techCards, { 
-      opacity: 0, 
-      y: 60,
-      rotateX: -20,
-      transformPerspective: 1000,
-      transformOrigin: "top center"
-    })
-    
-    const techTrigger = gsap.to(techCards, {
-      opacity: 1,
-      y: 0,
-      rotateX: 0,
-      duration: 1,
-      stagger: 0.15,
-      ease: "back.out(1.5)",
-      scrollTrigger: {
-        trigger: ".tech-card",
-        start: "top 85%",
-        once: true
-      }
-    })
-    scrollTriggers.push(techTrigger.scrollTrigger!)
-
-    // Add 3D perspective tilt on mouse hover
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-    if (!isTouch) {
-      techCards.forEach((card) => {
-        const el = card as HTMLElement
-        el.addEventListener("mousemove", (e) => {
-          const rect = el.getBoundingClientRect()
-          const x = (e.clientX - rect.left) / rect.width - 0.5
-          const y = (e.clientY - rect.top) / rect.height - 0.5
-
-          gsap.to(el, {
-            rotationY: x * 10, // gentle horizontal rotation
-            rotationX: -y * 10, // gentle vertical rotation
-            y: -6, // lift card slightly
-            transformPerspective: 800,
-            ease: "power2.out",
-            duration: 0.4
-          })
-        })
-
-        el.addEventListener("mouseleave", () => {
-          gsap.to(el, {
-            rotationY: 0,
-            rotationX: 0,
-            y: 0,
-            ease: "power3.out",
-            duration: 0.6
-          })
-        })
-      })
-    }
-  }
-
-  // 5. Stagger Achievements
-  const achieveCards = document.querySelectorAll('.achievement-card')
-  if (achieveCards.length > 0) {
-    gsap.set(achieveCards, { opacity: 0, y: 30 })
-    const achieveTrigger = gsap.to(achieveCards, {
+      ease: "power3.out"
+    }, "-=0.6")
+    .to(heroButtons.value, {
       opacity: 1,
       y: 0,
       duration: 0.8,
-      stagger: 0.15,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: ".achievement-card",
-        start: "top 85%",
-        once: true
-      }
-    })
-    scrollTriggers.push(achieveTrigger.scrollTrigger!)
+      ease: "power3.out"
+    }, "-=0.6")
   }
 
-  // 6. Career Journey grow vertical line + node reveals
-  if (journeyLine.value) {
-    const growTrigger = gsap.to(journeyLine.value, {
-      scaleY: 1,
-      ease: "none",
-      scrollTrigger: {
-        trigger: "#journey",
-        start: "top 75%",
-        end: "bottom 70%",
-        scrub: 1
-      }
-    })
-    scrollTriggers.push(growTrigger.scrollTrigger!)
-  }
-
-  const journeyItems = document.querySelectorAll('.journey-item')
-  if (journeyItems.length > 0) {
-    journeyItems.forEach((item) => {
-      const dot = item.querySelector('.timeline-dot')
-      const content = item.querySelector('div:last-child')
-      
-      if (dot && content) {
-        gsap.set(dot, { scale: 0, opacity: 0 })
-        gsap.set(content, { opacity: 0, x: 20 })
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: item,
-            start: "top 80%",
-            once: true
-          }
-        })
-
-        tl.to(dot, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" })
-          .to(content, { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" }, "-=0.3")
-
-        scrollTriggers.push(tl.scrollTrigger!)
-      }
-    })
-  }
-
-  // 7. Selected Work Project Cards Reveal (Clip-Path & Image Parallax)
-  const projectCards = document.querySelectorAll('.project-card')
-  if (projectCards.length > 0) {
-    projectCards.forEach((card) => {
-      const wrap = card.querySelector('.project-img-wrap')
-      const img = card.querySelector('.project-img')
-      const content = card.querySelector('.grow')
-
-      if (wrap && img && content) {
-        gsap.set(content, { opacity: 0, y: 15 })
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: card,
-            start: "top 85%",
-            once: true
-          }
-        })
-
-        tl.to(wrap, {
-          clipPath: "inset(0 0% 0 0)", // Slide reveal horizontal wipe
-          duration: 1,
-          ease: "power3.inOut"
-        })
-        .to(img, {
-          scale: 1, // Smoothly scale down
-          duration: 1,
-          ease: "power3.inOut"
-        }, "<")
-        .to(content, {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: "power2.out"
-        }, "-=0.4")
-
-        scrollTriggers.push(tl.scrollTrigger!)
-      }
-    })
-  }
-
-  // 8. Interactive 3D Glare Tilt for Get In Touch Card
-  if (contactCard.value && contactGlare.value) {
-    const card = contactCard.value
-    const glare = contactGlare.value
-
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect()
-      const x = (e.clientX - rect.left) / rect.width - 0.5
-      const y = (e.clientY - rect.top) / rect.height - 0.5
-
-      gsap.to(card, {
-        rotationY: x * 15,
-        rotationX: -y * 15,
-        transformPerspective: 1000,
-        ease: "power2.out",
-        duration: 0.5
-      })
-
-      gsap.to(glare, {
-        opacity: 1,
-        background: `radial-gradient(circle at ${(x + 0.5) * 100}% ${(y + 0.5) * 100}%, rgba(168, 85, 247, 0.18) 0%, transparent 60%)`,
-        ease: "power2.out",
-        duration: 0.5
-      })
-    })
-
-    card.addEventListener("mouseleave", () => {
-      gsap.to(card, {
-        rotationY: 0,
-        rotationX: 0,
-        ease: "power3.out",
-        duration: 0.8
-      })
-      gsap.to(glare, {
-        opacity: 0,
-        ease: "power3.out",
-        duration: 0.8
-      })
-    })
-  }
+  // Initialize all ScrollTrigger animations immediately on mount
+  initScrollTriggerAnimations()
 })
 
 onUnmounted(() => {
@@ -1001,11 +1137,6 @@ onUnmounted(() => {
 <style scoped>
 /* Base styling for splitting characters to avoid layout shifts */
 :deep(.char-span) {
-  display: inline-block;
-  transform-origin: bottom center;
-}
-
-:deep(.intro-char) {
   display: inline-block;
   transform-origin: bottom center;
 }
