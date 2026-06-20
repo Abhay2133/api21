@@ -83,7 +83,7 @@ jobs:
             pm2 delete api21-backend || true
             pm2 start ecosystem.config.cjs
 
-      - name: Diagnostics - PM2 Logs
+      - name: Diagnostics - Check VM State
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -93,4 +93,15 @@ jobs:
           script: |
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            pm2 logs api21-backend --lines 50 --raw || true
+            
+            echo "=== PM2 STATUS ==="
+            pm2 status || true
+            
+            echo "=== PM2 LOGS ==="
+            pm2 logs api21-backend --lines 100 --no-daemon || true
+            
+            echo "=== NGINX CONFIG ==="
+            sudo cat /etc/nginx/sites-enabled/* || cat /etc/nginx/nginx.conf || true
+            
+            echo "=== LISTENING PORTS ==="
+            netstat -an | grep LISTEN || true
