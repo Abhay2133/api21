@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Detailed API Documentation for api21 - High performance REST server built with Go, Gin, GORM, PostgreSQL, and Redis.">
+    <title>api21 - Interactive API Documentation</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <style>
+        :root {
+            --bg-main: #0B0F19;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-primary: #7E14FF;
+            --accent-primary-glow: rgba(126, 20, 255, 0.4);
+            --accent-secondary: #00C2FF;
+            --accent-success: #10B981;
+            --accent-error: #EF4444;
+            --text-primary: #F3F4F6;
+            --text-secondary: #9CA3AF;
+            --code-bg: #0D1117;
+            --sidebar-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            line-height: 1.5;
+        }
+
+        /* Ambient Glows */
+        .ambient-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-primary-glow) 0%, rgba(11,15,25,0) 70%);
+            top: -150px;
+            right: -100px;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .ambient-glow-2 {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 194, 255, 0.15) 0%, rgba(11,15,25,0) 70%);
+            bottom: -200px;
+            left: -200px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Sidebar navigation */
+        aside {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background-color: rgba(17, 24, 39, 0.9);
+            border-right: 1px solid var(--border-color);
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 0 15px var(--accent-primary-glow);
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: linear-gradient(135deg, #fff, #9CA3AF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-header {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item a {
+            display: block;
+            padding: 0.5rem 0.75rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item a:hover {
+            color: var(--text-primary);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active a {
+            color: white;
+            background: linear-gradient(90deg, var(--accent-primary), rgba(126, 20, 255, 0.2));
+            border-left: 3px solid var(--accent-secondary);
+        }
+
+        /* Main layout split */
+        main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .content-section {
+            flex: 1.2;
+            padding: 3rem 4rem;
+            max-width: 800px;
+        }
+
+        .code-section {
+            flex: 0.8;
+            background-color: #090C15;
+            border-left: 1px solid var(--border-color);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        /* Typography & elements */
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #FFF, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1.25rem;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Endpoint badge */
+        .endpoint-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .endpoint-badge.get {
+            background-color: rgba(0, 194, 255, 0.1);
+            color: var(--accent-secondary);
+            border-color: rgba(0, 194, 255, 0.2);
+        }
+
+        .endpoint-badge.post {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--accent-success);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .endpoint-badge.delete {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--accent-error);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(12px);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-primary);
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        .param-name {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-secondary);
+            font-weight: 500;
+        }
+
+        .param-type {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #A78BFA;
+        }
+
+        /* Code Blocks */
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #E2E8F0;
+            margin-bottom: 1rem;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            color: #F472B6;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+        }
+
+        pre code {
+            color: inherit;
+            background-color: transparent;
+            padding: 0;
+        }
+
+        /* Code Tab Switchers */
+        .code-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .code-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .code-tab.active {
+            color: var(--accent-secondary);
+            border-bottom-color: var(--accent-secondary);
+        }
+
+        /* Status Indicator badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .status-badge.up {
+            color: var(--accent-success);
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .status-badge.down {
+            color: var(--accent-error);
+            background-color: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .status-badge.checking {
+            color: var(--accent-secondary);
+            background-color: rgba(0, 194, 255, 0.1);
+            border-color: rgba(0, 194, 255, 0.2);
+        }
+
+        /* Pulse dot animation */
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            display: inline-block;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .pulse-dot.animating {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 1024px) {
+            body {
+                flex-direction: column;
+            }
+            aside {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1.5rem;
+            }
+            main {
+                margin-left: 0;
+                flex-direction: column;
+            }
+            .content-section {
+                padding: 2rem;
+            }
+            .code-section {
+                height: auto;
+                position: relative;
+                border-left: none;
+                border-top: 1px solid var(--border-color);
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
+
+    <!-- Sidebar navigation -->
+    <aside>
+        <div class="logo-section">
+            <div class="logo-icon">21</div>
+            <span class="logo-text">api21 Engine</span>
+        </div>
+        
+        <nav>
+            <ul class="nav-links">
+                <li class="nav-header">Getting Started</li>
+                <li class="nav-item active"><a href="#overview" id="nav-overview">Overview</a></li>
+                <li class="nav-item"><a href="#rate-limiting" id="nav-rate-limiting">Rate Limiting</a></li>
+                
+                <li class="nav-header">System Health</li>
+                <li class="nav-item"><a href="#health-endpoint" id="nav-health">Health Status</a></li>
+                
+                <li class="nav-header">Core Endpoints</li>
+                <li class="nav-item"><a href="#users-list" id="nav-users-list">Get Users</a></li>
+                <li class="nav-item"><a href="#user-create" id="nav-user-create">Create User</a></li>
+                <li class="nav-item"><a href="#user-delete" id="nav-user-delete">Delete User</a></li>
+            </ul>
+        </nav>
+        
+        <!-- Live Health Status Indicator in Sidebar -->
+        <div class="glass-card" style="margin-top: auto; margin-bottom: 0; padding: 1rem;">
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 600;">SERVER STATUS</div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem;">PostgreSQL</span>
+                    <span id="postgres-indicator" class="status-badge checking"><span class="pulse-dot animating"></span>Checking</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem;">Redis</span>
+                    <span id="redis-indicator" class="status-badge checking"><span class="pulse-dot animating"></span>Checking</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main>
+        
+        <!-- Left content pane -->
+        <div class="content-section">
+            
+            <section id="overview">
+                <h1>API Reference</h1>
+                <p>Welcome to the official API documentation for <strong>api21</strong>. This project serves as a highly modular, lightning-fast JSON API backend built on the Go stack.</p>
+                
+                <div class="glass-card">
+                    <h3>Architecture Summary</h3>
+                    <p>We migrated our architecture from a hybrid Bun + Vite SSR project into a Go standalone engine optimized for low latency and high concurrency:</p>
+                    <ul style="margin-left: 1.5rem; color: var(--text-secondary); font-size: 0.95rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <li><strong>Engine:</strong> Go v1.22+ utilizing the <a href="https://github.com/gin-gonic/gin" target="_blank" style="color: var(--accent-secondary);">Gin Web Framework</a>.</li>
+                        <li><strong>Databases:</strong> PostgreSQL for persistent data relational storage with <a href="https://gorm.io" target="_blank" style="color: var(--accent-secondary);">GORM ORM</a>.</li>
+                        <li><strong>Caching & Rate Limiting:</strong> Redis client connection managing distributed sliding window state.</li>
+                        <li><strong>Background Workers:</strong> Multi-threaded goroutine workers checking server and dependency health autonomously.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="rate-limiting">
+                <h2>Rate Limiting</h2>
+                <p>All endpoints grouped under the <code>/api/</code> path are governed by a sliding window rate limiter backed by Redis. This protects the service from abuse and ensures reliability.</p>
+                <div class="glass-card">
+                    <table style="margin: 0;">
+                        <thead>
+                            <tr>
+                                <th>Header</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="param-name">X-RateLimit-Limit</td>
+                                <td>Maximum allowed requests per client within the 15-minute window (Default: <code>200</code>).</td>
+                            </tr>
+                            <tr>
+                                <td class="param-name">X-RateLimit-Remaining</td>
+                                <td>The number of remaining requests allowed for your IP within the current window.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>If you exceed the limit, the API returns HTTP Status Code <code>429 Too Many Requests</code> with a JSON response body payload:</p>
+                <pre><code>{
+  "error": "Too many requests, please slow down."
+}</code></pre>
+            </section>
+
+            <section id="health-endpoint">
+                <h2>Health Check</h2>
+                <div class="endpoint-badge get">GET</div>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: white;">/api/v1/health</code>
+                <p style="margin-top: 1rem;">Returns connection diagnostics for database dependencies (PostgreSQL and Redis). Useful for Kubernetes readiness probes or status dashboards.</p>
+                
+                <h3>Response Format</h3>
+                <pre><code>{
+  "success": true,
+  "data": {
+    "status": "ok",
+    "postgres": "up",
+    "redis": "up"
+  }
+}</code></pre>
+            </section>
+
+            <section id="users-list">
+                <h2>Get Users</h2>
+                <div class="endpoint-badge get">GET</div>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: white;">/api/v1/users</code>
+                <p style="margin-top: 1rem;">Retrieves an array containing all registered users in the database.</p>
+
+                <h3>Query Parameters</h3>
+                <p>No query parameters are currently required.</p>
+            </section>
+
+            <section id="user-create">
+                <h2>Create User</h2>
+                <div class="endpoint-badge post">POST</div>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: white;">/api/v1/users</code>
+                <p style="margin-top: 1rem;">Creates a new user record. The request payload must be valid JSON.</p>
+
+                <h3>Request Body Parameters</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="param-name">name</td>
+                            <td class="param-type">string</td>
+                            <td style="color: var(--accent-error);">Yes</td>
+                            <td>Display name of the user. Maximum 255 characters.</td>
+                        </tr>
+                        <tr>
+                            <td class="param-name">email</td>
+                            <td class="param-type">string</td>
+                            <td style="color: var(--accent-error);">Yes</td>
+                            <td>Unique valid email address. Used for database unique validation index constraints.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="user-delete">
+                <h2>Delete User</h2>
+                <div class="endpoint-badge delete">DELETE</div>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: white;">/api/v1/users/:id</code>
+                <p style="margin-top: 1rem;">Permanently deletes a user from the system by their primary key ID.</p>
+
+                <h3>Path Parameters</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="param-name">id</td>
+                            <td class="param-type">integer</td>
+                            <td style="color: var(--accent-error);">Yes</td>
+                            <td>The unique numerical primary key of the target user.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+        </div>
+
+        <!-- Right code preview pane -->
+        <div class="code-section">
+            <div>
+                <h3 style="margin-top: 0; color: var(--text-primary);">Request Sandbox Examples</h3>
+                <p style="font-size: 0.85rem; margin-bottom: 1.5rem;">Select your preferred language environment to execute test queries against the engine endpoints.</p>
+            </div>
+
+            <!-- Health check codes -->
+            <div>
+                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem;">Get Health Check</div>
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchCode('health', 'curl')">cURL</button>
+                    <button class="code-tab" onclick="switchCode('health', 'js')">JavaScript</button>
+                    <button class="code-tab" onclick="switchCode('health', 'go')">Go</button>
+                </div>
+                <pre><code id="code-health-curl">curl -X GET http://localhost:3000/api/v1/health</code><code id="code-health-js" style="display:none;">fetch('http://localhost:3000/api/v1/health')
+  .then(res => res.json())
+  .then(data => console.log(data));</code><code id="code-health-go" style="display:none;">package main
+
+import (
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	resp, err := http.Get("http://localhost:3000/api/v1/health")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
+}</code></pre>
+            </div>
+
+            <!-- Get users codes -->
+            <div>
+                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem;">Get Users</div>
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchCode('getusers', 'curl')">cURL</button>
+                    <button class="code-tab" onclick="switchCode('getusers', 'js')">JavaScript</button>
+                    <button class="code-tab" onclick="switchCode('getusers', 'go')">Go</button>
+                </div>
+                <pre><code id="code-getusers-curl">curl -X GET http://localhost:3000/api/v1/users</code><code id="code-getusers-js" style="display:none;">fetch('http://localhost:3000/api/v1/users')
+  .then(res => res.json())
+  .then(data => console.log(data));</code><code id="code-getusers-go" style="display:none;">package main
+
+import (
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	resp, err := http.Get("http://localhost:3000/api/v1/users")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
+}</code></pre>
+            </div>
+
+            <!-- Create user codes -->
+            <div>
+                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem;">Create User</div>
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchCode('createuser', 'curl')">cURL</button>
+                    <button class="code-tab" onclick="switchCode('createuser', 'js')">JavaScript</button>
+                    <button class="code-tab" onclick="switchCode('createuser', 'go')">Go</button>
+                </div>
+                <pre><code id="code-createuser-curl">curl -X POST http://localhost:3000/api/v1/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Alice Smith", "email": "alice@example.com"}'</code><code id="code-createuser-js" style="display:none;">fetch('http://localhost:3000/api/v1/users', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name: 'Alice Smith',
+    email: 'alice@example.com'
+  })
+})
+.then(res => res.json())
+.then(data => console.log(data));</code><code id="code-createuser-go" style="display:none;">package main
+
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	payload := []byte(`{"name": "Alice Smith", "email": "alice@example.com"}`)
+	resp, err := http.Post(
+		"http://localhost:3000/api/v1/users", 
+		"application/json", 
+		bytes.NewBuffer(payload),
+	)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
+}</code></pre>
+            </div>
+            
+        </div>
+        
+    </main>
+
+    <!-- Scripts for interactive updates -->
+    <script>
+        // Language tabs switcher
+        function switchCode(endpoint, lang) {
+            const container = event.target.parentElement;
+            // Remove active from all tabs in this container
+            container.querySelectorAll('.code-tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Hide all code snippets for this endpoint
+            const preBlock = container.nextElementSibling;
+            preBlock.querySelectorAll('code').forEach(code => code.style.display = 'none');
+
+            // Show selected language code block
+            const targetCode = document.getElementById(`code-${endpoint}-${lang}`);
+            if (targetCode) {
+                targetCode.style.display = 'block';
+            }
+        }
+
+        // Live Health Status Query
+        async function updateHealthStatus() {
+            const pgIndicator = document.getElementById('postgres-indicator');
+            const redisIndicator = document.getElementById('redis-indicator');
+
+            try {
+                const response = await fetch('/api/v1/health');
+                const result = await response.json();
+                
+                if (result && result.success && result.data) {
+                    const pg = result.data.postgres;
+                    const redis = result.data.redis;
+
+                    if (pg === 'up') {
+                        pgIndicator.className = 'status-badge up';
+                        pgIndicator.innerHTML = '<span class="pulse-dot"></span>Connected';
+                    } else {
+                        pgIndicator.className = 'status-badge down';
+                        pgIndicator.innerHTML = '<span class="pulse-dot"></span>Offline';
+                    }
+
+                    if (redis === 'up') {
+                        redisIndicator.className = 'status-badge up';
+                        redisIndicator.innerHTML = '<span class="pulse-dot"></span>Connected';
+                    } else {
+                        redisIndicator.className = 'status-badge down';
+                        redisIndicator.innerHTML = '<span class="pulse-dot"></span>Offline';
+                    }
+                }
+            } catch (e) {
+                // If API fails or is not reachable
+                pgIndicator.className = 'status-badge down';
+                pgIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
+                redisIndicator.className = 'status-badge down';
+                redisIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
+            }
+        }
+
+        // Update health on load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateHealthStatus();
+            // Poll health state every 10 seconds
+            setInterval(updateHealthStatus, 10000);
+        });
+
+        // Simple Intersection Observer to highlight sidebar nav items based on scroll position
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                    const activeLink = document.querySelector(`.nav-item a[href="#${id}"]`);
+                    if (activeLink) {
+                        activeLink.parentElement.classList.add('active');
+                    }
+                }
+            });
+        }, { threshold: 0.3 });
+
+        document.querySelectorAll('section[id]').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

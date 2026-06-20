@@ -6,18 +6,14 @@ checks:
 plugins:
   fixme:
     enabled: true
-  gofmt:
+  eslint:
     enabled: true
-  golint:
-    enabled: true
-  govet:
-    enabled: true
+    channel: "stable"
 exclude_patterns:
-  - grifts/**/*
-  - "**/*_test.go"
-  - "*_test.go"
-  - "**_test.go"
-  - logs/*
-  - public/*
-  - templates/*
+  - "dist/**/*"
+  - "frontend/dist/**/*"
   - "**/node_modules/"
+  - "server/db/**/*.sqlite3"
+  - "drizzle/**/*"
+  - "nuxt_backup/**/*"
+  - ".agents/**/*"

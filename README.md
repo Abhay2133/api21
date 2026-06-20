@@ -1,39 +1,97 @@
-# Welcome to Buffalo
+# api21 Standalone API Engine
 
-Thank you for choosing Buffalo for your web development needs.
+A high-performance standalone REST API engine built with **Go (Golang)**. The frontend was moved to a separate repository, and this project serves exclusively as the API server.
 
-## Database Setup
+---
 
-It looks like you chose to set up your application using a database! Fantastic!
+## 🚀 Architecture Overview
 
-The first thing you need to do is open up the "database.yml" file and edit it to use the correct usernames, passwords, hosts, etc... that are appropriate for your environment.
+*   **Language & Framework:** Go (v1.22+) powered by the [Gin Web Framework](https://github.com/gin-gonic/gin).
+*   **Database & ORM:** PostgreSQL for relational data persistence managed via [GORM](https://gorm.io).
+*   **Caching & Limiter:** Redis connection managing distributed sliding window rate limiting.
+*   **Rate Limiting:** Sliding window limiter (200 requests / 15 minutes per IP) applied to `/api/` paths.
+*   **Documentation:** Interactive, responsive dark-themed API reference built directly into the server (accessible at the root `/`).
+*   **Process Management:** PM2 configuration managing the compiled Go binary.
 
-You will also need to make sure that **you** start/install the database of your choice. Buffalo **won't** install and start it for you.
+---
 
-### Create Your Databases
+## 📁 Directory Structure
 
-Ok, so you've edited the "database.yml" file and started your database, now Buffalo can create the databases in that file for you:
-
-```console
-buffalo pop create -a
+```
+├── cmd/
+│   └── app/
+│       └── main.go         # Application bootstrap entrypoint
+├── config/
+│   └── config.go       # Environment variable parsing and loading
+├── db/
+│   └── db.go           # GORM connection and Postgres migrations
+├── handlers/
+│   ├── health.go       # Health probe handler (Postgres + Redis checks)
+│   ├── health_test.go  # Route unit tests for health status
+│   └── user.go         # User CRUD handlers (GORM integration)
+├── middleware/
+│   ├── cors.go         # CORS headers middleware for separate frontend repo
+│   ├── logger.go       # Logger middleware
+│   ├── ratelimit.go    # Redis-backed sliding window rate limiter
+│   └── ssl.go          # HTTPS force redirect middleware
+├── models/
+│   └── user.go         # GORM database model schemas
+├── redis/
+│   └── redis.go        # Redis client pool and connectivity verification
+├── services/
+│   └── ping.go         # Background ping routine worker
+├── static/
+│   └── index.html      # Glassmorphic interactive API documentation page
+├── ecosystem.config.cjs # PM2 ecosystem configuration for Go binary
+└── go.mod / go.sum     # Go dependency manager manifest files
 ```
 
-## Starting the Application
+---
 
-Buffalo ships with a command that will watch your application and automatically rebuild the Go binary and any assets for you. To do that run the "buffalo dev" command:
+## 🛠️ Installation & Setup
 
-```console
-buffalo dev
-```
+1.  **Configure Environment Variables:**
+    Create a `.env` file in the root directory:
+    ```env
+    PORT=3000
+    GO_ENV=development
+    DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/api21?sslmode=disable
+    REDIS_URL=redis://localhost:6379/0
+    PING_URL=
+    ```
 
-If you point your browser to [http://127.0.0.1:3000](http://127.0.0.1:3000) you should see a "Welcome to Buffalo!" page.
+2.  **Download dependencies:**
+    ```bash
+    go mod tidy
+    ```
 
-**Congratulations!** You now have your Buffalo application up and running.
+3.  **Run Locally in Dev Mode:**
+    ```bash
+    go run cmd/app/main.go
+    ```
+    Open [http://localhost:3000](http://localhost:3000) to view the interactive API Documentation sandbox.
 
-## What Next?
+4.  **Run Local Tests:**
+    ```bash
+    go test ./...
+    ```
 
-We recommend you heading over to [http://gobuffalo.io](http://gobuffalo.io) and reviewing all of the great documentation there.
+---
 
-Good luck!
+## 📦 Production Deployment
 
-[Powered by Buffalo](http://gobuffalo.io)
+1.  **Compile Go Binary:**
+    ```bash
+    go build -o bin/server ./cmd/app
+    ```
+
+2.  **Deploy with PM2:**
+    ```bash
+    pm2 start ecosystem.config.cjs
+    ```
+
+3.  **Check Process Status:**
+    ```bash
+    pm2 list
+    pm2 logs api21-backend
+    ```
