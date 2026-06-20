@@ -82,3 +82,15 @@ jobs:
             # Restart app via PM2
             pm2 delete api21-backend || true
             pm2 start ecosystem.config.cjs
+
+      - name: Diagnostics - PM2 Logs
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            pm2 logs api21-backend --lines 50 --raw || true
