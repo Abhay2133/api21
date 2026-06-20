@@ -9,7 +9,7 @@ module.exports = {
       watch: false,
       max_memory_restart: "1G",
       env: {
-        PORT: "3000",
+        PORT: "8081",
         GO_ENV: "production",
       },
     },
