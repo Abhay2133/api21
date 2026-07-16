@@ -189,7 +189,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '../api'
+import api from '@/api'
 import Select from 'primevue/select'
 import Button from 'primevue/button'
 import Card from 'primevue/card'

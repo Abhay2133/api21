@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '../api'
+import api from '@/api'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import IconField from 'primevue/iconfield'
