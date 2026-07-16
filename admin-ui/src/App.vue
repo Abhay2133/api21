@@ -8,7 +8,11 @@
   </DefaultLayout>
 
   <Toast />
-  <ConfirmDialog />
+  <ConfirmDialog>
+    <template #icon>
+      <AlertTriangle class="w-8 h-8 text-yellow-500 mr-2 shrink-0" />
+    </template>
+  </ConfirmDialog>
 </template>
 
 <script setup lang="ts">
@@ -18,6 +22,7 @@ import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import SplashScreen from '@/components/SplashScreen.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import { AlertTriangle } from '@lucide/vue'
 
 const route = useRoute()
 const isLoginPage = computed(() => route.path === '/login')

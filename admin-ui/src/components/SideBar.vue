@@ -9,7 +9,7 @@
         :class="{ 'active': isActive(item.to) }"
         :title="collapsed ? item.label : ''"
       >
-        <span :class="[item.icon, 'sidebar-icon']" />
+        <component :is="item.icon" class="sidebar-icon" />
         <span v-if="!collapsed" class="sidebar-label">{{ item.label }}</span>
       </div>
     </div>
@@ -19,6 +19,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Activity, Settings, Terminal, Shield } from '@lucide/vue'
 
 defineProps<{
   collapsed: boolean
@@ -30,22 +31,22 @@ const router = useRouter()
 const menuItems = ref([
     {
         label: 'System Metrics',
-        icon: 'pi pi-chart-line',
+        icon: Activity,
         to: '/'
     },
     {
         label: 'Env Variables',
-        icon: 'pi pi-cog',
+        icon: Settings,
         to: '/env'
     },
     {
         label: 'Terminal',
-        icon: 'pi pi-code',
+        icon: Terminal,
         to: '/terminal'
     },
     {
         label: 'Sessions',
-        icon: 'pi pi-shield',
+        icon: Shield,
         to: '/sessions'
     }
 ]);

@@ -15,10 +15,20 @@
         <div class="flex items-center gap-2">
         </div>
         <div class="flex items-center gap-2">
-          <Button @click="reconnect" icon="pi pi-refresh" label="Reconnect" text size="small" severity="secondary" />
-          <Button @click="clearTerminal" icon="pi pi-trash" label="Clear" text size="small" severity="secondary" />
+          <Button @click="reconnect" label="Reconnect" text size="small" severity="secondary">
+            <template #icon>
+              <RefreshCw class="w-3.5 h-3.5 mr-1 shrink-0" />
+            </template>
+          </Button>
+          <Button @click="clearTerminal" label="Clear" text size="small" severity="secondary">
+            <template #icon>
+              <Trash2 class="w-3.5 h-3.5 mr-1 shrink-0" />
+            </template>
+          </Button>
           <div class="w-px h-4 mx-1 terminal-divider"></div>
-          <Button @click="copyTerminalSelection" icon="pi pi-copy" text rounded size="small" severity="secondary" title="Copy Selected Text" />
+          <Button @click="copyTerminalSelection" text rounded size="small" severity="secondary" title="Copy Selected Text">
+            <Copy class="w-3.5 h-3.5" />
+          </Button>
         </div>
       </div>
 
@@ -38,6 +48,7 @@ import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
+import { RefreshCw, Trash2, Copy } from '@lucide/vue'
 
 const router = useRouter()
 const toast = useToast()

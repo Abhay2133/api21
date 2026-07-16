@@ -19,11 +19,14 @@
         <Button
           @click="fetchMetrics"
           :loading="loading"
-          icon="pi pi-refresh"
           label="Refresh"
           severity="secondary"
           outlined
-        />
+        >
+          <template #icon>
+            <RefreshCw class="w-4 h-4 mr-1 shrink-0" />
+          </template>
+        </Button>
       </div>
     </div>
 
@@ -100,13 +103,13 @@
             <template #title>
                 <div class="flex justify-between items-center">
                     <span class="text-base font-medium text-surface-600">System Uptime</span>
-                    <i class="pi pi-clock text-surface-400"></i>
+                    <Clock class="w-4 h-4 text-surface-400" />
                 </div>
             </template>
             <template #content>
                 <div class="text-3xl font-semibold">{{ formattedUptime }}</div>
                 <div class="text-sm text-green-500 mt-2 flex items-center gap-1">
-                    <i class="pi pi-arrow-up"></i> 99.99% SLA
+                    <ArrowUp class="w-3.5 h-3.5" /> 99.99% SLA
                 </div>
             </template>
           </Card>
@@ -116,13 +119,13 @@
             <template #title>
                 <div class="flex justify-between items-center">
                     <span class="text-base font-medium text-surface-600">Active Conns</span>
-                    <i class="pi pi-server text-surface-400"></i>
+                    <Server class="w-4 h-4 text-surface-400" />
                 </div>
             </template>
             <template #content>
                 <div class="text-3xl font-semibold">{{ activeConnections }}</div>
                 <div class="text-sm text-surface-500 mt-2 flex items-center gap-1">
-                    <i class="pi pi-minus"></i> Normal Load
+                    <Minus class="w-3.5 h-3.5" /> Normal Load
                 </div>
             </template>
           </Card>
@@ -132,13 +135,13 @@
             <template #title>
                 <div class="flex justify-between items-center">
                     <span class="text-base font-medium text-surface-600">CPU Workload</span>
-                    <i class="pi pi-microchip text-surface-400"></i>
+                    <Cpu class="w-4 h-4 text-surface-400" />
                 </div>
             </template>
             <template #content>
                 <div class="text-3xl font-semibold">{{ metrics.cpu.usedPercent.toFixed(1) }}%</div>
                 <div class="text-sm mt-2 flex items-center gap-1" :class="metrics.cpu.usedPercent > 80 ? 'text-red-500' : 'text-green-500'">
-                    <i :class="metrics.cpu.usedPercent > 80 ? 'pi pi-exclamation-triangle' : 'pi pi-check-circle'"></i>
+                    <component :is="metrics.cpu.usedPercent > 80 ? AlertTriangle : CheckCircle" class="w-3.5 h-3.5" />
                     {{ metrics.cpu.usedPercent > 80 ? 'High Usage' : 'Healthy' }}
                 </div>
             </template>
@@ -149,7 +152,7 @@
             <template #title>
                 <div class="flex justify-between items-center">
                     <span class="text-base font-medium text-surface-600">RAM Utilization</span>
-                    <i class="pi pi-memory text-surface-400"></i>
+                    <HardDrive class="w-4 h-4 text-surface-400" />
                 </div>
             </template>
             <template #content>
@@ -223,7 +226,7 @@
                 <template #title>
                     <div class="flex justify-between items-center">
                         <span class="text-base font-medium text-surface-600">Disk Utilization (/)</span>
-                        <i class="pi pi-database text-surface-400"></i>
+                        <Database class="w-4 h-4 text-surface-400" />
                     </div>
                 </template>
                 <template #content>
@@ -254,6 +257,7 @@ import Message from 'primevue/message'
 import Skeleton from 'primevue/skeleton'
 import ProgressBar from 'primevue/progressbar'
 import Badge from 'primevue/badge'
+import { Clock, Server, Cpu, HardDrive, Database, RefreshCw, ArrowUp, Minus, AlertTriangle, CheckCircle } from '@lucide/vue'
 
 const router = useRouter()
 const metrics = ref<any>(null)

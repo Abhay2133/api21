@@ -1,12 +1,18 @@
 <template>
   <header class="layout-topbar">
     <div class="flex items-center gap-2">
-      <Button icon="pi pi-bars" text rounded @click="$emit('toggle-sidebar')" aria-label="Toggle Sidebar" />
+      <Button text rounded @click="$emit('toggle-sidebar')" aria-label="Toggle Sidebar">
+        <Menu class="w-5 h-5" />
+      </Button>
       <span style="font-size: 1.25rem; font-weight: 600;">CloudAdmin</span>
     </div>
     <div class="flex items-center gap-2">
-      <Button :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'" text rounded @click="toggleDarkMode" aria-label="Toggle Dark Mode" />
-      <Button icon="pi pi-sign-out" text rounded @click="logout" aria-label="Sign Out" />
+      <Button text rounded @click="toggleDarkMode" aria-label="Toggle Dark Mode">
+        <component :is="isDark ? Sun : Moon" class="w-5 h-5" />
+      </Button>
+      <Button text rounded @click="logout" aria-label="Sign Out">
+        <LogOut class="w-5 h-5" />
+      </Button>
     </div>
   </header>
 </template>
@@ -16,6 +22,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import api from '@/api'
+import { Menu, Sun, Moon, LogOut } from '@lucide/vue'
 
 import { useConfirm } from 'primevue/useconfirm'
 

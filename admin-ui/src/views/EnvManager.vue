@@ -8,12 +8,22 @@
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <IconField iconPosition="left">
-            <InputIcon class="pi pi-filter" />
+            <InputIcon>
+              <Filter class="w-4 h-4" />
+            </InputIcon>
             <InputText v-model="searchQuery" placeholder="Filter variables..." class="w-full sm:w-64" />
         </IconField>
         
-        <Button @click="openAddModal" icon="pi pi-plus" label="Add Variable" />
-        <Button @click="saveEnv" :disabled="saving || !hasChanges" :loading="saving" icon="pi pi-save" label="Save Changes" severity="success" />
+        <Button @click="openAddModal" label="Add Variable">
+          <template #icon>
+            <Plus class="w-4 h-4 mr-1 shrink-0" />
+          </template>
+        </Button>
+        <Button @click="saveEnv" :disabled="saving || !hasChanges" :loading="saving" label="Save Changes" severity="success">
+          <template #icon>
+            <Save class="w-4 h-4 mr-1 shrink-0" />
+          </template>
+        </Button>
       </div>
     </div>
 
@@ -62,16 +72,18 @@
                     </span>
                     <Button 
                         @click="toggleReveal(slotProps.data.key)" 
-                        :icon="revealedKeys.includes(slotProps.data.key) ? 'pi pi-eye-slash' : 'pi pi-eye'" 
                         text rounded severity="secondary" size="small"
                         :title="revealedKeys.includes(slotProps.data.key) ? 'Hide Secret' : 'Reveal Secret'"
-                    />
+                    >
+                      <component :is="revealedKeys.includes(slotProps.data.key) ? EyeOff : Eye" class="w-4 h-4" />
+                    </Button>
                     <Button 
                         @click="copyToClipboard(slotProps.data.value)" 
-                        icon="pi pi-copy" 
                         text rounded severity="secondary" size="small"
                         title="Copy Value"
-                    />
+                    >
+                      <Copy class="w-4 h-4" />
+                    </Button>
                 </div>
             </template>
         </Column>
@@ -83,8 +95,12 @@
         <Column header="Actions" style="width: 15%" headerStyle="text-align: center" bodyStyle="text-align: center">
             <template #body="slotProps">
                 <div class="flex justify-center gap-1">
-                    <Button @click="openEditModal(slotProps.data.key, slotProps.data.value)" icon="pi pi-pencil" text rounded severity="secondary" />
-                    <Button @click="deleteVar(slotProps.data.key)" icon="pi pi-trash" text rounded severity="danger" />
+                    <Button @click="openEditModal(slotProps.data.key, slotProps.data.value)" text rounded severity="secondary">
+                      <Pencil class="w-4 h-4" />
+                    </Button>
+                    <Button @click="deleteVar(slotProps.data.key)" text rounded severity="danger">
+                      <Trash2 class="w-4 h-4" />
+                    </Button>
                 </div>
             </template>
         </Column>
@@ -139,6 +155,7 @@ import Badge from 'primevue/badge'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
+import { Filter, Plus, Save, Eye, EyeOff, Copy, Pencil, Trash2 } from '@lucide/vue'
 
 const router = useRouter()
 const toast = useToast()

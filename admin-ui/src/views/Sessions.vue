@@ -3,7 +3,7 @@
     <div class="flex flex-row justify-between items-center gap-4">
       <div>
         <h1 class="text-3xl font-bold m-0 flex items-center gap-2">
-          <i class="pi pi-shield text-primary" style="font-size: 1.8rem;"></i>
+          <Shield class="w-8 h-8 text-primary shrink-0" />
           Session Management
         </h1>
         <p class="text-surface-500 dark:text-surface-400 m-0 mt-1">
@@ -13,12 +13,15 @@
       <div class="shrink-0">
         <Button 
           label="Logout All Other Sessions" 
-          icon="pi pi-power-off" 
           severity="danger" 
           outlined
           @click="confirmLogoutAllOthers" 
           :disabled="activeSessionsCount <= 1"
-        />
+        >
+          <template #icon>
+            <Power class="w-4 h-4 mr-1 shrink-0" />
+          </template>
+        </Button>
       </div>
     </div>
 
@@ -42,7 +45,7 @@
           <template #header>
             <div class="flex justify-between items-center gap-4 py-1">
               <span class="text-base font-bold text-surface-800 dark:text-surface-100 flex items-center gap-2">
-                <i class="pi pi-list text-primary"></i>
+                <List class="w-4 h-4 text-primary" />
                 Session Audit Log
               </span>
               <div class="flex items-center gap-2">
@@ -147,7 +150,7 @@
           <!-- Empty State -->
           <template #empty>
             <div class="flex flex-col items-center justify-center py-12 text-surface-500 dark:text-surface-400">
-              <i class="pi pi-key text-surface-400 dark:text-surface-600 mb-3" style="font-size: 2.5rem;"></i>
+              <Key class="w-10 h-10 text-surface-400 dark:text-surface-600 mb-3" />
               <h3 class="m-0 text-base font-semibold text-surface-700 dark:text-surface-300">No Active Sessions</h3>
               <p class="m-0 text-sm mt-1">This should not happen as you are currently logged in.</p>
             </div>
@@ -158,7 +161,7 @@
             <template #body="slotProps">
               <div class="flex items-center gap-2.5 py-1">
                 <div class="avatar-icon p-2 rounded-lg bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300">
-                  <i :class="[parseUA(slotProps.data.user_agent).browserIcon, 'text-lg']"></i>
+                  <component :is="parseUA(slotProps.data.user_agent).browserIcon" class="w-5 h-5" />
                 </div>
                 <div class="flex flex-col">
                   <span class="font-bold text-surface-800 dark:text-surface-100">
@@ -169,7 +172,7 @@
                     style="white-space: nowrap; padding: 3px 8px;"
                     class="inline-flex items-center gap-1 text-xs font-semibold mt-1 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700"
                   >
-                    <i class="pi pi-check-circle" style="font-size: 0.65rem;"></i> This Device
+                    <CheckCircle class="w-3 h-3 shrink-0 mr-1" /> This Device
                   </span>
                 </div>
               </div>
@@ -181,7 +184,7 @@
             <template #body="slotProps">
               <div class="flex items-center gap-2.5 py-1">
                 <div class="avatar-icon p-2 rounded-lg bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300">
-                  <i :class="[parseUA(slotProps.data.user_agent).osIcon, 'text-lg']"></i>
+                  <component :is="parseUA(slotProps.data.user_agent).osIcon" class="w-5 h-5" />
                 </div>
                 <div class="flex flex-col min-w-0">
                   <span class="font-semibold text-surface-700 dark:text-surface-200">
@@ -199,7 +202,7 @@
           <Column header="IP Address" sortable style="width: 20%">
             <template #body="slotProps">
               <div class="flex items-center gap-2 font-mono text-surface-700 dark:text-surface-300">
-                <i class="pi pi-map-marker text-xs text-surface-400"></i>
+                <MapPin class="w-3.5 h-3.5 text-surface-400" />
                 <span>{{ slotProps.data.ip_address }}</span>
               </div>
             </template>
@@ -209,7 +212,7 @@
           <Column header="Admin User" sortable style="width: 15%">
             <template #body="slotProps">
               <div class="flex items-center gap-2 text-surface-700 dark:text-surface-300">
-                <i class="pi pi-user text-xs text-surface-400"></i>
+                <User class="w-3.5 h-3.5 text-surface-400" />
                 <span>{{ slotProps.data.username }}</span>
               </div>
             </template>
@@ -219,7 +222,7 @@
           <Column header="Logged In Since" sortable style="width: 20%">
             <template #body="slotProps">
               <div class="flex items-center gap-2 text-surface-700 dark:text-surface-300">
-                <i class="pi pi-calendar text-xs text-surface-400"></i>
+                <Calendar class="w-3.5 h-3.5 text-surface-400" />
                 <span>{{ formatDate(slotProps.data.created_at) }}</span>
               </div>
             </template>
@@ -231,15 +234,21 @@
               <Tag 
                 v-if="slotProps.data.is_active" 
                 severity="success" 
-                value="Active" 
-                icon="pi pi-check-circle" 
-              />
+              >
+                <div class="flex items-center gap-1">
+                  <CheckCircle class="w-3.5 h-3.5" />
+                  <span>Active</span>
+                </div>
+              </Tag>
               <Tag 
                 v-else 
                 severity="secondary" 
-                value="Inactive" 
-                icon="pi pi-times-circle" 
-              />
+              >
+                <div class="flex items-center gap-1">
+                  <XCircle class="w-3.5 h-3.5" />
+                  <span>Inactive</span>
+                </div>
+              </Tag>
             </template>
           </Column>
 
@@ -250,15 +259,18 @@
                 <Button 
                   v-if="slotProps.data.is_active && !isCurrentSession(slotProps.data.token)"
                   label="Logout" 
-                  icon="pi pi-sign-out" 
                   severity="danger" 
                   text 
                   size="small"
                   class="font-semibold"
                   @click="confirmLogout(slotProps.data.id)" 
-                />
+                >
+                  <template #icon>
+                    <LogOut class="w-4 h-4 mr-1 shrink-0" />
+                  </template>
+                </Button>
                 <span v-else-if="slotProps.data.is_active && isCurrentSession(slotProps.data.token)" style="white-space: nowrap; padding: 3px 8px;" class="text-xs text-success-500 font-semibold inline-flex items-center gap-1.5 bg-success-50 dark:bg-success-950/20 rounded-full border border-success-200 dark:border-success-800">
-                  <i class="pi pi-check-circle text-xs"></i> Current
+                  <CheckCircle class="w-3.5 h-3.5 shrink-0" /> Current
                 </span>
               </div>
             </template>
@@ -283,6 +295,7 @@ import Message from 'primevue/message'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Select from 'primevue/select'
+import { Shield, Power, List, Key, Globe, Compass, Monitor, Laptop, Smartphone, MapPin, User, Calendar, CheckCircle, XCircle, LogOut } from '@lucide/vue'
 
 interface Session {
   id: number
@@ -355,43 +368,43 @@ const parseUA = (ua: string) => {
   if (!ua) return { 
     browser: 'Unknown Browser', 
     os: 'Unknown OS', 
-    browserIcon: 'pi pi-globe', 
-    osIcon: 'pi pi-desktop' 
+    browserIcon: Globe, 
+    osIcon: Monitor 
   }
   let browser = 'Unknown Browser'
   let os = 'Unknown OS'
-  let browserIcon = 'pi pi-globe'
-  let osIcon = 'pi pi-desktop'
+  let browserIcon = Globe
+  let osIcon = Monitor
 
   if (ua.includes('Firefox')) {
     browser = 'Firefox'
-    browserIcon = 'pi pi-globe'
+    browserIcon = Globe
   } else if (ua.includes('Chrome') || ua.includes('Chromium')) {
     browser = 'Chrome'
-    browserIcon = 'pi pi-google'
+    browserIcon = Globe
   } else if (ua.includes('Safari') && !ua.includes('Chrome')) {
     browser = 'Safari'
-    browserIcon = 'pi pi-compass'
+    browserIcon = Compass
   } else if (ua.includes('Edge') || ua.includes('Edg')) {
     browser = 'Edge'
-    browserIcon = 'pi pi-microsoft'
+    browserIcon = Globe
   }
 
   if (ua.includes('Windows')) {
     os = 'Windows'
-    osIcon = 'pi pi-microsoft'
+    osIcon = Monitor
   } else if (ua.includes('Macintosh') || ua.includes('Mac OS')) {
     os = 'macOS'
-    osIcon = 'pi pi-apple'
+    osIcon = Laptop
   } else if (ua.includes('Linux')) {
     os = 'Linux'
-    osIcon = 'pi pi-desktop'
+    osIcon = Monitor
   } else if (ua.includes('Android')) {
     os = 'Android'
-    osIcon = 'pi pi-android'
+    osIcon = Smartphone
   } else if (ua.includes('iPhone') || ua.includes('iPad')) {
     os = 'iOS'
-    osIcon = 'pi pi-mobile'
+    osIcon = Smartphone
   }
 
   return { browser, os, browserIcon, osIcon }
