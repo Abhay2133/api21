@@ -6,4 +6,19 @@ const api = axios.create({
   withCredentials: true,
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('adminToken');
+      sessionStorage.removeItem('adminToken');
+      delete api.defaults.headers.common['Authorization'];
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
