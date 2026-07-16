@@ -36,8 +36,13 @@ func main() {
 	// 5. Wire layers (Dependency Injection)
 	userRepo := repository.NewUserPostgresRepository(dbConn)
 	userUsecase := usecase.NewUserUsecase(userRepo)
+	
+	sessionRepo := repository.NewSessionPostgresRepository(dbConn)
+	sessionUsecase := usecase.NewSessionUsecase(sessionRepo)
+
 	userHandler := handler.NewUserHandler(userUsecase)
 	healthHandler := handler.NewHealthHandler(dbConn, redisClient)
+	adminHandler := handler.NewAdminHandler(sessionUsecase)
 
 	// 6. Setup Gin Router & register handlers
 	router := deliveryHttp.NewRouter(
@@ -46,6 +51,8 @@ func main() {
 		redisClient,
 		userHandler,
 		healthHandler,
+		adminHandler,
+		sessionUsecase,
 	)
 
 	// 7. Start the HTTP server
