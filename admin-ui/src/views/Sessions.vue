@@ -27,9 +27,96 @@
 
     <Card class="border border-surface-200 dark:border-surface-800 overflow-hidden shadow-sm">
       <template #content>
+        <!-- Loading state (Skeleton Table) -->
         <DataTable 
+          v-if="loading"
+          :value="Array(4).fill({})"
+          stripedRows
+          responsiveLayout="scroll"
+          scrollable
+          scrollHeight="400px"
+          class="w-full text-sm sticky-header-table"
+          tableStyle="min-width: 50rem"
+        >
+          <!-- Table Header / Audit Filter -->
+          <template #header>
+            <div class="flex justify-between items-center gap-4 py-1">
+              <span class="text-base font-bold text-surface-800 dark:text-surface-100 flex items-center gap-2">
+                <i class="pi pi-list text-primary"></i>
+                Session Audit Log
+              </span>
+              <div class="flex items-center gap-2">
+                <label for="status-filter" class="font-semibold text-xs text-surface-600 dark:text-surface-400">Filter Status:</label>
+                <Select 
+                  id="status-filter"
+                  v-model="statusFilter" 
+                  :options="filterOptions" 
+                  optionLabel="label" 
+                  optionValue="value" 
+                  class="w-40 text-xs"
+                  disabled
+                />
+              </div>
+            </div>
+          </template>
+          <Column header="Browser" style="width: 15%">
+            <template #body>
+              <div class="flex items-center gap-2.5 py-1">
+                <Skeleton shape="circle" size="2.5rem" class="shrink-0" />
+                <Skeleton width="4rem" height="1.25rem" />
+              </div>
+            </template>
+          </Column>
+          <Column header="Device / OS" style="width: 25%">
+            <template #body>
+              <div class="flex items-center gap-2.5 py-1">
+                <Skeleton shape="circle" size="2.5rem" class="shrink-0" />
+                <div class="flex flex-col gap-1 w-full">
+                  <Skeleton width="6rem" height="1.1rem" />
+                  <Skeleton width="10rem" height="0.8rem" />
+                </div>
+              </div>
+            </template>
+          </Column>
+          <Column header="IP Address" style="width: 20%">
+            <template #body>
+              <div class="flex items-center gap-2">
+                <Skeleton width="7rem" height="1.25rem" />
+              </div>
+            </template>
+          </Column>
+          <Column header="Admin User" style="width: 15%">
+            <template #body>
+              <div class="flex items-center gap-2">
+                <Skeleton width="5rem" height="1.25rem" />
+              </div>
+            </template>
+          </Column>
+          <Column header="Logged In Since" style="width: 20%">
+            <template #body>
+              <div class="flex items-center gap-2">
+                <Skeleton width="8rem" height="1.25rem" />
+              </div>
+            </template>
+          </Column>
+          <Column header="Status" style="width: 15%">
+            <template #body>
+              <Skeleton width="4rem" height="1.5rem" borderRadius="9999px" />
+            </template>
+          </Column>
+          <Column header="Action" style="width: 15%; text-align: right">
+            <template #body>
+              <div class="flex justify-end pr-2">
+                <Skeleton width="3.5rem" height="1.5rem" />
+              </div>
+            </template>
+          </Column>
+        </DataTable>
+
+        <!-- Real Data Table -->
+        <DataTable 
+          v-else
           :value="filteredSessions" 
-          :loading="loading"
           stripedRows
           responsiveLayout="scroll"
           scrollable
@@ -63,13 +150,6 @@
               <i class="pi pi-key text-surface-400 dark:text-surface-600 mb-3" style="font-size: 2.5rem;"></i>
               <h3 class="m-0 text-base font-semibold text-surface-700 dark:text-surface-300">No Active Sessions</h3>
               <p class="m-0 text-sm mt-1">This should not happen as you are currently logged in.</p>
-            </div>
-          </template>
-
-          <!-- Loading Spinner -->
-          <template #loading>
-            <div class="flex justify-center items-center py-12">
-              <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
             </div>
           </template>
 
@@ -198,7 +278,7 @@ import api from '@/api'
 import Card from 'primevue/card'
 import Button from 'primevue/button'
 import Tag from 'primevue/tag'
-import ProgressSpinner from 'primevue/progressspinner'
+import Skeleton from 'primevue/skeleton'
 import Message from 'primevue/message'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'

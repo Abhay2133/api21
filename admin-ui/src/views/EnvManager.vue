@@ -17,9 +17,33 @@
       </div>
     </div>
 
-    <!-- Loading state -->
-    <div v-if="loading" class="flex justify-center p-8">
-      <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
+    <!-- Loading state (Skeleton Table) -->
+    <div v-if="loading" class="card mt-4">
+      <DataTable :value="Array(5).fill({})" class="border rounded-md">
+        <Column header="Key" style="width: 25%">
+          <template #body>
+            <Skeleton width="60%" height="1.25rem" />
+          </template>
+        </Column>
+        <Column header="Value" style="width: 45%">
+          <template #body>
+            <Skeleton width="80%" height="1.25rem" />
+          </template>
+        </Column>
+        <Column header="Scope" style="width: 15%">
+          <template #body>
+            <Skeleton width="40%" height="1.25rem" />
+          </template>
+        </Column>
+        <Column header="Actions" style="width: 15%">
+          <template #body>
+            <div class="flex justify-center gap-1">
+              <Skeleton shape="circle" size="2.5rem" />
+              <Skeleton shape="circle" size="2.5rem" />
+            </div>
+          </template>
+        </Column>
+      </DataTable>
     </div>
 
     <!-- Data Table -->
@@ -112,7 +136,7 @@ import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Dialog from 'primevue/dialog'
 import Badge from 'primevue/badge'
-import ProgressSpinner from 'primevue/progressspinner'
+import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 

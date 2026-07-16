@@ -31,8 +31,65 @@
     <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
 
     <!-- Loading state -->
-    <div v-if="loading && !metrics" class="flex justify-center p-8">
-      <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
+    <div v-if="loading && !metrics" class="flex flex-col gap-4">
+      <!-- Bento Grid: Status Cards Skeleton -->
+      <div class="metrics-grid">
+        <Card v-for="i in 4" :key="'status-loader-' + i">
+          <template #title>
+            <div class="flex justify-between items-center">
+              <Skeleton width="6rem" height="1.25rem" />
+              <Skeleton shape="circle" size="1.25rem" />
+            </div>
+          </template>
+          <template #content>
+            <Skeleton width="80%" height="2rem" />
+            <Skeleton width="40%" height="1.25rem" class="mt-3" />
+          </template>
+        </Card>
+      </div>
+
+      <!-- Charts Grid Skeleton -->
+      <div class="charts-grid mt-4">
+        <Card v-for="i in 2" :key="'chart-loader-' + i">
+          <template #title>
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <Skeleton width="8rem" height="1.25rem" />
+                <Skeleton width="1.5rem" height="1rem" borderRadius="4px" />
+              </div>
+              <Skeleton width="3rem" height="1.5rem" />
+            </div>
+          </template>
+          <template #content>
+            <div class="chart-container flex items-end">
+              <Skeleton width="100%" height="100%" />
+            </div>
+            <div class="flex justify-between mt-2">
+              <Skeleton width="3rem" height="0.75rem" />
+              <Skeleton width="3rem" height="0.75rem" />
+              <Skeleton width="3rem" height="0.75rem" />
+            </div>
+          </template>
+        </Card>
+      </div>
+
+      <!-- Details Grid Skeleton -->
+      <div class="details-grid mt-4">
+        <Card class="disk-card">
+          <template #title>
+            <div class="flex justify-between items-center">
+              <Skeleton width="10rem" height="1.25rem" />
+              <Skeleton shape="circle" size="1.25rem" />
+            </div>
+          </template>
+          <template #content>
+            <Skeleton width="5rem" height="2rem" class="mb-1" />
+            <Skeleton width="12rem" height="1rem" class="mb-4" />
+            <Skeleton width="100%" height="10px" borderRadius="4px" />
+            <Skeleton width="6rem" height="0.8rem" class="mt-2" />
+          </template>
+        </Card>
+      </div>
     </div>
 
     <template v-if="metrics">
@@ -194,7 +251,7 @@ import Select from 'primevue/select'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Message from 'primevue/message'
-import ProgressSpinner from 'primevue/progressspinner'
+import Skeleton from 'primevue/skeleton'
 import ProgressBar from 'primevue/progressbar'
 import Badge from 'primevue/badge'
 
