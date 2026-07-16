@@ -234,7 +234,7 @@ body {
   font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: -0.025em;
-  background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #3b82f6 100%);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: splash-text-fade 2s infinite ease-in-out;
@@ -243,11 +243,11 @@ body {
 @keyframes splash-pulse-glow {
   0%, 100% {
     transform: scale(1) translateY(0);
-    filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.4)) drop-shadow(0 0 30px rgba(99, 102, 241, 0.2));
+    filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.4)) drop-shadow(0 0 30px rgba(16, 185, 129, 0.2));
   }
   50% {
     transform: scale(1.08) translateY(-6px);
-    filter: drop-shadow(0 0 25px rgba(99, 102, 241, 0.7)) drop-shadow(0 0 45px rgba(99, 102, 241, 0.4));
+    filter: drop-shadow(0 0 25px rgba(16, 185, 129, 0.7)) drop-shadow(0 0 45px rgba(16, 185, 129, 0.4));
   }
 }
 
