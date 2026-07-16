@@ -23,7 +23,7 @@ func (r *sessionPostgresRepository) Create(ctx context.Context, session *domain.
 
 func (r *sessionPostgresRepository) FindByToken(ctx context.Context, token string) (*domain.Session, error) {
 	var s domain.Session
-	err := r.db.WithContext(ctx).Where("token = ? AND is_active = ?", token, true).First(&s).Error
+	err := r.db.WithContext(ctx).Where("token = ? AND is_active = ?", token, true).Take(&s).Error
 	if err != nil {
 		return nil, err
 	}
