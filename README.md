@@ -66,10 +66,17 @@ A high-performance standalone REST API engine built with **Go (Golang)**. The fr
     ```
 
 3.  **Run Locally in Dev Mode:**
-    ```bash
-    go run cmd/app/main.go
-    ```
-    Open [http://localhost:3000](http://localhost:3000) to view the interactive API Documentation sandbox.
+    - Standard run:
+      ```bash
+      go run cmd/app/main.go
+      ```
+    - Live auto-reload (using installed `air` watcher):
+      ```bash
+      # Add ~/go/bin to path if needed
+      export PATH=$PATH:~/go/bin
+      air
+      ```
+    Open [http://localhost:8080](http://localhost:8080) to view the interactive API Documentation sandbox.
 
 4.  **Run Local Tests:**
     ```bash
@@ -78,20 +85,47 @@ A high-performance standalone REST API engine built with **Go (Golang)**. The fr
 
 ---
 
-## 📦 Production Deployment
+## 📦 Production Deployment (Systemd on EC2)
+
+Deploy the Go binary using native Linux `systemd` to ensure automatic restarts and robust logging without requiring Node.js/PM2.
 
 1.  **Compile Go Binary:**
     ```bash
     go build -o bin/server ./cmd/app
     ```
 
-2.  **Deploy with PM2:**
-    ```bash
-    pm2 start ecosystem.config.cjs
+2.  **Create Systemd Service:**
+    Create a file at `/etc/systemd/system/api21.service`:
+    ```ini
+    [Unit]
+    Description=api21 Go Backend Service
+    After=network.target postgresql.service redis.service
+
+    [Service]
+    User=ubuntu
+    Group=ubuntu
+    WorkingDirectory=/home/ubuntu/api21
+    ExecStart=/home/ubuntu/api21/bin/server
+    Restart=always
+    RestartSec=5s
+
+    # Standard Output/Error is automatically captured by journald
+    StandardOutput=syslog
+    StandardError=syslog
+    SyslogIdentifier=api21
+
+    [Install]
+    WantedBy=multi-user.target
     ```
 
-3.  **Check Process Status:**
+3.  **Start and Enable Service:**
     ```bash
-    pm2 list
-    pm2 logs api21-backend
+    sudo systemctl daemon-reload
+    sudo systemctl enable api21.service
+    sudo systemctl start api21.service
+    ```
+
+4.  **Check Logs:**
+    ```bash
+    sudo journalctl -u api21.service -f
     ```
