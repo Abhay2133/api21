@@ -17,11 +17,14 @@ import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import api from '@/api'
 
+import { useConfirm } from 'primevue/useconfirm'
+
 defineEmits<{
   (e: 'toggle-sidebar'): void
 }>()
 
 const router = useRouter()
+const confirm = useConfirm()
 const isDark = ref(false)
 
 const toggleDarkMode = () => {
@@ -35,20 +38,36 @@ const toggleDarkMode = () => {
     }
 }
 
-const logout = async () => {
-  try {
-    const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken')
-    if (token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`
-      await api.post('/logout')
+const logout = () => {
+  confirm.require({
+    message: 'Are you sure you want to log out of the admin panel?',
+    header: 'Confirm Logout',
+    icon: 'pi pi-exclamation-triangle',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: 'Logout',
+      severity: 'danger'
+    },
+    accept: async () => {
+      try {
+        const token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken')
+        if (token) {
+          api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+          await api.post('/logout')
+        }
+      } catch (e) {
+        // Ignore error and proceed to local logout
+      }
+      localStorage.removeItem('adminToken')
+      sessionStorage.removeItem('adminToken')
+      delete api.defaults.headers.common['Authorization']
+      router.push('/login')
     }
-  } catch (e) {
-    // Ignore error and proceed to local logout
-  }
-  localStorage.removeItem('adminToken')
-  sessionStorage.removeItem('adminToken')
-  delete api.defaults.headers.common['Authorization']
-  router.push('/login')
+  })
 }
 
 onMounted(() => {
