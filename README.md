@@ -154,5 +154,12 @@ Deploy the Go binary using native Linux `systemd` to ensure automatic restarts a
     sudo journalctl -u api21.service -f
     ```
 
-6.  **Configure Nginx Reverse Proxy:**
-    To support reverse proxying HTTP requests and WebSocket connections (for the WebTerminal dashboard feature), configure Nginx using the mappings in [nginx.conf.example](file:///home/abhay/pj/api21/nginx.conf.example).
+6.  **Configure and Reload Nginx Reverse Proxy:**
+    To support reverse proxying HTTP requests and WebSocket connections (for the WebTerminal dashboard feature), merge the configuration from [nginx.conf.example](file:///home/abhay/pj/api21/nginx.conf.example) into your Nginx site configuration, and then run the following commands to test and apply the configuration:
+    ```bash
+    # Test the configuration file for syntax errors
+    sudo nginx -t
+
+    # Reload Nginx to apply changes (keeps existing connections alive)
+    sudo systemctl reload nginx
+    ```
