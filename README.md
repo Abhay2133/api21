@@ -91,7 +91,7 @@ Deploy the Go binary using native Linux `systemd` to ensure automatic restarts a
 
 1.  **Compile Go Binary:**
     ```bash
-    go build -o bin/server ./cmd/app
+    CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o bin/api21_server cmd/app/main.go
     ```
 
 2.  **Create Systemd Service:**
@@ -105,7 +105,7 @@ Deploy the Go binary using native Linux `systemd` to ensure automatic restarts a
     User=ubuntu
     Group=ubuntu
     WorkingDirectory=/home/ubuntu/api21
-    ExecStart=/home/ubuntu/api21/bin/server
+    ExecStart=/home/ubuntu/api21/bin/api21_server
     Restart=always
     RestartSec=5s
 
