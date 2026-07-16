@@ -34,11 +34,9 @@
               <!-- Error Message -->
               <Message v-if="error" severity="error" :closable="false" class="m-0 mt-2">{{ error }}</Message>
 
-              <div class="flex items-center mt-2">
-                <label class="flex items-center gap-2 cursor-pointer select-none" @click="remember = !remember">
-                  <Checkbox v-model="remember" :binary="true" />
-                  <span class="text-sm">Stay logged in</span>
-                </label>
+              <div class="flex items-center gap-2 mt-2">
+                <Checkbox v-model="remember" inputId="stay-logged-in" :binary="true" />
+                <label for="stay-logged-in" class="cursor-pointer select-none text-sm">Stay logged in</label>
               </div>
 
               <Button type="submit" :loading="loading" label="Sign In" icon="pi pi-arrow-right" iconPos="right" class="w-full mt-2" />
