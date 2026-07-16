@@ -1,5 +1,8 @@
 <template>
-  <div class="login-wrapper bg-surface-50 dark:bg-surface-950">
+  <div class="login-wrapper bg-surface-50 dark:bg-surface-950" style="position: relative;">
+    <div style="position: absolute; top: 1rem; right: 1rem; z-index: 10;">
+      <Button :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'" text rounded @click="toggleDarkMode" aria-label="Toggle Dark Mode" />
+    </div>
     <div class="login-panel">
       <!-- Brand Header -->
       <div class="flex flex-col items-center justify-center mb-4 gap-2">
@@ -47,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api'
 import Card from 'primevue/card'
@@ -57,6 +60,28 @@ import InputIcon from 'primevue/inputicon'
 import Checkbox from 'primevue/checkbox'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
+
+const isDark = ref(false)
+
+const toggleDarkMode = () => {
+    isDark.value = !isDark.value;
+    if (isDark.value) {
+        document.documentElement.classList.add('p-dark');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.documentElement.classList.remove('p-dark');
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+onMounted(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        isDark.value = savedTheme === 'dark';
+    } else {
+        isDark.value = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+})
 
 const username = ref('')
 const password = ref('')

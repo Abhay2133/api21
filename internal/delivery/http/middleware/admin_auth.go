@@ -24,7 +24,9 @@ func AdminAuth(sessionUsecase domain.SessionUsecase) gin.HandlerFunc {
 		}
 
 		token := parts[1]
-		session, err := sessionUsecase.ValidateToken(c.Request.Context(), token)
+		ip := c.ClientIP()
+		ua := c.Request.UserAgent()
+		session, err := sessionUsecase.ValidateToken(c.Request.Context(), token, ip, ua)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired session token"})
 			return

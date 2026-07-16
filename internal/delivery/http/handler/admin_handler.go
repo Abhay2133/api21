@@ -240,7 +240,9 @@ func (h *AdminHandler) WebTerminal(c *gin.Context) {
 		return
 	}
 
-	session, err := h.sessionUsecase.ValidateToken(c.Request.Context(), authMsg.Token)
+	ip := c.ClientIP()
+	ua := c.Request.UserAgent()
+	session, err := h.sessionUsecase.ValidateToken(c.Request.Context(), authMsg.Token, ip, ua)
 	if err != nil || !session.IsActive {
 		ws.WriteMessage(websocket.TextMessage, []byte("\r\nUnauthorized WebSocket connection.\r\n"))
 		return

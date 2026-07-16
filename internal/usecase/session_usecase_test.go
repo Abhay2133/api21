@@ -88,14 +88,26 @@ func TestSessionUsecase_CreateSession(t *testing.T) {
 	}
 
 	// Verify s is now inactive, s2 is active
-	sCheck1, _ := u.ValidateToken(context.Background(), s.Token)
+	sCheck1, _ := u.ValidateToken(context.Background(), s.Token, "127.0.0.1", "Mozilla")
 	if sCheck1 != nil {
 		t.Error("expected first session to be deactivated")
 	}
 
-	sCheck2, err := u.ValidateToken(context.Background(), s2.Token)
+	sCheck2, err := u.ValidateToken(context.Background(), s2.Token, "127.0.0.1", "Mozilla")
 	if err != nil || sCheck2 == nil {
 		t.Error("expected second session to be active")
+	}
+
+	// Test stolen token / fingerprint mismatch (different IP)
+	sCheckMismatchIP, err := u.ValidateToken(context.Background(), s2.Token, "192.168.1.1", "Mozilla")
+	if err == nil || sCheckMismatchIP != nil {
+		t.Error("expected validation to fail due to IP fingerprint mismatch")
+	}
+
+	// Test stolen token / fingerprint mismatch (different UA)
+	sCheckMismatchUA, err := u.ValidateToken(context.Background(), s2.Token, "127.0.0.1", "Chrome")
+	if err == nil || sCheckMismatchUA != nil {
+		t.Error("expected validation to fail due to UA fingerprint mismatch")
 	}
 }
 
@@ -113,7 +125,7 @@ func TestSessionUsecase_RevokeSession(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	sCheck, _ := u.ValidateToken(context.Background(), s.Token)
+	sCheck, _ := u.ValidateToken(context.Background(), s.Token, "127.0.0.1", "Mozilla")
 	if sCheck != nil {
 		t.Error("expected session to be revoked")
 	}
@@ -131,12 +143,12 @@ func TestSessionUsecase_RevokeSessionByID(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	sCheck1, _ := u.ValidateToken(context.Background(), s1.Token)
+	sCheck1, _ := u.ValidateToken(context.Background(), s1.Token, "127.0.0.1", "Mozilla")
 	if sCheck1 != nil {
 		t.Error("expected first session to be revoked by ID")
 	}
 
-	sCheck2, err := u.ValidateToken(context.Background(), s2.Token)
+	sCheck2, err := u.ValidateToken(context.Background(), s2.Token, "127.0.0.1", "Mozilla")
 	if err != nil || sCheck2 == nil {
 		t.Error("expected second session to remain active")
 	}

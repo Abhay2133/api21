@@ -32,12 +32,15 @@ func (u *sessionUsecase) CreateSession(ctx context.Context, username, ip, ua str
 	}
 	token := hex.EncodeToString(tokenBytes)
 
+	hash := domain.GenerateSessionHash(username, ip, ua)
+
 	session := &domain.Session{
-		Token:     token,
-		Username:  username,
-		IPAddress: ip,
-		UserAgent: ua,
-		IsActive:  true,
+		Token:       token,
+		Username:    username,
+		IPAddress:   ip,
+		UserAgent:   ua,
+		SessionHash: hash,
+		IsActive:    true,
 	}
 
 	if err := u.repo.Create(ctx, session); err != nil {
@@ -47,11 +50,21 @@ func (u *sessionUsecase) CreateSession(ctx context.Context, username, ip, ua str
 	return session, nil
 }
 
-func (u *sessionUsecase) ValidateToken(ctx context.Context, token string) (*domain.Session, error) {
+func (u *sessionUsecase) ValidateToken(ctx context.Context, token string, currentIP string, currentUA string) (*domain.Session, error) {
 	if token == "" {
 		return nil, errors.New("empty token")
 	}
-	return u.repo.FindByToken(ctx, token)
+	session, err := u.repo.FindByToken(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	expectedHash := domain.GenerateSessionHash(session.Username, currentIP, currentUA)
+	if session.SessionHash != expectedHash {
+		return nil, errors.New("session fingerprint mismatch")
+	}
+
+	return session, nil
 }
 
 func (u *sessionUsecase) GetActiveSessions(ctx context.Context, username string) ([]domain.Session, error) {
