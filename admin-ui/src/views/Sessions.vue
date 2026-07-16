@@ -157,7 +157,7 @@
           </template>
 
           <!-- Browser Column -->
-          <Column header="Browser" sortable style="width: 15%">
+          <Column field="user_agent" header="Browser" sortable style="width: 15%">
             <template #body="slotProps">
               <div class="flex items-center gap-2.5 py-1">
                 <div class="avatar-icon p-2 rounded-lg bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300">
@@ -180,7 +180,7 @@
           </Column>
 
           <!-- Device / OS Column -->
-          <Column header="Device / OS" sortable style="width: 25%">
+          <Column field="user_agent" header="Device / OS" sortable style="width: 25%">
             <template #body="slotProps">
               <div class="flex items-center gap-2.5 py-1">
                 <div class="avatar-icon p-2 rounded-lg bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300">
@@ -199,7 +199,7 @@
           </Column>
 
           <!-- IP Address Column -->
-          <Column header="IP Address" sortable style="width: 20%">
+          <Column field="ip_address" header="IP Address" sortable style="width: 20%">
             <template #body="slotProps">
               <div class="flex items-center gap-2 font-mono text-surface-700 dark:text-surface-300">
                 <MapPin :size="14" class="text-surface-400" />
@@ -209,7 +209,7 @@
           </Column>
 
           <!-- Username Column -->
-          <Column header="Admin User" sortable style="width: 15%">
+          <Column field="username" header="Admin User" sortable style="width: 15%">
             <template #body="slotProps">
               <div class="flex items-center gap-2 text-surface-700 dark:text-surface-300">
                 <User :size="14" class="text-surface-400" />
@@ -219,7 +219,7 @@
           </Column>
 
           <!-- Logged In At Column -->
-          <Column header="Logged In Since" sortable style="width: 20%">
+          <Column field="created_at" header="Logged In Since" sortable style="width: 20%">
             <template #body="slotProps">
               <div class="flex items-center gap-2 text-surface-700 dark:text-surface-300">
                 <Calendar :size="14" class="text-surface-400" />
@@ -229,7 +229,7 @@
           </Column>
 
           <!-- Status Column -->
-          <Column header="Status" sortable style="width: 15%">
+          <Column field="is_active" header="Status" sortable style="width: 15%">
             <template #body="slotProps">
               <Tag 
                 v-if="slotProps.data.is_active" 
