@@ -11,6 +11,7 @@ jobs:
     env:
       GO_ENV: test
       REDIS_URL: redis://localhost:6379
+      DATABASE_URL: postgres://postgres:password@localhost:5432/api21_test?sslmode=disable
 
     services:
       redis:
@@ -19,6 +20,20 @@ jobs:
           - 6379:6379
         options: >-
           --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: api21_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -36,11 +51,11 @@ jobs:
         run: |
           CGO_ENABLED=0 go test -p 1 -v ./...
 
-      - name: Build Backend
+      - name: Build ARM64 Binary
         run: |
-          CGO_ENABLED=0 go build -o bin/api21_server cmd/app/main.go
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o bin/api21_server cmd/app/main.go
 
-      - name: Prepare VM for Deployment
+      - name: Prepare Deployment Directory
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -48,22 +63,19 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd ~/api21
-            git reset --hard origin/main
-            git pull origin main
-            mkdir -p bin static
+            mkdir -p ~/api21/bin ~/api21/static
 
-      - name: Copy Binary and Configs to GCP VM
+      - name: Copy Binary and Assets to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: "bin/api21_server,ecosystem.config.cjs,static/index.html"
+          source: "bin/api21_server,static/index.html"
           target: "~/api21"
 
-      - name: Restart on VM
+      - name: Restart Systemd Service
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -71,19 +83,13 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # Load system profiles (for pm2)
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-            cd ~/api21
             # Make the binary executable
-            chmod +x bin/api21_server
+            chmod +x ~/api21/bin/api21_server
+            
+            # Restart the service (assumes systemd service is configured as described in README.md)
+            sudo systemctl restart api21.service
 
-            # Restart app via PM2
-            pm2 delete api21-backend || true
-            pm2 start ecosystem.config.cjs
-
-      - name: Diagnostics - Check VM State
+      - name: Verify Service Status
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -91,14 +97,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            echo "=== SYSTEMD STATUS ==="
+            sudo systemctl status api21.service --no-pager || true
             
-            echo "=== PM2 STATUS ==="
-            pm2 status || true
-            
-            echo "=== PM2 LOGS ==="
-            pm2 logs api21-backend --lines 100 --no-daemon || true
+            echo "=== SYSTEMD RECENT LOGS ==="
+            sudo journalctl -u api21.service -n 50 --no-pager || true
             
             echo "=== NGINX CONFIG ==="
             sudo cat /etc/nginx/sites-enabled/* || cat /etc/nginx/nginx.conf || true
