@@ -273,8 +273,8 @@ const intervalOptions = [
 const refreshInterval = ref(3000)
 let pollTimer: any = null
 
-const cpuHistory = ref<number[]>([25, 30, 45, 35, 40, 50, 48, 55, 62, 58, 60, 55])
-const ramHistory = ref<number[]>([42, 42, 43, 43, 44, 44, 45, 45, 45, 46, 46, 45])
+const cpuHistory = ref<number[]>([])
+const ramHistory = ref<number[]>([])
 const chartTimes = ref<string[]>([])
 
 const startTime = Date.now() - 1232542000
@@ -347,6 +347,10 @@ const formatBytes = (bytes: number) => {
 
 const computePath = (history: number[]) => {
   if (history.length === 0) return ''
+  if (history.length === 1) {
+    const y = 95 - (history[0] / 100) * 90
+    return `M0,${y.toFixed(1)} L100,${y.toFixed(1)}`
+  }
   const step = 100 / (history.length - 1)
   return history.map((val, index) => {
     const x = index * step
@@ -385,11 +389,6 @@ const updateInterval = () => {
 }
 
 onMounted(() => {
-  const now = Date.now()
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now - i * refreshInterval.value)
-    chartTimes.value.push(d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }))
-  }
   startPolling()
 })
 
