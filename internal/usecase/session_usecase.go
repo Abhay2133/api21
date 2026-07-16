@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"log"
 
 	"github.com/abhay2133/api21/internal/domain"
 )
@@ -61,6 +62,9 @@ func (u *sessionUsecase) ValidateToken(ctx context.Context, token string, curren
 
 	expectedHash := domain.GenerateSessionHash(session.Username, currentIP, currentUA)
 	if session.SessionHash != expectedHash {
+		log.Printf("[ValidateToken] Fingerprint mismatch! Username: %s", session.Username)
+		log.Printf("  Stored:  IP=%s, UA=%s, Hash=%s", session.IPAddress, session.UserAgent, session.SessionHash)
+		log.Printf("  Current: IP=%s, UA=%s, Hash=%s", currentIP, currentUA, expectedHash)
 		return nil, errors.New("session fingerprint mismatch")
 	}
 

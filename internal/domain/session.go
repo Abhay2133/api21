@@ -40,9 +40,18 @@ type SessionUsecase interface {
 // GenerateSessionHash hashes client attributes to create a consistent fingerprint
 func GenerateSessionHash(username, ip, ua string) string {
 	browser, device, os := parseUA(ua)
-	data := strings.Join([]string{browser, device, os, ua, ip, username}, "|")
+	normalizedIP := normalizeIP(ip)
+	data := strings.Join([]string{browser, device, os, ua, normalizedIP, username}, "|")
 	hash := sha256.Sum256([]byte(data))
 	return hex.EncodeToString(hash[:])
+}
+
+func normalizeIP(ip string) string {
+	ip = strings.TrimSpace(ip)
+	if ip == "::1" || ip == "127.0.0.1" || ip == "::ffff:127.0.0.1" {
+		return "127.0.0.1"
+	}
+	return ip
 }
 
 func parseUA(ua string) (browser, device, os string) {
