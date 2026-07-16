@@ -43,3 +43,4 @@ coverage/
 # Backups
 /nuxt_backup/
 
+.playwright-mcp
