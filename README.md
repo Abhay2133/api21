@@ -87,6 +87,19 @@ A high-performance standalone REST API engine built with **Go (Golang)**. The fr
 
 ## 📦 Production Deployment (Systemd on EC2)
 
+### 🔑 GitHub Actions Secrets Setup
+
+To enable automated CI/CD deployment via GitHub Actions, add the following Secrets under your GitHub repository (**Settings > Secrets and variables > Actions > New repository secret**):
+
+| Secret Name | Description / How to Get It |
+| :--- | :--- |
+| `SERVER_HOST` | **The Public IPv4 Address or DNS name of your EC2 instance.**<br>• *How to get:* In your AWS EC2 Console, select your active instance and copy the **Public IPv4 address** or **Public IPv4 DNS** from the *Instance Details* tab. |
+| `SERVER_USER` | **The SSH login user for the EC2 instance.**<br>• *How to get:* Depends on the AMI you launched your instance with. Typical default users are:<br>  - Ubuntu: `ubuntu`<br>  - Amazon Linux 2 / 2023: `ec2-user`<br>  - Debian: `admin`<br>  - CentOS: `centos` |
+| `SSH_PRIVATE_KEY` | **The private key (.pem) used to authenticate with your EC2 instance.**<br>• *How to get:* Locate the Key Pair file (`.pem`) you created/downloaded when launching the EC2 instance. Open this file in any raw text editor, copy its entire contents (including headers `-----BEGIN RSA PRIVATE KEY-----` and `-----END RSA PRIVATE KEY-----`), and paste it as the secret value. |
+
+---
+
+### ⚙️ EC2 Manual Setup Guide
 Deploy the Go binary using native Linux `systemd` to ensure automatic restarts and robust logging without requiring Node.js/PM2.
 
 1.  **Compile Go Binary:**
