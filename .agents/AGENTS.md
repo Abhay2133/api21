@@ -52,6 +52,10 @@ Commands are run using standard Go tooling:
 export PATH=$PATH:/home/abhay/.local/go/bin
 go run cmd/app/main.go
 
+# Run local Go dev server with live auto-reload on file changes
+export PATH=$PATH:/home/abhay/.local/go/bin:~/go/bin
+air
+
 # Compile production binary
 go build -o bin/server ./cmd/app
 
