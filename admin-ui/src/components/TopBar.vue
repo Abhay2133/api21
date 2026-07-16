@@ -1,7 +1,7 @@
 <template>
   <header class="layout-topbar">
     <div class="flex items-center gap-2">
-      <Button text rounded @click="$emit('toggle-sidebar')" aria-label="Toggle Sidebar">
+      <Button class="sidebar-toggle-btn" text rounded @click="$emit('toggle-sidebar')" aria-label="Toggle Sidebar">
         <Menu :size="20" />
       </Button>
       <span style="font-size: 1.25rem; font-weight: 600;">CloudAdmin</span>

@@ -1,6 +1,6 @@
 <template>
-  <div class="sessions-container flex flex-col gap-6 p-6">
-    <div class="flex flex-row justify-between items-center gap-4">
+  <div class="sessions-container flex flex-col gap-6">
+    <div class="flex justify-between items-center flex-wrap gap-4">
       <div>
         <h1 class="text-3xl font-bold m-0 flex items-center gap-2">
           <Shield :size="28" class="text-primary flex-shrink-0" />
@@ -43,7 +43,7 @@
         >
           <!-- Table Header / Audit Filter -->
           <template #header>
-            <div class="flex justify-between items-center gap-4 py-1">
+            <div class="flex justify-between items-center flex-wrap gap-4 py-1">
               <span class="text-base font-bold text-surface-800 dark:text-surface-100 flex items-center gap-2">
                 <List :size="16" class="text-primary" />
                 Session Audit Log
@@ -129,7 +129,7 @@
         >
           <!-- Table Header / Audit Filter -->
           <template #header>
-            <div class="flex justify-between items-center gap-4 py-1">
+            <div class="flex justify-between items-center flex-wrap gap-4 py-1">
               <span class="text-base font-bold text-surface-800 dark:text-surface-100 flex items-center gap-2">
                 <i class="pi pi-list text-primary"></i>
                 Session Audit Log

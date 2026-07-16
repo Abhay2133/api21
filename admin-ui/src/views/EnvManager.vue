@@ -29,7 +29,7 @@
 
     <!-- Loading state (Skeleton Table) -->
     <div v-if="loading" class="card mt-4">
-      <DataTable :value="Array(5).fill({})" class="border rounded-md">
+      <DataTable :value="Array(5).fill({})" class="border rounded-md" tableStyle="min-width: 50rem">
         <Column header="Key" style="width: 25%">
           <template #body>
             <Skeleton width="60%" height="1.25rem" />
@@ -58,7 +58,7 @@
 
     <!-- Data Table -->
     <div v-else class="card mt-4">
-      <DataTable :value="filteredVarsList" scrollable scrollHeight="flex" class="border rounded-md">
+      <DataTable :value="filteredVarsList" scrollable scrollHeight="flex" class="border rounded-md" tableStyle="min-width: 50rem">
         <Column field="key" header="Key" style="width: 25%">
             <template #body="slotProps">
                 <span class="font-semibold" style="word-break: break-all">{{ slotProps.data.key }}</span>
@@ -119,7 +119,7 @@
     </div>
 
     <!-- Variable Dialog Modal (Add/Edit) -->
-    <Dialog v-model:visible="showModal" modal :header="isEditMode ? 'Edit Environment Variable' : 'Add Environment Variable'" :style="{ width: '25rem' }">
+    <Dialog v-model:visible="showModal" modal :header="isEditMode ? 'Edit Environment Variable' : 'Add Environment Variable'" :style="{ width: '90vw', maxWidth: '25rem' }">
         <form @submit.prevent="submitModal" class="flex flex-col gap-4 mt-2">
             <div class="flex flex-col gap-2">
                 <label for="modal-key" class="font-semibold text-sm">Variable Key</label>
