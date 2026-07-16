@@ -107,7 +107,18 @@ Deploy the Go binary using native Linux `systemd` to ensure automatic restarts a
     CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o bin/api21_server cmd/app/main.go
     ```
 
-2.  **Create Systemd Service:**
+2.  **Configure Environment Variables on EC2:**
+    Create a `.env` file in the working directory on your EC2 instance (`/home/ubuntu/api21/.env`) with your production variables:
+    ```env
+    PORT=8080
+    GO_ENV=production
+    DATABASE_URL=postgres://<db_user>:<db_password>@<db_host>:5432/<db_name>?sslmode=require
+    REDIS_URL=redis://localhost:6379/0
+    MASTER_CREDENTIALS=admin:securepassword
+    ADMIN_ORIGIN=https://admin.yourdomain.com
+    ```
+
+3.  **Create Systemd Service:**
     Create a file at `/etc/systemd/system/api21.service`:
     ```ini
     [Unit]
@@ -131,14 +142,14 @@ Deploy the Go binary using native Linux `systemd` to ensure automatic restarts a
     WantedBy=multi-user.target
     ```
 
-3.  **Start and Enable Service:**
+4.  **Start and Enable Service:**
     ```bash
     sudo systemctl daemon-reload
     sudo systemctl enable api21.service
     sudo systemctl start api21.service
     ```
 
-4.  **Check Logs:**
+5.  **Check Logs:**
     ```bash
     sudo journalctl -u api21.service -f
     ```
