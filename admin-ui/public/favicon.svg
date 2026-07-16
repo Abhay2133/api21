@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
   <defs>
     <linearGradient id="cloud-grad" x1="10%" y1="10%" x2="90%" y2="90%">
-      <stop offset="0%" stop-color="#8B5CF6" />
-      <stop offset="50%" stop-color="#6366F1" />
-      <stop offset="100%" stop-color="#3B82F6" />
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="50%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#059669" />
     </linearGradient>
     <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#6366F1" flood-opacity="0.3"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#10b981" flood-opacity="0.3"/>
     </filter>
   </defs>
   <circle cx="32" cy="32" r="30" fill="#1E1E2F" opacity="0.05" />
