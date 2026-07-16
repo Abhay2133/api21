@@ -16,7 +16,7 @@
         <template #content>
             <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
               <div class="flex flex-col gap-2">
-                <label for="username" class="font-semibold text-sm">Username / Access Key</label>
+                <label for="username" class="font-semibold text-sm">Username</label>
                 <IconField iconPosition="left">
                     <InputIcon class="pi pi-user" />
                     <InputText id="username" v-model="username" placeholder="e.g. devops_admin_01" class="w-full" required />
@@ -24,7 +24,7 @@
               </div>
 
               <div class="flex flex-col gap-2">
-                <label for="password" class="font-semibold text-sm">Password / Secret Key</label>
+                <label for="password" class="font-semibold text-sm">Password</label>
                 <IconField iconPosition="left">
                     <InputIcon class="pi pi-key" />
                     <InputText id="password" type="password" v-model="password" placeholder="••••••••••••••••" class="w-full" required />
