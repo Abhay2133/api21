@@ -9,7 +9,7 @@
         :class="{ 'active': isActive(item.to) }"
         :title="collapsed ? item.label : ''"
       >
-        <component :is="item.icon" class="sidebar-icon" />
+        <component :is="item.icon" :size="20" class="sidebar-icon" />
         <span v-if="!collapsed" class="sidebar-label">{{ item.label }}</span>
       </div>
     </div>

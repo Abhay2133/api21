@@ -24,7 +24,7 @@
           outlined
         >
           <template #icon>
-            <RefreshCw class="w-4 h-4 mr-1 shrink-0" />
+            <RefreshCw :size="16" class="mr-1 flex-shrink-0" />
           </template>
         </Button>
       </div>
@@ -103,13 +103,13 @@
             <template #title>
                 <div class="flex justify-between items-center">
                     <span class="text-base font-medium text-surface-600">System Uptime</span>
-                    <Clock class="w-4 h-4 text-surface-400" />
+                    <Clock :size="16" class="text-surface-400" />
                 </div>
             </template>
             <template #content>
                 <div class="text-3xl font-semibold">{{ formattedUptime }}</div>
                 <div class="text-sm text-green-500 mt-2 flex items-center gap-1">
-                    <ArrowUp class="w-3.5 h-3.5" /> 99.99% SLA
+                    <ArrowUp :size="14" /> 99.99% SLA
                 </div>
             </template>
           </Card>
@@ -119,13 +119,13 @@
             <template #title>
                 <div class="flex justify-between items-center">
                     <span class="text-base font-medium text-surface-600">Active Conns</span>
-                    <Server class="w-4 h-4 text-surface-400" />
+                    <Server :size="16" class="text-surface-400" />
                 </div>
             </template>
             <template #content>
                 <div class="text-3xl font-semibold">{{ activeConnections }}</div>
                 <div class="text-sm text-surface-500 mt-2 flex items-center gap-1">
-                    <Minus class="w-3.5 h-3.5" /> Normal Load
+                    <Minus :size="14" /> Normal Load
                 </div>
             </template>
           </Card>
@@ -135,13 +135,13 @@
             <template #title>
                 <div class="flex justify-between items-center">
                     <span class="text-base font-medium text-surface-600">CPU Workload</span>
-                    <Cpu class="w-4 h-4 text-surface-400" />
+                    <Cpu :size="16" class="text-surface-400" />
                 </div>
             </template>
             <template #content>
                 <div class="text-3xl font-semibold">{{ metrics.cpu.usedPercent.toFixed(1) }}%</div>
                 <div class="text-sm mt-2 flex items-center gap-1" :class="metrics.cpu.usedPercent > 80 ? 'text-red-500' : 'text-green-500'">
-                    <component :is="metrics.cpu.usedPercent > 80 ? AlertTriangle : CheckCircle" class="w-3.5 h-3.5" />
+                    <component :is="metrics.cpu.usedPercent > 80 ? AlertTriangle : CheckCircle" :size="14" />
                     {{ metrics.cpu.usedPercent > 80 ? 'High Usage' : 'Healthy' }}
                 </div>
             </template>
@@ -152,7 +152,7 @@
             <template #title>
                 <div class="flex justify-between items-center">
                     <span class="text-base font-medium text-surface-600">RAM Utilization</span>
-                    <HardDrive class="w-4 h-4 text-surface-400" />
+                    <HardDrive :size="16" class="text-surface-400" />
                 </div>
             </template>
             <template #content>
@@ -226,7 +226,7 @@
                 <template #title>
                     <div class="flex justify-between items-center">
                         <span class="text-base font-medium text-surface-600">Disk Utilization (/)</span>
-                        <Database class="w-4 h-4 text-surface-400" />
+                        <Database :size="16" class="text-surface-400" />
                     </div>
                 </template>
                 <template #content>

@@ -10,7 +10,7 @@
   <Toast />
   <ConfirmDialog>
     <template #icon>
-      <AlertTriangle class="w-8 h-8 text-yellow-500 mr-2 shrink-0" />
+      <AlertTriangle :size="32" class="text-yellow-500 mr-2 flex-shrink-0" />
     </template>
   </ConfirmDialog>
 </template>

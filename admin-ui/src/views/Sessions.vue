@@ -3,7 +3,7 @@
     <div class="flex flex-row justify-between items-center gap-4">
       <div>
         <h1 class="text-3xl font-bold m-0 flex items-center gap-2">
-          <Shield class="w-8 h-8 text-primary shrink-0" />
+          <Shield :size="28" class="text-primary flex-shrink-0" />
           Session Management
         </h1>
         <p class="text-surface-500 dark:text-surface-400 m-0 mt-1">
@@ -19,7 +19,7 @@
           :disabled="activeSessionsCount <= 1"
         >
           <template #icon>
-            <Power class="w-4 h-4 mr-1 shrink-0" />
+            <Power :size="16" class="mr-1 flex-shrink-0" />
           </template>
         </Button>
       </div>
@@ -45,7 +45,7 @@
           <template #header>
             <div class="flex justify-between items-center gap-4 py-1">
               <span class="text-base font-bold text-surface-800 dark:text-surface-100 flex items-center gap-2">
-                <List class="w-4 h-4 text-primary" />
+                <List :size="16" class="text-primary" />
                 Session Audit Log
               </span>
               <div class="flex items-center gap-2">
@@ -150,7 +150,7 @@
           <!-- Empty State -->
           <template #empty>
             <div class="flex flex-col items-center justify-center py-12 text-surface-500 dark:text-surface-400">
-              <Key class="w-10 h-10 text-surface-400 dark:text-surface-600 mb-3" />
+              <Key :size="40" class="text-surface-400 dark:text-surface-600 mb-3" />
               <h3 class="m-0 text-base font-semibold text-surface-700 dark:text-surface-300">No Active Sessions</h3>
               <p class="m-0 text-sm mt-1">This should not happen as you are currently logged in.</p>
             </div>
@@ -161,7 +161,7 @@
             <template #body="slotProps">
               <div class="flex items-center gap-2.5 py-1">
                 <div class="avatar-icon p-2 rounded-lg bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300">
-                  <component :is="parseUA(slotProps.data.user_agent).browserIcon" class="w-5 h-5" />
+                  <component :is="parseUA(slotProps.data.user_agent).browserIcon" :size="20" />
                 </div>
                 <div class="flex flex-col">
                   <span class="font-bold text-surface-800 dark:text-surface-100">
@@ -172,7 +172,7 @@
                     style="white-space: nowrap; padding: 3px 8px;"
                     class="inline-flex items-center gap-1 text-xs font-semibold mt-1 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700"
                   >
-                    <CheckCircle class="w-3 h-3 shrink-0 mr-1" /> This Device
+                    <CheckCircle :size="12" class="flex-shrink-0 mr-1" /> This Device
                   </span>
                 </div>
               </div>
@@ -184,7 +184,7 @@
             <template #body="slotProps">
               <div class="flex items-center gap-2.5 py-1">
                 <div class="avatar-icon p-2 rounded-lg bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300">
-                  <component :is="parseUA(slotProps.data.user_agent).osIcon" class="w-5 h-5" />
+                  <component :is="parseUA(slotProps.data.user_agent).osIcon" :size="20" />
                 </div>
                 <div class="flex flex-col min-w-0">
                   <span class="font-semibold text-surface-700 dark:text-surface-200">
@@ -202,7 +202,7 @@
           <Column header="IP Address" sortable style="width: 20%">
             <template #body="slotProps">
               <div class="flex items-center gap-2 font-mono text-surface-700 dark:text-surface-300">
-                <MapPin class="w-3.5 h-3.5 text-surface-400" />
+                <MapPin :size="14" class="text-surface-400" />
                 <span>{{ slotProps.data.ip_address }}</span>
               </div>
             </template>
@@ -212,7 +212,7 @@
           <Column header="Admin User" sortable style="width: 15%">
             <template #body="slotProps">
               <div class="flex items-center gap-2 text-surface-700 dark:text-surface-300">
-                <User class="w-3.5 h-3.5 text-surface-400" />
+                <User :size="14" class="text-surface-400" />
                 <span>{{ slotProps.data.username }}</span>
               </div>
             </template>
@@ -222,7 +222,7 @@
           <Column header="Logged In Since" sortable style="width: 20%">
             <template #body="slotProps">
               <div class="flex items-center gap-2 text-surface-700 dark:text-surface-300">
-                <Calendar class="w-3.5 h-3.5 text-surface-400" />
+                <Calendar :size="14" class="text-surface-400" />
                 <span>{{ formatDate(slotProps.data.created_at) }}</span>
               </div>
             </template>
@@ -236,7 +236,7 @@
                 severity="success" 
               >
                 <div class="flex items-center gap-1">
-                  <CheckCircle class="w-3.5 h-3.5" />
+                  <CheckCircle :size="14" />
                   <span>Active</span>
                 </div>
               </Tag>
@@ -245,7 +245,7 @@
                 severity="secondary" 
               >
                 <div class="flex items-center gap-1">
-                  <XCircle class="w-3.5 h-3.5" />
+                  <XCircle :size="14" />
                   <span>Inactive</span>
                 </div>
               </Tag>
@@ -266,11 +266,11 @@
                   @click="confirmLogout(slotProps.data.id)" 
                 >
                   <template #icon>
-                    <LogOut class="w-4 h-4 mr-1 shrink-0" />
+                    <LogOut :size="16" class="mr-1 flex-shrink-0" />
                   </template>
                 </Button>
                 <span v-else-if="slotProps.data.is_active && isCurrentSession(slotProps.data.token)" style="white-space: nowrap; padding: 3px 8px;" class="text-xs text-success-500 font-semibold inline-flex items-center gap-1.5 bg-success-50 dark:bg-success-950/20 rounded-full border border-success-200 dark:border-success-800">
-                  <CheckCircle class="w-3.5 h-3.5 shrink-0" /> Current
+                  <CheckCircle :size="14" class="flex-shrink-0" /> Current
                 </span>
               </div>
             </template>

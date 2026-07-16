@@ -9,19 +9,19 @@
       <div class="flex flex-wrap items-center gap-2">
         <IconField iconPosition="left">
             <InputIcon>
-              <Filter class="w-4 h-4" />
+              <Filter :size="16" />
             </InputIcon>
             <InputText v-model="searchQuery" placeholder="Filter variables..." class="w-full sm:w-64" />
         </IconField>
         
         <Button @click="openAddModal" label="Add Variable">
           <template #icon>
-            <Plus class="w-4 h-4 mr-1 shrink-0" />
+            <Plus :size="16" class="mr-1 flex-shrink-0" />
           </template>
         </Button>
         <Button @click="saveEnv" :disabled="saving || !hasChanges" :loading="saving" label="Save Changes" severity="success">
           <template #icon>
-            <Save class="w-4 h-4 mr-1 shrink-0" />
+            <Save :size="16" class="mr-1 flex-shrink-0" />
           </template>
         </Button>
       </div>
@@ -75,14 +75,14 @@
                         text rounded severity="secondary" size="small"
                         :title="revealedKeys.includes(slotProps.data.key) ? 'Hide Secret' : 'Reveal Secret'"
                     >
-                      <component :is="revealedKeys.includes(slotProps.data.key) ? EyeOff : Eye" class="w-4 h-4" />
+                      <component :is="revealedKeys.includes(slotProps.data.key) ? EyeOff : Eye" :size="16" />
                     </Button>
                     <Button 
                         @click="copyToClipboard(slotProps.data.value)" 
                         text rounded severity="secondary" size="small"
                         title="Copy Value"
                     >
-                      <Copy class="w-4 h-4" />
+                      <Copy :size="16" />
                     </Button>
                 </div>
             </template>
@@ -96,10 +96,10 @@
             <template #body="slotProps">
                 <div class="flex justify-center gap-1">
                     <Button @click="openEditModal(slotProps.data.key, slotProps.data.value)" text rounded severity="secondary">
-                      <Pencil class="w-4 h-4" />
+                      <Pencil :size="16" />
                     </Button>
                     <Button @click="deleteVar(slotProps.data.key)" text rounded severity="danger">
-                      <Trash2 class="w-4 h-4" />
+                      <Trash2 :size="16" />
                     </Button>
                 </div>
             </template>
