@@ -80,6 +80,9 @@ func TestSessionUsecase_CreateSession(t *testing.T) {
 	if len(s.Token) != 64 {
 		t.Errorf("expected 64 character hex token, got %d", len(s.Token))
 	}
+	if s.IPAddress != "127.0.0.xxx" {
+		t.Errorf("expected masked IP address 127.0.0.xxx, got %s", s.IPAddress)
+	}
 
 	// Test create session with deactivateOthers = true
 	s2, err := u.CreateSession(context.Background(), "admin", "127.0.0.1", "Mozilla", true)

@@ -98,3 +98,35 @@ func parseUA(ua string) (browser, device, os string) {
 
 	return browser, device, os
 }
+
+// MaskIP obscures the IP address to protect user privacy in storage
+func MaskIP(ip string) string {
+	ip = strings.TrimSpace(ip)
+	if ip == "" {
+		return ""
+	}
+
+	// Check if it's IPv6
+	if strings.Contains(ip, ":") {
+		parts := strings.Split(ip, ":")
+		if len(parts) > 1 {
+			parts[len(parts)-1] = "xxxx"
+			return strings.Join(parts, ":")
+		}
+		return "xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx"
+	}
+
+	// Check if it's IPv4
+	if strings.Contains(ip, ".") {
+		parts := strings.Split(ip, ".")
+		if len(parts) == 4 {
+			return parts[0] + "." + parts[1] + "." + parts[2] + ".xxx"
+		}
+		if len(parts) > 1 {
+			parts[len(parts)-1] = "xxx"
+			return strings.Join(parts, ".")
+		}
+	}
+
+	return "xxx.xxx.xxx.xxx"
+}

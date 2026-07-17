@@ -38,7 +38,7 @@ func (u *sessionUsecase) CreateSession(ctx context.Context, username, ip, ua str
 	session := &domain.Session{
 		Token:       token,
 		Username:    username,
-		IPAddress:   ip,
+		IPAddress:   domain.MaskIP(ip),
 		UserAgent:   ua,
 		SessionHash: hash,
 		IsActive:    true,
