@@ -2,15 +2,15 @@ module.exports = {
   apps: [
     {
       name: "api21-backend",
-      script: "./bin/api21_server",
+      script: "./dist/server.js",
       exec_mode: "fork",
       instances: 1,
       autorestart: true,
       watch: false,
       max_memory_restart: "1G",
       env: {
-        PORT: "8081",
-        GO_ENV: "production",
+        PORT: "3000",
+        NODE_ENV: "production",
       },
     },
   ],
