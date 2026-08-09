@@ -206,7 +206,7 @@ async function main() {
     fs.mkdirSync(path.dirname(tmpDir), { recursive: true });
 
     const repoUrl = getRepoUrl();
-    execSync(`git clone --depth 1 "${repoUrl}" "${tmpDir}"`, { stdio: 'pipe' });
+    execSync(`git clone --depth 1 "${repoUrl}" "${tmpDir}"`, { stdio: 'inherit' });
     await logStep(deploymentId, 'Repository cloned successfully.');
 
     // Ensure local .env, src, tsconfig, package.json, pnpm-lock.yaml are synced to tmpDir
@@ -223,18 +223,19 @@ async function main() {
 
     // Step 2: Install dependencies & Build
     await logStep(deploymentId, 'Installing dependencies in ./tmp/api21...', 'building');
+    const buildEnv = { ...process.env, NODE_ENV: 'development' };
     try {
-      execSync('pnpm install --frozen-lockfile', { cwd: tmpDir, stdio: 'pipe' });
+      execSync('pnpm install --frozen-lockfile', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
     } catch {
       try {
-        execSync('npx -y pnpm install', { cwd: tmpDir, stdio: 'pipe' });
+        execSync('npx -y pnpm install', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
       } catch {
-        execSync('npm install', { cwd: tmpDir, stdio: 'pipe' });
+        execSync('npm install --include=dev', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
       }
     }
 
     await logStep(deploymentId, 'Building TypeScript project in ./tmp/api21...');
-    execSync('npm run build', { cwd: tmpDir, stdio: 'pipe' });
+    execSync('npm run build', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
     await logStep(deploymentId, 'Build completed successfully.');
 
     // Step 3: Health Check Best Practice
@@ -280,7 +281,15 @@ async function main() {
 
     await logStep(deploymentId, 'PM2 processes started successfully. Operations complete!', 'completed');
   } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
+    let errorMsg = err instanceof Error ? err.message : String(err);
+    if (err && typeof err === 'object') {
+      const stdout = err.stdout ? err.stdout.toString().trim() : '';
+      const stderr = err.stderr ? err.stderr.toString().trim() : '';
+      const details = [stdout, stderr].filter(Boolean).join('\n');
+      if (details) {
+        errorMsg += `\nDetails:\n${details}`;
+      }
+    }
     await logStep(deploymentId, `Deployment failed: ${errorMsg}`, 'failed');
     console.error(`[${getTimestamp()}] [Start:${deploymentId || 'CLI'}] Error:`, errorMsg);
   } finally {
