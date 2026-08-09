@@ -85,7 +85,32 @@ export const getSampleJob = async (
   return job || undefined;
 };
 
-export const getSampleQueueMetrics = async () => {
-  const counts = await sampleQueue.getJobCounts('active', 'completed', 'failed', 'delayed', 'waiting');
-  return counts;
+let cachedMetrics: Record<string, number> | null = null;
+let lastMetricsFetchTime = 0;
+const METRICS_CACHE_TTL_MS = 2500;
+
+export const getSampleQueueMetrics = async (): Promise<Record<string, number>> => {
+  const now = Date.now();
+  if (cachedMetrics && now - lastMetricsFetchTime < METRICS_CACHE_TTL_MS) {
+    return cachedMetrics;
+  }
+
+  try {
+    const metricsPromise = sampleQueue.getJobCounts('active', 'completed', 'failed', 'delayed', 'waiting');
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Redis metrics query timed out')), 2000);
+    });
+
+    const counts = await Promise.race([metricsPromise, timeoutPromise]);
+    cachedMetrics = counts;
+    lastMetricsFetchTime = Date.now();
+    return counts;
+  } catch (err) {
+    console.warn('[SampleQueue] Failed to fetch queue metrics or query timed out:', err);
+    if (cachedMetrics) {
+      return cachedMetrics;
+    }
+    return { active: 0, completed: 0, failed: 0, delayed: 0, waiting: 0 };
+  }
 };
+
