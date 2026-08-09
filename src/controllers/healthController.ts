@@ -5,9 +5,11 @@ import { checkQueueHealth } from '../config/bullmq.js';
 
 
 export const getHealth = async (req: Request, res: Response) => {
-  const dbHealthy = await checkDatabaseHealth();
-  const redisHealthy = await checkRedisHealth();
-  const queueHealthy = await checkQueueHealth();
+  const [dbHealthy, redisHealthy, queueHealthy] = await Promise.all([
+    checkDatabaseHealth(),
+    checkRedisHealth(),
+    checkQueueHealth(),
+  ]);
 
   const isHealthy = dbHealthy; // DB is critical, Redis & Queue warning only
 
