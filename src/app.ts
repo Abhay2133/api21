@@ -13,6 +13,8 @@ import { adminAuthMiddleware } from './middleware/adminAuth.js';
 import { sampleQueue } from './queues/sampleQueue.js';
 import apiRouter from './routes/index.js';
 
+import fs from 'fs';
+
 export const createApp = (): express.Application => {
   const app = express();
 
@@ -24,7 +26,9 @@ export const createApp = (): express.Application => {
   app.use(express.urlencoded({ extended: true }));
 
   // Static HTML documentation served at root /
-  const staticPath = path.resolve(process.cwd(), 'static');
+  const staticPathInDist = path.resolve(process.cwd(), 'dist', 'static');
+  const staticPathInRoot = path.resolve(process.cwd(), 'static');
+  const staticPath = fs.existsSync(staticPathInDist) ? staticPathInDist : staticPathInRoot;
   app.use(express.static(staticPath));
 
   app.get('/', (req, res) => {

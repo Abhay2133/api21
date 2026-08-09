@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r static dist/",
     "start": "node dist/server.js",
     "start:worker": "node dist/worker.js",
     "dev": "tsx watch src/server.ts",
