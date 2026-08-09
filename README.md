@@ -42,8 +42,6 @@ A high-performance standalone REST API engine built with **Node.js, Express, and
 │   │   ├── sessionRoutes.ts
 │   │   ├── webhookRoutes.ts
 │   │   └── index.ts
-│   ├── services/
-│   │   └── pingService.ts   # Background ping worker
 │   ├── app.ts               # Express application configuration
 │   ├── server.ts            # Web server entrypoint
 │   └── worker.ts            # Standalone BullMQ worker entrypoint

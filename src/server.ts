@@ -3,17 +3,11 @@ import { config } from './config/env.js';
 import { initDatabase } from './config/database.js';
 import { initRedis } from './config/redis.js';
 import { closeAllQueuesAndWorkers } from './config/bullmq.js';
-import { startPingWorker } from './services/pingService.js';
-
-
 const startServer = async () => {
   try {
     // Initialize infrastructure
     await initDatabase();
     initRedis();
-
-    // Start background ping worker if configured
-    startPingWorker();
 
     const app = createApp();
 
