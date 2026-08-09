@@ -36,10 +36,21 @@ export const registerWorker = <T extends Worker>(worker: T): T => {
   return worker;
 };
 
-export const closeAllQueuesAndWorkers = async (): Promise<void> => {
+export const closeAllQueuesAndWorkers = async (timeoutMs: number = 5000): Promise<void> => {
   console.log('[BullMQ] Gracefully closing workers and queues...');
-  await Promise.all(registeredWorkers.map((worker) => worker.close().catch(() => {})));
-  await Promise.all(registeredQueues.map((queue) => queue.close().catch(() => {})));
+  const closePromise = (async () => {
+    await Promise.all(registeredWorkers.map((worker) => worker.close().catch(() => {})));
+    await Promise.all(registeredQueues.map((queue) => queue.close().catch(() => {})));
+  })();
+
+  const timeoutPromise = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      console.warn(`[BullMQ] Closing workers/queues timed out after ${timeoutMs}ms.`);
+      resolve();
+    }, timeoutMs);
+  });
+
+  await Promise.race([closePromise, timeoutPromise]);
   console.log('[BullMQ] All workers and queues closed.');
 };
 

@@ -17,7 +17,7 @@ const startServer = async () => {
 
     const shutdown = async () => {
       console.log('[Server] Gracefully shutting down...');
-      await closeAllQueuesAndWorkers();
+      await closeAllQueuesAndWorkers(5000);
       server.close(() => {
         console.log('[Server] HTTP server closed.');
         process.exit(0);

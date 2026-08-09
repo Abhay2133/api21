@@ -14,7 +14,7 @@ const startWorker = async () => {
 
     const shutdown = async () => {
       console.log('[Worker] Gracefully shutting down worker process...');
-      await closeAllQueuesAndWorkers();
+      await closeAllQueuesAndWorkers(5000);
       console.log('[Worker] Worker process terminated.');
       process.exit(0);
     };
