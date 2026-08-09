@@ -21,13 +21,18 @@ const databaseUrl =
 
 const pool = new Pool({ connectionString: databaseUrl });
 
+function getTimestamp() {
+  return new Date().toISOString();
+}
+
 async function logStep(deploymentId, message, status = null) {
+  const ts = getTimestamp();
   if (!deploymentId) {
-    console.log(`[Start] ${message}`);
+    console.log(`[${ts}] [Start] ${message}`);
     return;
   }
 
-  console.log(`[Deployment:${deploymentId}] ${message}`);
+  console.log(`[${ts}] [Deployment:${deploymentId}] ${message}`);
   try {
     if (status) {
       await pool.query(
@@ -42,7 +47,7 @@ async function logStep(deploymentId, message, status = null) {
       [deploymentId, message]
     );
   } catch (err) {
-    console.error(`[Deployment:${deploymentId}] Failed to log to DB:`, err.message);
+    console.error(`[${ts}] [Deployment:${deploymentId}] Failed to log to DB:`, err.message);
   }
 }
 
@@ -65,7 +70,7 @@ async function ensureTablesExist() {
       );
     `);
   } catch (err) {
-    console.error('[Deployment] Error ensuring tables exist:', err.message);
+    console.error(`[${getTimestamp()}] [Deployment] Error ensuring tables exist:`, err.message);
   }
 }
 
@@ -80,7 +85,7 @@ function getRepoUrl() {
 function runHealthCheck(testPort, targetDir) {
   return new Promise((resolve) => {
     const serverDistPath = path.join(targetDir, 'dist', 'server.js');
-    console.log(`[HealthCheck] Testing compiled server at: ${serverDistPath} on port ${testPort}`);
+    console.log(`[${getTimestamp()}] [HealthCheck] Testing compiled server at: ${serverDistPath} on port ${testPort}`);
 
     const env = { ...process.env, PORT: String(testPort), NODE_ENV: 'production' };
     const tempProcess = spawn('node', [serverDistPath], {
@@ -245,7 +250,7 @@ async function main() {
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
     await logStep(deploymentId, `Deployment failed: ${errorMsg}`, 'failed');
-    console.error(`[Start:${deploymentId || 'CLI'}] Error:`, errorMsg);
+    console.error(`[${getTimestamp()}] [Start:${deploymentId || 'CLI'}] Error:`, errorMsg);
   } finally {
     await pool.end();
     process.exit(0);
