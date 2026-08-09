@@ -82,6 +82,14 @@ function getRepoUrl() {
   return 'https://github.com/abhay2133/api21.git';
 }
 
+function getBranchName() {
+  try {
+    const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
+    if (branch && branch !== 'HEAD') return branch;
+  } catch {}
+  return 'prod';
+}
+
 function runHealthCheck(testPort, targetDir) {
   return new Promise((resolve) => {
     const serverDistPath = path.join(targetDir, 'dist', 'server.js');
@@ -222,7 +230,9 @@ async function main() {
     fs.mkdirSync(path.dirname(tmpDir), { recursive: true });
 
     const repoUrl = getRepoUrl();
-    execSync(`git clone --depth 1 "${repoUrl}" "${tmpDir}"`, { stdio: 'inherit' });
+    const branchName = getBranchName();
+    await logStep(deploymentId, `Cloning branch '${branchName}' from ${repoUrl}...`);
+    execSync(`git clone --depth 1 --single-branch -b "${branchName}" "${repoUrl}" "${tmpDir}"`, { stdio: 'inherit' });
     await logStep(deploymentId, 'Repository cloned successfully.');
 
     // Ensure local .env, src, tsconfig, package.json, pnpm-lock.yaml are synced to tmpDir
@@ -252,6 +262,12 @@ async function main() {
 
     await logStep(deploymentId, 'Building TypeScript project in ./tmp/api21...');
     execSync('npm run build', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
+    
+    const serverDistPath = path.join(tmpDir, 'dist', 'server.js');
+    if (!fs.existsSync(serverDistPath)) {
+      throw new Error(`Build failed: Compiled entrypoint not found at ${serverDistPath}`);
+    }
+    
     await logStep(deploymentId, 'Build completed successfully.');
 
     // Step 3: Health Check Best Practice
