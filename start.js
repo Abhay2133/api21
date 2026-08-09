@@ -95,13 +95,23 @@ function runHealthCheck(testPort, targetDir) {
     });
 
     let logs = '';
-    tempProcess.stdout.on('data', (d) => { logs += d.toString(); });
-    tempProcess.stderr.on('data', (d) => { logs += d.toString(); });
+    tempProcess.stdout.on('data', (d) => {
+      const str = d.toString();
+      logs += str;
+    });
+    tempProcess.stderr.on('data', (d) => {
+      const str = d.toString();
+      logs += str;
+    });
 
     let attempts = 0;
-    const maxAttempts = 12;
+    const maxAttempts = 30; // 30 seconds max timeout for slower devices (Termux / cloud cold start)
     const interval = setInterval(() => {
       attempts++;
+      if (attempts % 5 === 0) {
+        console.log(`[${getTimestamp()}] [HealthCheck] Waiting for server startup on port ${testPort} (${attempts}/${maxAttempts}s)...`);
+      }
+
       const req = http.get(`http://127.0.0.1:${testPort}/api/v1/health`, (res) => {
         let body = '';
         res.on('data', (chunk) => { body += chunk; });
@@ -114,26 +124,31 @@ function runHealthCheck(testPort, targetDir) {
         });
       });
 
-      req.on('error', () => {
+      req.on('error', async () => {
         if (attempts >= maxAttempts) {
           clearInterval(interval);
-          tempProcess.kill('SIGKILL');
+          tempProcess.kill('SIGTERM');
+          await new Promise((r) => setTimeout(r, 500));
+          if (!tempProcess.killed) tempProcess.kill('SIGKILL');
+
+          const captured = logs.trim();
           resolve({
             success: false,
-            details: `Health check timed out after ${maxAttempts} attempts on port ${testPort}.\nCaptured logs:\n${logs.trim() || '(No output produced)'}`,
+            details: `Health check timed out after ${maxAttempts} seconds on port ${testPort}.\nCaptured logs:\n${captured || '(No output produced)'}`,
           });
         }
       });
 
       req.end();
-    }, 500);
+    }, 1000);
 
     tempProcess.on('exit', (code) => {
       if (code !== null && code !== 0 && attempts < maxAttempts) {
         clearInterval(interval);
+        const captured = logs.trim();
         resolve({
           success: false,
-          details: `Process exited prematurely with code ${code}.\nCaptured logs:\n${logs.trim() || '(No output produced)'}`,
+          details: `Process exited prematurely with code ${code}.\nCaptured logs:\n${captured || '(No output produced)'}`,
         });
       }
     });
