@@ -114,15 +114,31 @@ function runHealthCheck(testPort, targetDir) {
       if (resolved) return;
       resolved = true;
       clearInterval(interval);
-      try {
-        tempProcess.kill('SIGTERM');
-        setTimeout(() => {
-          if (!tempProcess.killed) {
-            try { tempProcess.kill('SIGKILL'); } catch {}
-          }
-        }, 500);
-      } catch {}
-      resolve(result);
+
+      let done = false;
+      const finish = () => {
+        if (!done) {
+          done = true;
+          resolve(result);
+        }
+      };
+
+      if (tempProcess.exitCode !== null) {
+        finish();
+      } else {
+        tempProcess.once('exit', finish);
+        try {
+          tempProcess.kill('SIGTERM');
+          setTimeout(() => {
+            if (tempProcess.exitCode === null) {
+              try { tempProcess.kill('SIGKILL'); } catch {}
+            }
+            finish();
+          }, 1000);
+        } catch {
+          finish();
+        }
+      }
     };
 
     const interval = setInterval(() => {
@@ -256,15 +272,20 @@ async function main() {
     const distCurrent = path.join(rootDir, 'dist');
     const distNew = path.join(tmpDir, 'dist');
 
+    if (!fs.existsSync(distNew)) {
+      throw new Error(`Compiled dist directory does not exist at: ${distNew}`);
+    }
+
     if (fs.existsSync(distOld)) {
       fs.rmSync(distOld, { recursive: true, force: true });
     }
 
     if (fs.existsSync(distCurrent)) {
-      fs.renameSync(distCurrent, distOld);
+      fs.cpSync(distCurrent, distOld, { recursive: true });
+      fs.rmSync(distCurrent, { recursive: true, force: true });
     }
 
-    fs.renameSync(distNew, distCurrent);
+    fs.cpSync(distNew, distCurrent, { recursive: true });
 
     // Delete existing PM2 processes to clear any cached env variables in PM2
     try {
