@@ -1,10 +1,16 @@
 import express from 'express';
 import path from 'path';
+import { createBullBoard } from '@bull-board/api';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import { ExpressAdapter } from '@bull-board/express';
+
 import { corsMiddleware } from './middleware/cors.js';
 import { loggerMiddleware } from './middleware/logger.js';
 import { sslMiddleware } from './middleware/ssl.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { errorHandlerMiddleware } from './middleware/errorHandler.js';
+import { adminAuthMiddleware } from './middleware/adminAuth.js';
+import { sampleQueue } from './queues/sampleQueue.js';
 import apiRouter from './routes/index.js';
 
 export const createApp = (): express.Application => {
@@ -25,6 +31,17 @@ export const createApp = (): express.Application => {
     res.sendFile(path.join(staticPath, 'index.html'));
   });
 
+  // BullMQ Bull Board Admin UI Dashboard
+  const serverAdapter = new ExpressAdapter();
+  serverAdapter.setBasePath('/admin/queues');
+
+  createBullBoard({
+    queues: [new BullMQAdapter(sampleQueue)],
+    serverAdapter: serverAdapter,
+  });
+
+  app.use('/admin/queues', adminAuthMiddleware, serverAdapter.getRouter());
+
   // API router with rate limiting
   app.use('/api/v1', rateLimitMiddleware, apiRouter);
 
@@ -33,3 +50,4 @@ export const createApp = (): express.Application => {
 
   return app;
 };
+

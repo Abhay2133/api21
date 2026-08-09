@@ -453,6 +453,12 @@
                 <li class="nav-item"><a href="#users-list" id="nav-users-list">Get Users</a></li>
                 <li class="nav-item"><a href="#user-create" id="nav-user-create">Create User</a></li>
                 <li class="nav-item"><a href="#user-delete" id="nav-user-delete">Delete User</a></li>
+
+                <li class="nav-header">Background Jobs (BullMQ)</li>
+                <li class="nav-item"><a href="#job-enqueue" id="nav-job-enqueue">Enqueue Job</a></li>
+                <li class="nav-item"><a href="#job-status" id="nav-job-status">Job Status</a></li>
+                <li class="nav-item"><a href="#job-metrics" id="nav-job-metrics">Queue Metrics</a></li>
+                <li class="nav-item"><a href="/admin/queues" target="_blank" id="nav-bull-board">Bull Board UI ↗</a></li>
             </ul>
         </nav>
         
@@ -467,6 +473,10 @@
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 0.85rem;">Redis</span>
                     <span id="redis-indicator" class="status-badge checking"><span class="pulse-dot animating"></span>Checking</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem;">BullMQ</span>
+                    <span id="bullmq-indicator" class="status-badge checking"><span class="pulse-dot animating"></span>Checking</span>
                 </div>
             </div>
         </div>
@@ -749,16 +759,18 @@ func main() {
         async function updateHealthStatus() {
             const pgIndicator = document.getElementById('postgres-indicator');
             const redisIndicator = document.getElementById('redis-indicator');
+            const bullmqIndicator = document.getElementById('bullmq-indicator');
 
             try {
                 const response = await fetch('/api/v1/health');
                 const result = await response.json();
                 
-                if (result && result.success && result.data) {
-                    const pg = result.data.postgres;
-                    const redis = result.data.redis;
+                if (result && result.services) {
+                    const pg = result.services.database;
+                    const redis = result.services.redis;
+                    const bullmq = result.services.bullmq;
 
-                    if (pg === 'up') {
+                    if (pg === 'connected') {
                         pgIndicator.className = 'status-badge up';
                         pgIndicator.innerHTML = '<span class="pulse-dot"></span>Connected';
                     } else {
@@ -766,22 +778,32 @@ func main() {
                         pgIndicator.innerHTML = '<span class="pulse-dot"></span>Offline';
                     }
 
-                    if (redis === 'up') {
+                    if (redis === 'connected') {
                         redisIndicator.className = 'status-badge up';
                         redisIndicator.innerHTML = '<span class="pulse-dot"></span>Connected';
                     } else {
                         redisIndicator.className = 'status-badge down';
                         redisIndicator.innerHTML = '<span class="pulse-dot"></span>Offline';
                     }
+
+                    if (bullmq === 'connected') {
+                        bullmqIndicator.className = 'status-badge up';
+                        bullmqIndicator.innerHTML = '<span class="pulse-dot"></span>Connected';
+                    } else {
+                        bullmqIndicator.className = 'status-badge down';
+                        bullmqIndicator.innerHTML = '<span class="pulse-dot"></span>Offline';
+                    }
                 }
             } catch (e) {
-                // If API fails or is not reachable
                 pgIndicator.className = 'status-badge down';
                 pgIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
                 redisIndicator.className = 'status-badge down';
                 redisIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
+                bullmqIndicator.className = 'status-badge down';
+                bullmqIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
             }
         }
+
 
         // Update health on load
         window.addEventListener('DOMContentLoaded', () => {
