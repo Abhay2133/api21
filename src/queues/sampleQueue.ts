@@ -1,6 +1,5 @@
-import { Queue, Worker, QueueEvents, JobsOptions, Job } from 'bullmq';
+import { Queue, Worker, JobsOptions, Job } from 'bullmq';
 import { getBullMQConnectionOptions, registerQueue, registerWorker } from '../config/bullmq.js';
-
 
 export interface SampleJobData {
   type: string;
@@ -33,35 +32,40 @@ export const sampleQueue = registerQueue(
   })
 );
 
-export const sampleWorker = registerWorker(
-  new Worker<SampleJobData, SampleJobResult>(
-    SAMPLE_QUEUE_NAME,
-    async (job: Job<SampleJobData, SampleJobResult>): Promise<SampleJobResult> => {
-      console.log(`[SampleWorker] Processing job ${job.id} of type "${job.data.type}"`);
+let sampleWorkerInstance: Worker<SampleJobData, SampleJobResult> | null = null;
 
-      // Simulate failure scenario if type is 'fail'
-      if (job.data.type === 'fail') {
-        throw new Error(`Job ${job.id} deliberately failed for testing.`);
-      }
+export const initSampleWorker = (): Worker<SampleJobData, SampleJobResult> => {
+  if (!sampleWorkerInstance) {
+    sampleWorkerInstance = registerWorker(
+      new Worker<SampleJobData, SampleJobResult>(
+        SAMPLE_QUEUE_NAME,
+        async (job: Job<SampleJobData, SampleJobResult>): Promise<SampleJobResult> => {
+          console.log(`[SampleWorker] Processing job ${job.id} of type "${job.data.type}"`);
 
-      // Process sample job logic
-      return {
-        success: true,
-        processedAt: new Date().toISOString(),
-        message: `Successfully processed task of type "${job.data.type}"`,
-      };
-    },
-    { connection, concurrency: 5 }
-  )
-);
+          if (job.data.type === 'fail') {
+            throw new Error(`Job ${job.id} deliberately failed for testing.`);
+          }
 
-sampleWorker.on('completed', (job: Job<SampleJobData, SampleJobResult>, result: SampleJobResult) => {
-  console.log(`[SampleWorker] Job ${job.id} completed:`, result.message);
-});
+          return {
+            success: true,
+            processedAt: new Date().toISOString(),
+            message: `Successfully processed task of type "${job.data.type}"`,
+          };
+        },
+        { connection, concurrency: 5 }
+      )
+    );
 
-sampleWorker.on('failed', (job: Job<SampleJobData, SampleJobResult> | undefined, err: Error) => {
-  console.warn(`[SampleWorker] Job ${job?.id} failed:`, err.message);
-});
+    sampleWorkerInstance.on('completed', (job: Job<SampleJobData, SampleJobResult>, result: SampleJobResult) => {
+      console.log(`[SampleWorker] Job ${job.id} completed:`, result.message);
+    });
+
+    sampleWorkerInstance.on('failed', (job: Job<SampleJobData, SampleJobResult> | undefined, err: Error) => {
+      console.warn(`[SampleWorker] Job ${job?.id} failed:`, err.message);
+    });
+  }
+  return sampleWorkerInstance;
+};
 
 export const addSampleJob = async (
   data: SampleJobData,
