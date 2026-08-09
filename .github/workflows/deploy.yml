@@ -64,8 +64,14 @@ jobs:
         run: pnpm run build
 
       - name: Trigger Deployment Webhook
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
         run: |
-          echo "Sending deployment trigger to webhook..."
-          curl -f -X POST "${{ secrets.WEBHOOK_URL }}" \
-            -H "Content-Type: application/json" \
-            -d '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "::warning ::WEBHOOK_URL secret is not configured in GitHub repository secrets. Skipping deployment trigger."
+          else
+            echo "Sending deployment trigger to webhook..."
+            curl -f -X POST "$WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+          fi
