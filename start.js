@@ -98,16 +98,44 @@ function runHealthCheck(testPort, targetDir) {
     tempProcess.stdout.on('data', (d) => {
       const str = d.toString();
       logs += str;
+      process.stdout.write(`[Server stdout] ${str}`);
     });
     tempProcess.stderr.on('data', (d) => {
       const str = d.toString();
       logs += str;
+      process.stderr.write(`[Server stderr] ${str}`);
     });
 
     let attempts = 0;
-    const maxAttempts = 30; // 30 seconds max timeout for slower devices (Termux / cloud cold start)
+    const maxAttempts = 25; // 25 seconds max timeout
+    let resolved = false;
+
+    const cleanupAndResolve = (result) => {
+      if (resolved) return;
+      resolved = true;
+      clearInterval(interval);
+      try {
+        tempProcess.kill('SIGTERM');
+        setTimeout(() => {
+          if (!tempProcess.killed) {
+            try { tempProcess.kill('SIGKILL'); } catch {}
+          }
+        }, 500);
+      } catch {}
+      resolve(result);
+    };
+
     const interval = setInterval(() => {
+      if (resolved) return;
       attempts++;
+
+      if (attempts >= maxAttempts) {
+        return cleanupAndResolve({
+          success: false,
+          details: `Health check timed out after ${maxAttempts} seconds on port ${testPort}.\nCaptured logs:\n${logs.trim() || '(No output produced)'}`,
+        });
+      }
+
       if (attempts % 5 === 0) {
         console.log(`[${getTimestamp()}] [HealthCheck] Waiting for server startup on port ${testPort} (${attempts}/${maxAttempts}s)...`);
       }
@@ -117,38 +145,27 @@ function runHealthCheck(testPort, targetDir) {
         res.on('data', (chunk) => { body += chunk; });
         res.on('end', () => {
           if (res.statusCode === 200) {
-            clearInterval(interval);
-            tempProcess.kill('SIGTERM');
-            resolve({ success: true, details: `HTTP 200 received. Body: ${body}` });
+            cleanupAndResolve({ success: true, details: `HTTP 200 received. Body: ${body}` });
           }
         });
       });
 
-      req.on('error', async () => {
-        if (attempts >= maxAttempts) {
-          clearInterval(interval);
-          tempProcess.kill('SIGTERM');
-          await new Promise((r) => setTimeout(r, 500));
-          if (!tempProcess.killed) tempProcess.kill('SIGKILL');
+      req.setTimeout(2000, () => {
+        req.destroy();
+      });
 
-          const captured = logs.trim();
-          resolve({
-            success: false,
-            details: `Health check timed out after ${maxAttempts} seconds on port ${testPort}.\nCaptured logs:\n${captured || '(No output produced)'}`,
-          });
-        }
+      req.on('error', () => {
+        // Connection error or destroyed socket - retry on next interval tick
       });
 
       req.end();
     }, 1000);
 
     tempProcess.on('exit', (code) => {
-      if (code !== null && code !== 0 && attempts < maxAttempts) {
-        clearInterval(interval);
-        const captured = logs.trim();
-        resolve({
+      if (!resolved && code !== null && code !== 0) {
+        cleanupAndResolve({
           success: false,
-          details: `Process exited prematurely with code ${code}.\nCaptured logs:\n${captured || '(No output produced)'}`,
+          details: `Process exited prematurely with code ${code}.\nCaptured logs:\n${logs.trim() || '(No output produced)'}`,
         });
       }
     });
