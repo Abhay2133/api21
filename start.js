@@ -172,8 +172,8 @@ async function main() {
     execSync(`git clone --depth 1 "${repoUrl}" "${tmpDir}"`, { stdio: 'pipe' });
     await logStep(deploymentId, 'Repository cloned successfully.');
 
-    // Ensure local .env, src, tsconfig, package.json, package-lock.json are synced to tmpDir
-    const filesToSync = ['.env', 'package.json', 'package-lock.json', 'tsconfig.json'];
+    // Ensure local .env, src, tsconfig, package.json, pnpm-lock.yaml are synced to tmpDir
+    const filesToSync = ['.env', 'package.json', 'pnpm-lock.yaml', 'package-lock.json', 'tsconfig.json'];
     for (const file of filesToSync) {
       const srcPath = path.join(rootDir, file);
       if (fs.existsSync(srcPath)) {
@@ -187,9 +187,13 @@ async function main() {
     // Step 2: Install dependencies & Build
     await logStep(deploymentId, 'Installing dependencies in ./tmp/api21...', 'building');
     try {
-      execSync('npm ci', { cwd: tmpDir, stdio: 'pipe' });
+      execSync('pnpm install --frozen-lockfile', { cwd: tmpDir, stdio: 'pipe' });
     } catch {
-      execSync('npm install', { cwd: tmpDir, stdio: 'pipe' });
+      try {
+        execSync('npx -y pnpm install', { cwd: tmpDir, stdio: 'pipe' });
+      } catch {
+        execSync('npm install', { cwd: tmpDir, stdio: 'pipe' });
+      }
     }
 
     await logStep(deploymentId, 'Building TypeScript project in ./tmp/api21...');
