@@ -89,9 +89,9 @@ function runHealthCheck(testPort, targetDir) {
       cwd: targetDir,
     });
 
-    let stdoutLog = '';
-    tempProcess.stdout.on('data', (d) => { stdoutLog += d.toString(); });
-    tempProcess.stderr.on('data', (d) => { stdoutLog += d.toString(); });
+    let logs = '';
+    tempProcess.stdout.on('data', (d) => { logs += d.toString(); });
+    tempProcess.stderr.on('data', (d) => { logs += d.toString(); });
 
     let attempts = 0;
     const maxAttempts = 12;
@@ -115,7 +115,7 @@ function runHealthCheck(testPort, targetDir) {
           tempProcess.kill('SIGKILL');
           resolve({
             success: false,
-            details: `Health check timed out after ${maxAttempts} attempts. Output log:\n${stdoutLog}`,
+            details: `Health check timed out after ${maxAttempts} attempts on port ${testPort}.\nCaptured logs:\n${logs.trim() || '(No output produced)'}`,
           });
         }
       });
@@ -128,7 +128,7 @@ function runHealthCheck(testPort, targetDir) {
         clearInterval(interval);
         resolve({
           success: false,
-          details: `Process exited prematurely with code ${code}. Output log:\n${stdoutLog}`,
+          details: `Process exited prematurely with code ${code}.\nCaptured logs:\n${logs.trim() || '(No output produced)'}`,
         });
       }
     });
@@ -172,8 +172,8 @@ async function main() {
     execSync(`git clone --depth 1 "${repoUrl}" "${tmpDir}"`, { stdio: 'pipe' });
     await logStep(deploymentId, 'Repository cloned successfully.');
 
-    // Ensure local src, tsconfig, package.json, package-lock.json are synced to tmpDir
-    const filesToSync = ['package.json', 'package-lock.json', 'tsconfig.json'];
+    // Ensure local .env, src, tsconfig, package.json, package-lock.json are synced to tmpDir
+    const filesToSync = ['.env', 'package.json', 'package-lock.json', 'tsconfig.json'];
     for (const file of filesToSync) {
       const srcPath = path.join(rootDir, file);
       if (fs.existsSync(srcPath)) {
