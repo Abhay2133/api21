@@ -1,6 +1,7 @@
 # Node modules & build
 node_modules/
 dist/
+dist_old/
 bin/
 
 # Environment files

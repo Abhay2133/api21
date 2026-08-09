@@ -58,34 +58,9 @@ jobs:
       - name: Build TypeScript
         run: npm run build
 
-      - name: Prepare Deployment Directory
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            mkdir -p ~/api21/dist ~/api21/static
-
-      - name: Copy Built Dist and Assets to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          source: "dist/,package.json,package-lock.json,static/,ecosystem.config.cjs"
-          target: "~/api21"
-
-      - name: Restart Server Service
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            cd ~/api21
-            npm install --omit=dev
-            pm2 restart ecosystem.config.cjs || pm2 start ecosystem.config.cjs
+      - name: Trigger Deployment Webhook
+        run: |
+          echo "Sending deployment trigger to webhook..."
+          curl -f -X POST "${{ secrets.DEPLOY_WEBHOOK }}/api/v1/webhooks/deploy?token=${{ secrets.DEPLOY_CI_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
