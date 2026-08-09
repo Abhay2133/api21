@@ -3,8 +3,8 @@ module.exports = {
     {
       name: "api21-backend",
       script: "./dist/server.js",
-      exec_mode: "fork",
-      instances: 1,
+      exec_mode: "cluster",
+      instances: "max",
       autorestart: true,
       watch: false,
       max_memory_restart: "1G",
