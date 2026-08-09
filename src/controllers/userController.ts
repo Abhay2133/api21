@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { getDbPool } from '../infrastructure/database.js';
+import { getDbPool } from '../config/database.js';
+
 
 export const getUsers = async (req: Request, res: Response) => {
   try {

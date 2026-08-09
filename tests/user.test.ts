@@ -3,16 +3,36 @@ import { createApp } from '../src/app';
 
 const mockQuery = jest.fn();
 
-jest.mock('../src/infrastructure/database', () => ({
+jest.mock('@bull-board/api', () => ({
+  createBullBoard: jest.fn(),
+}));
+
+jest.mock('@bull-board/api/bullMQAdapter', () => ({
+  BullMQAdapter: jest.fn(),
+}));
+
+jest.mock('@bull-board/express', () => ({
+  ExpressAdapter: jest.fn().mockImplementation(() => ({
+    setBasePath: jest.fn(),
+    getRouter: jest.fn().mockReturnValue((req: any, res: any, next: any) => next()),
+  })),
+}));
+
+jest.mock('../src/config/database', () => ({
   getDbPool: () => ({
     query: mockQuery,
   }),
   checkDatabaseHealth: jest.fn().mockResolvedValue(true),
 }));
 
-jest.mock('../src/infrastructure/redis', () => ({
+jest.mock('../src/config/redis', () => ({
   getRedisClient: jest.fn().mockReturnValue(null),
   checkRedisHealth: jest.fn().mockResolvedValue(true),
+}));
+
+
+jest.mock('../src/queues/sampleQueue', () => ({
+  sampleQueue: {},
 }));
 
 describe('User Endpoints', () => {

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
-import { getDbPool } from '../infrastructure/database.js';
+import { getDbPool } from '../config/database.js';
+
 
 const generateSessionHash = (username: string, ip: string, ua: string): string => {
   const normalizedIp = ip === '::1' || ip === '::ffff:127.0.0.1' ? '127.0.0.1' : ip.trim();

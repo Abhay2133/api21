@@ -19,8 +19,10 @@ Welcome! This workspace configuration defines the context, conventions, and guid
 - [src/server.ts](file:///home/abhay/pj/api21/src/server.ts): Application entrypoint.
 - [src/app.ts](file:///home/abhay/pj/api21/src/app.ts): Express application bootstrap.
 - [src/config/env.ts](file:///home/abhay/pj/api21/src/config/env.ts): Settings loading from environment variables.
-- [src/infrastructure/database.ts](file:///home/abhay/pj/api21/src/infrastructure/database.ts): PostgreSQL pool & table migrations.
-- [src/infrastructure/redis.ts](file:///home/abhay/pj/api21/src/infrastructure/redis.ts): Redis client connection.
+- [src/config/database.ts](file:///home/abhay/pj/api21/src/config/database.ts): PostgreSQL pool & table migrations.
+- [src/config/redis.ts](file:///home/abhay/pj/api21/src/config/redis.ts): Redis client connection.
+- [src/config/bullmq.ts](file:///home/abhay/pj/api21/src/config/bullmq.ts): BullMQ queue connection & shutdown manager.
+
 - [src/middleware/](file:///home/abhay/pj/api21/src/middleware): Middleware filters (CORS, Logger, SSL, RateLimit, AdminAuth, ErrorHandler).
 - [src/controllers/](file:///home/abhay/pj/api21/src/controllers): Controller handlers for endpoints.
 - [static/index.html](file:///home/abhay/pj/api21/static/index.html): Interactive API reference page.

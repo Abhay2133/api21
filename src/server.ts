@@ -1,8 +1,10 @@
 import { createApp } from './app.js';
 import { config } from './config/env.js';
-import { initDatabase } from './infrastructure/database.js';
-import { initRedis } from './infrastructure/redis.js';
+import { initDatabase } from './config/database.js';
+import { initRedis } from './config/redis.js';
+import { closeAllQueuesAndWorkers } from './config/bullmq.js';
 import { startPingWorker } from './services/pingService.js';
+
 
 const startServer = async () => {
   try {
@@ -21,6 +23,7 @@ const startServer = async () => {
 
     const shutdown = async () => {
       console.log('[Server] Gracefully shutting down...');
+      await closeAllQueuesAndWorkers();
       server.close(() => {
         console.log('[Server] HTTP server closed.');
         process.exit(0);
@@ -36,3 +39,4 @@ const startServer = async () => {
 };
 
 startServer();
+

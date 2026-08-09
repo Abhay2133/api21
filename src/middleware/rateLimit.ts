@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { getRedisClient } from '../infrastructure/redis.js';
+import { getRedisClient } from '../config/redis.js';
+
 
 const WINDOW_SIZE_IN_SECONDS = 15 * 60; // 15 minutes
 const MAX_REQUESTS = 200;

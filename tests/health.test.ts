@@ -1,15 +1,42 @@
 import request from 'supertest';
 import { createApp } from '../src/app';
 
-// Mock DB and Redis infrastructure for fast unit test
-jest.mock('../src/infrastructure/database', () => ({
+jest.mock('@bull-board/api', () => ({
+  createBullBoard: jest.fn(),
+}));
+
+jest.mock('@bull-board/api/bullMQAdapter', () => ({
+  BullMQAdapter: jest.fn(),
+}));
+
+jest.mock('@bull-board/express', () => ({
+  ExpressAdapter: jest.fn().mockImplementation(() => ({
+    setBasePath: jest.fn(),
+    getRouter: jest.fn().mockReturnValue((req: any, res: any, next: any) => next()),
+  })),
+}));
+
+jest.mock('../src/config/database', () => ({
   checkDatabaseHealth: jest.fn().mockResolvedValue(true),
   getDbPool: jest.fn(),
 }));
 
-jest.mock('../src/infrastructure/redis', () => ({
+jest.mock('../src/config/redis', () => ({
   checkRedisHealth: jest.fn().mockResolvedValue(true),
   getRedisClient: jest.fn().mockReturnValue(null),
+}));
+
+jest.mock('../src/config/bullmq', () => ({
+  getBullMQConnectionOptions: jest.fn().mockReturnValue({ host: '127.0.0.1', port: 6379 }),
+  registerQueue: jest.fn((q) => q),
+  registerWorker: jest.fn((w) => w),
+  checkQueueHealth: jest.fn().mockResolvedValue(true),
+  closeAllQueuesAndWorkers: jest.fn().mockResolvedValue(undefined),
+}));
+
+
+jest.mock('../src/queues/sampleQueue', () => ({
+  sampleQueue: {},
 }));
 
 describe('Health Endpoint', () => {
@@ -22,6 +49,7 @@ describe('Health Endpoint', () => {
     expect(res.body.services).toEqual({
       database: 'connected',
       redis: 'connected',
+      bullmq: 'connected',
     });
   });
 });

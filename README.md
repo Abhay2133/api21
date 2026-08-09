@@ -19,10 +19,11 @@ A high-performance standalone REST API engine built with **Node.js, Express, and
 ```
 ├── src/
 │   ├── config/
-│   │   └── env.ts           # Environment variable parsing and loading
-│   ├── infrastructure/
+│   │   ├── env.ts           # Environment variable parsing and loading
 │   │   ├── database.ts      # PostgreSQL connection pool and migrations
-│   │   └── redis.ts         # Redis client pool and health check
+│   │   ├── redis.ts         # Redis client pool and health check
+│   │   └── bullmq.ts        # BullMQ queue connection and worker manager
+
 │   ├── middleware/
 │   │   ├── cors.ts          # CORS middleware
 │   │   ├── logger.ts        # Request logging middleware

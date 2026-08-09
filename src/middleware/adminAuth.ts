@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { getDbPool } from '../infrastructure/database.js';
+import { getDbPool } from '../config/database.js';
+
 
 export interface AuthenticatedRequest extends Request {
   session?: {
