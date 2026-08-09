@@ -1,6 +1,11 @@
+import dns from 'dns';
 import { Pool } from 'pg';
 import { config } from './env.js';
 import { getKnexDb } from './knex.js';
+
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 let pool: Pool | null = null;
 

@@ -10,6 +10,8 @@ export const config = {
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379/0',
   pingUrl: process.env.PING_URL || '',
   masterCredentials: process.env.MASTER_CREDENTIALS || 'admin:securepassword',
+  deployCiToken: process.env.DEPLOY_CI_TOKEN || 'secret-ci-token',
+  redeployScript: process.env.REDEPLOY_SCRIPT || 'node start.js ${deployment_id}',
   isProduction: (process.env.NODE_ENV || process.env.GO_ENV) === 'production',
   isTest: (process.env.NODE_ENV || process.env.GO_ENV) === 'test',
 };
