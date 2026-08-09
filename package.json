@@ -8,9 +8,10 @@
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "test": "jest --runInBand --detectOpenHandles",
-    "migrate:latest": "knex migrate:latest --knexfile knexfile.ts",
-    "migrate:rollback": "knex migrate:rollback --knexfile knexfile.ts",
-    "migrate:make": "knex migrate:make --knexfile knexfile.ts"
+    "migrate:latest": "knex migrate:latest --knexfile src/config/knexfile.ts",
+    "migrate:rollback": "knex migrate:rollback --knexfile src/config/knexfile.ts",
+    "migrate:make": "knex migrate:make --knexfile src/config/knexfile.ts"
+
 
   },
   "keywords": [],
