@@ -265,13 +265,13 @@ async function main() {
 
     fs.renameSync(distNew, distCurrent);
 
-    // Stop existing PM2 processes if running
+    // Delete existing PM2 processes to clear any cached env variables in PM2
     try {
-      execSync('npx pm2 stop ecosystem.config.cjs', { cwd: rootDir, stdio: 'pipe' });
+      execSync('npx pm2 delete ecosystem.config.cjs', { cwd: rootDir, stdio: 'pipe' });
     } catch {}
 
-    // Start detached PM2 server in a new process
-    const pm2Child = spawn('npx', ['pm2', 'start', 'ecosystem.config.cjs'], {
+    // Start detached PM2 processes with updated environment
+    const pm2Child = spawn('npx', ['pm2', 'start', 'ecosystem.config.cjs', '--update-env'], {
       cwd: rootDir,
       detached: true,
       stdio: 'ignore',
