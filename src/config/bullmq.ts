@@ -46,16 +46,22 @@ export const closeAllQueuesAndWorkers = async (): Promise<void> => {
 export const checkQueueHealth = async (): Promise<boolean> => {
   if (registeredQueues.length === 0) return true;
   try {
-    for (const queue of registeredQueues) {
-      const client = await (queue as any).client;
-      if (client && typeof client.ping === 'function') {
-        const ping = await client.ping();
-        if (ping !== 'PONG') return false;
-      } else {
-        await queue.waitUntilReady();
+    const healthCheckPromise = (async () => {
+      for (const queue of registeredQueues) {
+        const client = await (queue as any).client;
+        if (client && typeof client.ping === 'function') {
+          const ping = await client.ping();
+          if (ping !== 'PONG') return false;
+        }
       }
-    }
-    return true;
+      return true;
+    })();
+
+    const timeoutPromise = new Promise<boolean>((resolve) => {
+      setTimeout(() => resolve(false), 2000);
+    });
+
+    return await Promise.race([healthCheckPromise, timeoutPromise]);
   } catch {
     return false;
   }

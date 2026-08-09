@@ -7,7 +7,7 @@ const MAX_REQUESTS = 200;
 
 export const rateLimitMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const redis = getRedisClient();
-  if (!redis) {
+  if (!redis || redis.status !== 'ready') {
     return next();
   }
 
