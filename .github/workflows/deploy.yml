@@ -66,6 +66,6 @@ jobs:
       - name: Trigger Deployment Webhook
         run: |
           echo "Sending deployment trigger to webhook..."
-          curl -f -X POST "${{ secrets.DEPLOY_WEBHOOK }}/api/v1/webhooks/deploy?token=${{ secrets.DEPLOY_CI_TOKEN }}" \
+          curl -f -X POST "${{ secrets.WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
             -d '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
