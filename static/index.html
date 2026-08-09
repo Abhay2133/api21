@@ -56,7 +56,7 @@
             --bg-sidebar: #ffffff;
             --bg-card: #ffffff;
             --bg-code-pane: #f1f5f9;
-            --bg-code-block: #1e293b;
+            --bg-code-block: #ffffff;
             --border-color: #e2e8f0;
             --border-hover: #cbd5e1;
             --accent-primary: #4f46e5;
@@ -67,7 +67,7 @@
             --text-primary: #0f172a;
             --text-secondary: #64748b;
             --text-heading: #0f172a;
-            --code-text: #f8fafc;
+            --code-text: #0f172a;
             --code-inline-bg: #e2e8f0;
             --logo-bg: linear-gradient(135deg, #4f46e5, #0284c7);
             --logo-text-gradient: linear-gradient(135deg, #0f172a, #475569);
@@ -435,6 +435,7 @@
             font-size: 0.825rem;
             color: var(--code-text);
             margin-bottom: 1rem;
+            transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
         }
 
         code {
