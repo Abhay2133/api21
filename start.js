@@ -222,18 +222,30 @@ async function main() {
   const tmpDir = path.join(rootDir, 'tmp', 'api21');
 
   try {
-    // Step 1: Clone repo to ./tmp/api21
-    await logStep(deploymentId, 'Cloning repository into ./tmp/api21...', 'cloning');
-    if (fs.existsSync(tmpDir)) {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
-    }
-    fs.mkdirSync(path.dirname(tmpDir), { recursive: true });
-
+    // Step 1: Clone or update repo in ./tmp/api21
     const repoUrl = getRepoUrl();
     const branchName = getBranchName();
-    await logStep(deploymentId, `Cloning branch '${branchName}' from ${repoUrl}...`);
-    execSync(`git clone --depth 1 --single-branch -b "${branchName}" "${repoUrl}" "${tmpDir}"`, { stdio: 'inherit' });
-    await logStep(deploymentId, 'Repository cloned successfully.');
+
+    if (fs.existsSync(path.join(tmpDir, '.git'))) {
+      await logStep(deploymentId, `Updating existing repository in ./tmp/api21 (branch '${branchName}')...`, 'cloning');
+      try {
+        execSync(`git fetch origin "${branchName}" --depth 1`, { cwd: tmpDir, stdio: 'inherit' });
+        execSync('git reset --hard FETCH_HEAD', { cwd: tmpDir, stdio: 'inherit' });
+        execSync('git clean -fdx', { cwd: tmpDir, stdio: 'inherit' });
+      } catch {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+        fs.mkdirSync(path.dirname(tmpDir), { recursive: true });
+        execSync(`git clone --depth 1 --single-branch -b "${branchName}" "${repoUrl}" "${tmpDir}"`, { stdio: 'inherit' });
+      }
+    } else {
+      await logStep(deploymentId, `Cloning branch '${branchName}' into ./tmp/api21...`, 'cloning');
+      if (fs.existsSync(tmpDir)) {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+      fs.mkdirSync(path.dirname(tmpDir), { recursive: true });
+      execSync(`git clone --depth 1 --single-branch -b "${branchName}" "${repoUrl}" "${tmpDir}"`, { stdio: 'inherit' });
+    }
+    await logStep(deploymentId, 'Repository prepared successfully.');
 
     // Ensure local .env, src, tsconfig, package.json, pnpm-lock.yaml are synced to tmpDir
     const filesToSync = ['.env', 'package.json', 'pnpm-lock.yaml', 'package-lock.json', 'tsconfig.json'];
