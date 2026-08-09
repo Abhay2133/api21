@@ -5,7 +5,7 @@ import sessionRoutes from './sessionRoutes.js';
 import jobRoutes from './jobRoutes.js';
 import webhookRoutes from './webhookRoutes.js';
 
-const apiRouter = Router();
+const apiRouter: Router = Router();
 
 apiRouter.use('/health', healthRoutes);
 apiRouter.use('/users', userRoutes);

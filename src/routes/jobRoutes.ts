@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { enqueueJob, getJobStatus, getQueueMetrics } from '../controllers/jobController.js';
 
-const router = Router();
+const router: Router = Router();
 
 router.post('/', enqueueJob);
 router.get('/metrics', getQueueMetrics);
