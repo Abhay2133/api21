@@ -20,6 +20,7 @@ import {
 import {
   LayoutDashboard,
   Terminal,
+  ShieldCheck,
   Rocket,
   LogOut,
   ChevronsUpDown,
@@ -34,19 +35,21 @@ const mainNavItems = [
     title: 'Overview',
     url: '/overview',
     icon: LayoutDashboard,
-    badge: 'Live',
   },
   {
     title: 'Terminal',
     url: '/terminal',
     icon: Terminal,
-    badge: 'PTY',
+  },
+  {
+    title: 'Sessions',
+    url: '/sessions',
+    icon: ShieldCheck,
   },
   {
     title: 'Deployments',
     url: '/deployments',
     icon: Rocket,
-    badge: '14',
   },
 ];
 
@@ -61,30 +64,27 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-slate-800/80 bg-[#070b12] text-slate-200">
-      {/* 1. Shadcn Team/Project Switcher Header */}
-      <SidebarHeader className="h-14 flex items-center justify-center p-2.5 border-b border-slate-800/80">
-        <div className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-slate-900/60 transition-colors cursor-pointer select-none w-full">
-          <div className="w-7 h-7 rounded-md bg-gradient-to-tr from-sky-500 to-cyan-400 flex items-center justify-center text-slate-950 font-black text-xs shadow-sm shadow-sky-500/20 flex-shrink-0">
+    <Sidebar collapsible="icon" className="border-r border-zinc-800 bg-[#09090b] text-zinc-200">
+      {/* 1. Minimal Shadcn Team/Project Switcher Header */}
+      <SidebarHeader className="h-14 flex items-center justify-center p-2 border-b border-zinc-800">
+        <div className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-zinc-800/60 transition-colors cursor-pointer select-none w-full">
+          <div className="size-8 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-100 flex items-center justify-center font-bold text-xs flex-shrink-0">
             21
           </div>
           <div className="flex flex-col flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-            <div className="text-sm font-bold text-slate-100 truncate flex items-center gap-1.5 leading-none">
+            <div className="text-sm font-semibold text-zinc-100 truncate leading-none">
               api21
-              <span className="text-[10px] px-1 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono font-medium">
-                v1.0
-              </span>
             </div>
-            <div className="text-xs text-slate-400 truncate mt-1 leading-none font-normal">System Control Panel</div>
+            <div className="text-xs text-zinc-400 truncate mt-1 leading-none">System Control Panel</div>
           </div>
-          <ChevronsUpDown className="w-3.5 h-3.5 text-slate-400 ml-auto group-data-[collapsible=icon]:hidden flex-shrink-0" />
+          <ChevronsUpDown className="size-4 text-zinc-400 ml-auto group-data-[collapsible=icon]:hidden flex-shrink-0" />
         </div>
       </SidebarHeader>
 
-      {/* 2. Nav Menu */}
+      {/* 2. Minimal Nav Menu */}
       <SidebarContent className="px-2 py-3 gap-3">
         <SidebarGroup className="p-0">
-          <SidebarGroupLabel className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 h-7 mb-0.5">
+          <SidebarGroupLabel className="text-xs font-medium text-zinc-400 px-2 h-7 mb-0.5">
             Platform
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -99,22 +99,11 @@ export function AppSidebar() {
                       isActive={isActive}
                       tooltip={item.title}
                       size="sm"
-                      className="h-9 px-2.5 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900/80 data-[active=true]:bg-slate-900 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:shadow-sm data-[active=true]:border-slate-700/60"
+                      className="h-9 px-2.5 rounded-md text-sm font-normal text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/60 data-[active=true]:bg-zinc-800 data-[active=true]:text-zinc-100 data-[active=true]:font-medium"
                     >
-                      <Link href={item.url} className="flex items-center gap-2.5 w-full">
-                        <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-sky-400' : 'text-slate-400'}`} />
+                      <Link href={item.url} className="flex items-center gap-3 w-full">
+                        <Icon className={`size-4 flex-shrink-0 ${isActive ? 'text-zinc-100' : 'text-zinc-400'}`} />
                         <span className="truncate flex-1">{item.title}</span>
-                        {item.badge && (
-                          <span
-                            className={`text-xs px-1.5 py-0.5 rounded font-mono font-medium group-data-[collapsible=icon]:hidden ${
-                              isActive
-                                ? 'bg-sky-500/20 text-sky-300'
-                                : 'bg-slate-800 text-slate-400'
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -124,10 +113,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="bg-slate-800/60 my-1" />
+        <SidebarSeparator className="bg-zinc-800 my-1" />
 
         <SidebarGroup className="p-0">
-          <SidebarGroupLabel className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 h-7 mb-0.5">
+          <SidebarGroupLabel className="text-xs font-medium text-zinc-400 px-2 h-7 mb-0.5">
             Infrastructure
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -137,17 +126,17 @@ export function AppSidebar() {
                   asChild
                   size="sm"
                   tooltip="API Documentation"
-                  className="h-9 px-2.5 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900/80"
+                  className="h-9 px-2.5 rounded-md text-sm font-normal text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/60"
                 >
                   <a
                     href={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2.5 w-full"
+                    className="flex items-center gap-3 w-full"
                   >
-                    <Server className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    <Server className="size-4 text-zinc-400 flex-shrink-0" />
                     <span className="truncate flex-1">API Docs</span>
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 ml-auto group-data-[collapsible=icon]:hidden" />
+                    <ChevronRight className="size-3.5 text-zinc-600 ml-auto group-data-[collapsible=icon]:hidden" />
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -156,17 +145,17 @@ export function AppSidebar() {
                   asChild
                   size="sm"
                   tooltip="BullMQ Queues"
-                  className="h-9 px-2.5 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900/80"
+                  className="h-9 px-2.5 rounded-md text-sm font-normal text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/60"
                 >
                   <a
                     href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/admin/queues`}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-2.5 w-full"
+                    className="flex items-center gap-3 w-full"
                   >
-                    <Layers className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    <Layers className="size-4 text-zinc-400 flex-shrink-0" />
                     <span className="truncate flex-1">BullMQ Dashboard</span>
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 ml-auto group-data-[collapsible=icon]:hidden" />
+                    <ChevronRight className="size-3.5 text-zinc-600 ml-auto group-data-[collapsible=icon]:hidden" />
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -175,17 +164,17 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* 3. Shadcn User Profile Footer */}
-      <SidebarFooter className="h-14 flex items-center p-2.5 border-t border-slate-800/80 mt-auto">
-        <div className="flex items-center justify-between p-1 rounded-lg hover:bg-slate-900/60 transition-colors w-full">
+      {/* 3. Minimal Shadcn User Profile Footer */}
+      <SidebarFooter className="h-14 flex items-center p-2 border-t border-zinc-800 mt-auto">
+        <div className="flex items-center justify-between p-1.5 rounded-lg hover:bg-zinc-800/60 transition-colors w-full">
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="w-7 h-7 rounded-md bg-slate-800 flex items-center justify-center text-slate-200 font-bold text-xs border border-slate-700/60 flex-shrink-0">
+            <div className="size-8 rounded-lg bg-zinc-800 text-zinc-200 flex items-center justify-center font-medium text-xs border border-zinc-700 flex-shrink-0">
               {user?.username?.charAt(0).toUpperCase() || 'A'}
             </div>
             <div className="overflow-hidden group-data-[collapsible=icon]:hidden">
-              <div className="text-sm font-semibold text-slate-200 truncate leading-tight">{user?.username || 'admin'}</div>
-              <div className="text-xs text-slate-400 truncate flex items-center gap-1 font-mono mt-0.5 leading-none">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <div className="text-sm font-medium text-zinc-200 truncate leading-tight">{user?.username || 'admin'}</div>
+              <div className="text-xs text-zinc-400 truncate flex items-center gap-1.5 font-mono mt-0.5 leading-none">
+                <span className="size-1.5 rounded-full bg-emerald-500" />
                 authorized
               </div>
             </div>
@@ -193,9 +182,9 @@ export function AppSidebar() {
           <button
             onClick={handleLogout}
             title="Sign out"
-            className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors group-data-[collapsible=icon]:hidden flex-shrink-0"
+            className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors group-data-[collapsible=icon]:hidden flex-shrink-0"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="size-4" />
           </button>
         </div>
       </SidebarFooter>

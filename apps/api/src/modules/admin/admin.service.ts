@@ -204,6 +204,26 @@ export class AdminService {
     return true;
   }
 
+  async getSessions(limit = 100, offset = 0) {
+    return this.model.getSessions(limit, offset);
+  }
+
+  async getSessionById(id: number | string) {
+    const session = await this.model.getSessionById(id);
+    if (!session) {
+      throw new AppError('Session not found', 404);
+    }
+    return session;
+  }
+
+  async deactivateSession(id: number | string) {
+    const success = await this.model.deactivateSessionById(id);
+    if (!success) {
+      throw new AppError('Failed to deactivate session or session not found', 404);
+    }
+    return { success: true, message: 'Session deactivated successfully' };
+  }
+
   async getDashboardSummary() {
     const stats = await this.model.getAdminStats();
     const queueMetrics = await jobsService.getQueueMetrics();

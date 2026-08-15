@@ -62,6 +62,30 @@ export class AdminModel {
     return (result.rowCount ?? 0) > 0;
   }
 
+  async getSessions(limit = 100, offset = 0): Promise<Session[]> {
+    const result = await databaseService.query<Session>(
+      'SELECT id, username, ip_address, user_agent, is_active, created_at, updated_at FROM sessions ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+      [limit, offset]
+    );
+    return result.rows;
+  }
+
+  async getSessionById(id: number | string): Promise<Session | null> {
+    const result = await databaseService.query<Session>(
+      'SELECT id, username, ip_address, user_agent, is_active, created_at, updated_at FROM sessions WHERE id = $1',
+      [id]
+    );
+    return result.rows[0] || null;
+  }
+
+  async deactivateSessionById(id: number | string): Promise<boolean> {
+    const result = await databaseService.query(
+      'UPDATE sessions SET is_active = false, updated_at = NOW() WHERE id = $1',
+      [id]
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
   async getDeployments(limit = 50, offset = 0): Promise<DeploymentItem[]> {
     const result = await databaseService.query<DeploymentItem>(
       'SELECT id, status, created_at, updated_at FROM deployments ORDER BY created_at DESC LIMIT $1 OFFSET $2',

@@ -131,6 +131,47 @@ router.post('/terminal/ticket', adminGuard, async (req: AdminRequest, res: Respo
   }
 });
 
+// GET /api/v1/admin/sessions - List recorded admin sessions
+router.get('/sessions', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 100;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const data = await adminService.getSessions(limit, offset);
+    return res.status(200).json({
+      status: 'success',
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/v1/admin/sessions/:id - Inspect session details
+router.get('/sessions/:id', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
+  try {
+    const data = await adminService.getSessionById(req.params.id);
+    return res.status(200).json({
+      status: 'success',
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/v1/admin/sessions/:id/deactivate - Deactivate or revoke an admin session
+router.post('/sessions/:id/deactivate', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
+  try {
+    const data = await adminService.deactivateSession(req.params.id);
+    return res.status(200).json({
+      status: 'success',
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/v1/admin/summary - Dashboard statistics
 router.get('/summary', adminGuard, async (_req: AdminRequest, res: Response, next: NextFunction) => {
   try {
