@@ -38,6 +38,7 @@ import {
   ChevronRight,
   Server,
   AlertTriangle,
+  UserCog,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 
@@ -56,6 +57,11 @@ const mainNavItems = [
     title: 'Sessions',
     url: '/sessions',
     icon: ShieldCheck,
+  },
+  {
+    title: 'Users',
+    url: '/users',
+    icon: UserCog,
   },
   {
     title: 'Deployments',

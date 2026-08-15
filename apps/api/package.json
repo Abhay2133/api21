@@ -23,6 +23,7 @@
     "@api21/types": "workspace:*",
     "@bull-board/api": "^8.6.0",
     "@bull-board/express": "^8.6.0",
+    "bcryptjs": "^3.0.3",
     "bullmq": "^6.0.9",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
@@ -37,6 +38,7 @@
     "ws": "^8.21.3"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^3.0.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",

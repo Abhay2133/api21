@@ -1,5 +1,5 @@
 import { databaseService } from '../../core/database/database.service.js';
-import { Session } from '@api21/types';
+import { Session, AdminUser } from '@api21/types';
 
 export interface DeploymentItem {
   id: string;
@@ -15,18 +15,24 @@ export interface DeploymentLogItem {
   created_at: string;
 }
 
+export interface AdminUserRecord extends AdminUser {
+  password_hash: string;
+}
+
 export class AdminModel {
-  async getAdminStats(): Promise<{ totalUsers: number; activeSessions: number; totalDeployments: number }> {
-    const [usersCount, sessionsCount, deploymentsCount] = await Promise.all([
+  async getAdminStats(): Promise<{ totalUsers: number; activeSessions: number; totalDeployments: number; totalAdminUsers: number }> {
+    const [usersCount, sessionsCount, deploymentsCount, adminUsersCount] = await Promise.all([
       databaseService.query<{ count: string }>('SELECT COUNT(*) as count FROM users'),
       databaseService.query<{ count: string }>('SELECT COUNT(*) as count FROM sessions WHERE is_active = true'),
       databaseService.query<{ count: string }>('SELECT COUNT(*) as count FROM deployments'),
+      databaseService.query<{ count: string }>('SELECT COUNT(*) as count FROM admin_users'),
     ]);
 
     return {
       totalUsers: parseInt(usersCount.rows[0]?.count || '0', 10),
       activeSessions: parseInt(sessionsCount.rows[0]?.count || '0', 10),
       totalDeployments: parseInt(deploymentsCount.rows[0]?.count || '0', 10),
+      totalAdminUsers: parseInt(adminUsersCount.rows[0]?.count || '0', 10),
     };
   }
 
@@ -100,6 +106,129 @@ export class AdminModel {
       [deploymentId]
     );
     return result.rows;
+  }
+
+  // --- Admin Users Management Methods ---
+
+  async findAdminUserByUsername(username: string): Promise<AdminUserRecord | null> {
+    const result = await databaseService.query<AdminUserRecord>(
+      'SELECT id, username, password_hash, name, email, role, is_active, last_login_at, created_at, updated_at FROM admin_users WHERE username = $1',
+      [username]
+    );
+    return result.rows[0] || null;
+  }
+
+  async findAdminUserById(id: number | string): Promise<AdminUser | null> {
+    const result = await databaseService.query<AdminUser>(
+      'SELECT id, username, name, email, role, is_active, last_login_at, created_at, updated_at FROM admin_users WHERE id = $1',
+      [id]
+    );
+    return result.rows[0] || null;
+  }
+
+  async getAdminUsers(limit = 100, offset = 0): Promise<AdminUser[]> {
+    const result = await databaseService.query<AdminUser>(
+      'SELECT id, username, name, email, role, is_active, last_login_at, created_at, updated_at FROM admin_users ORDER BY id ASC LIMIT $1 OFFSET $2',
+      [limit, offset]
+    );
+    return result.rows;
+  }
+
+  async countActiveAdminUsers(): Promise<number> {
+    const result = await databaseService.query<{ count: string }>(
+      'SELECT COUNT(*) as count FROM admin_users WHERE is_active = true'
+    );
+    return parseInt(result.rows[0]?.count || '0', 10);
+  }
+
+  async countAdminUsers(): Promise<number> {
+    const result = await databaseService.query<{ count: string }>(
+      'SELECT COUNT(*) as count FROM admin_users'
+    );
+    return parseInt(result.rows[0]?.count || '0', 10);
+  }
+
+  async createAdminUser(data: {
+    username: string;
+    password_hash: string;
+    name?: string | null;
+    email?: string | null;
+    role?: string;
+    is_active?: boolean;
+  }): Promise<AdminUser> {
+    const result = await databaseService.query<AdminUser>(
+      `INSERT INTO admin_users (username, password_hash, name, email, role, is_active, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+       RETURNING id, username, name, email, role, is_active, last_login_at, created_at, updated_at`,
+      [
+        data.username,
+        data.password_hash,
+        data.name || null,
+        data.email || null,
+        data.role || 'admin',
+        data.is_active !== undefined ? data.is_active : true,
+      ]
+    );
+    return result.rows[0];
+  }
+
+  async updateAdminUser(
+    id: number | string,
+    data: {
+      name?: string | null;
+      email?: string | null;
+      role?: string;
+      is_active?: boolean;
+    }
+  ): Promise<AdminUser | null> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (data.name !== undefined) {
+      fields.push(`name = $${idx++}`);
+      values.push(data.name);
+    }
+    if (data.email !== undefined) {
+      fields.push(`email = $${idx++}`);
+      values.push(data.email);
+    }
+    if (data.role !== undefined) {
+      fields.push(`role = $${idx++}`);
+      values.push(data.role);
+    }
+    if (data.is_active !== undefined) {
+      fields.push(`is_active = $${idx++}`);
+      values.push(data.is_active);
+    }
+
+    if (fields.length === 0) {
+      return this.findAdminUserById(id);
+    }
+
+    fields.push(`updated_at = NOW()`);
+    values.push(id);
+
+    const query = `UPDATE admin_users SET ${fields.join(', ')} WHERE id = $${idx} RETURNING id, username, name, email, role, is_active, last_login_at, created_at, updated_at`;
+    const result = await databaseService.query<AdminUser>(query, values);
+    return result.rows[0] || null;
+  }
+
+  async updateAdminUserPassword(id: number | string, passwordHash: string): Promise<boolean> {
+    const result = await databaseService.query(
+      'UPDATE admin_users SET password_hash = $1, updated_at = NOW() WHERE id = $2',
+      [passwordHash, id]
+    );
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async updateAdminUserLastLogin(id: number | string): Promise<void> {
+    await databaseService.query('UPDATE admin_users SET last_login_at = NOW() WHERE id = $1', [id]);
+  }
+
+  async deleteAdminUser(id: number | string): Promise<boolean> {
+    const result = await databaseService.query('DELETE FROM admin_users WHERE id = $1', [id]);
+    return (result.rowCount ?? 0) > 0;
   }
 }
 

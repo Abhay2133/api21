@@ -1,11 +1,13 @@
 import crypto from 'crypto';
 import os from 'os';
 import fs from 'fs';
+import bcrypt from 'bcryptjs';
 import { adminModel, AdminModel, DeploymentItem, DeploymentLogItem } from './admin.model.js';
 import { config } from '../../config/env.js';
 import { AppError } from '../../common/middleware/error.middleware.js';
 import { jobsService } from '../jobs/jobs.service.js';
 import { redisService } from '../../core/redis/redis.service.js';
+import { CreateAdminUserDto, UpdateAdminUserDto } from '@api21/types';
 
 // In-memory store for single-use terminal connection tickets (30-second expiry)
 const terminalTickets = new Map<string, { token: string; expiresAt: number }>();
@@ -29,13 +31,51 @@ export class AdminService {
       throw new AppError('Username and password are required', 400);
     }
 
-    const [expectedUser, expectedPass] = config.masterCredentials.split(':');
-    const secretPass = process.env.ADMIN_SECRET || 'securepassword';
+    let authenticatedUser: { id: number | string; username: string; role: string; name?: string | null } | null = null;
 
-    const isValidUser = safeCompare(username, expectedUser || 'admin');
-    const isValidPass = safeCompare(password, expectedPass || 'securepassword') || safeCompare(password, secretPass);
+    // 1. Try Authenticating via PostgreSQL database admin_users table
+    try {
+      const dbUser = await this.model.findAdminUserByUsername(username);
+      if (dbUser) {
+        if (!dbUser.is_active) {
+          throw new AppError('Account is deactivated. Contact system administrator.', 403);
+        }
 
-    if (!isValidUser || !isValidPass) {
+        const isMatch = await bcrypt.compare(password, dbUser.password_hash);
+        if (isMatch) {
+          await this.model.updateAdminUserLastLogin(dbUser.id);
+          authenticatedUser = {
+            id: dbUser.id,
+            username: dbUser.username,
+            role: dbUser.role,
+            name: dbUser.name,
+          };
+        }
+      }
+    } catch (err: any) {
+      if (err instanceof AppError) throw err;
+      console.warn(`[Admin Auth] Database lookup warning: ${err.message}`);
+    }
+
+    // 2. Master Credentials Fallback (Env variables: ADMIN_USER / ADMIN_PASS / ADMIN_SECRET)
+    if (!authenticatedUser) {
+      const [expectedUser, expectedPass] = config.masterCredentials.split(':');
+      const secretPass = process.env.ADMIN_SECRET || 'securepassword';
+
+      const isValidUser = safeCompare(username, expectedUser || 'admin');
+      const isValidPass = safeCompare(password, expectedPass || 'securepassword') || safeCompare(password, secretPass);
+
+      if (isValidUser && isValidPass) {
+        authenticatedUser = {
+          id: 'root',
+          username,
+          role: 'superadmin',
+          name: 'Root Administrator',
+        };
+      }
+    }
+
+    if (!authenticatedUser) {
       throw new AppError('Invalid credentials', 401);
     }
 
@@ -50,7 +90,10 @@ export class AdminService {
       token: session.token,
       csrfToken,
       user: {
-        username: session.username,
+        id: authenticatedUser.id,
+        username: authenticatedUser.username,
+        role: authenticatedUser.role,
+        name: authenticatedUser.name,
       },
     };
   }
@@ -67,13 +110,137 @@ export class AdminService {
       throw new AppError('Unauthorized or expired session', 401);
     }
 
+    // Check if database user info is available
+    let role = 'admin';
+    let name: string | null = null;
+    try {
+      if (session.username) {
+        const dbUser = await this.model.findAdminUserByUsername(session.username);
+        if (dbUser) {
+          role = dbUser.role;
+          name = dbUser.name ?? null;
+        } else if (session.username === (config.masterCredentials.split(':')[0] || 'admin')) {
+          role = 'superadmin';
+          name = 'Root Administrator';
+        }
+      }
+    } catch {}
+
     return {
       id: session.id,
       username: session.username,
+      role,
+      name,
       ip_address: session.ip_address,
       created_at: session.created_at,
     };
   }
+
+  // --- Admin Users CRUD & Actions ---
+
+  async getAdminUsers(limit = 100, offset = 0) {
+    return this.model.getAdminUsers(limit, offset);
+  }
+
+  async getAdminUserById(id: number | string) {
+    const user = await this.model.findAdminUserById(id);
+    if (!user) {
+      throw new AppError('Admin user not found', 404);
+    }
+    return user;
+  }
+
+  async createAdminUser(dto: CreateAdminUserDto) {
+    if (!dto.username || !dto.password) {
+      throw new AppError('Username and password are required', 400);
+    }
+
+    const trimmedUsername = dto.username.trim().toLowerCase();
+    if (trimmedUsername.length < 3) {
+      throw new AppError('Username must be at least 3 characters long', 400);
+    }
+    if (dto.password.length < 6) {
+      throw new AppError('Password must be at least 6 characters long', 400);
+    }
+
+    const existing = await this.model.findAdminUserByUsername(trimmedUsername);
+    if (existing) {
+      throw new AppError('An admin user with this username already exists', 409);
+    }
+
+    const password_hash = await bcrypt.hash(dto.password, 10);
+    const user = await this.model.createAdminUser({
+      username: trimmedUsername,
+      password_hash,
+      name: dto.name?.trim(),
+      email: dto.email?.trim().toLowerCase(),
+      role: dto.role || 'admin',
+      is_active: dto.is_active !== undefined ? dto.is_active : true,
+    });
+
+    return user;
+  }
+
+  async updateAdminUser(id: number | string, dto: UpdateAdminUserDto) {
+    const user = await this.model.findAdminUserById(id);
+    if (!user) {
+      throw new AppError('Admin user not found', 404);
+    }
+
+    const updated = await this.model.updateAdminUser(id, {
+      name: dto.name !== undefined ? dto.name?.trim() : undefined,
+      email: dto.email !== undefined ? dto.email?.trim().toLowerCase() : undefined,
+      role: dto.role,
+      is_active: dto.is_active,
+    });
+
+    return updated;
+  }
+
+  async resetAdminUserPassword(id: number | string, newPassword?: string) {
+    if (!newPassword || newPassword.length < 6) {
+      throw new AppError('New password must be at least 6 characters long', 400);
+    }
+
+    const user = await this.model.findAdminUserById(id);
+    if (!user) {
+      throw new AppError('Admin user not found', 404);
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await this.model.updateAdminUserPassword(id, passwordHash);
+
+    return { success: true, message: `Password for admin user '${user.username}' reset successfully.` };
+  }
+
+  async deleteAdminUser(id: number | string) {
+    const user = await this.model.findAdminUserById(id);
+    if (!user) {
+      throw new AppError('Admin user not found', 404);
+    }
+
+    const success = await this.model.deleteAdminUser(id);
+    if (!success) {
+      throw new AppError('Failed to delete admin user', 500);
+    }
+
+    return { success: true, message: `Admin user '${user.username}' deleted successfully.` };
+  }
+
+  async toggleAdminUserStatus(id: number | string) {
+    const user = await this.model.findAdminUserById(id);
+    if (!user) {
+      throw new AppError('Admin user not found', 404);
+    }
+
+    const updated = await this.model.updateAdminUser(id, {
+      is_active: !user.is_active,
+    });
+
+    return updated;
+  }
+
+  // --- Metrics & Telemetry ---
 
   async getSystemMetrics() {
     const cpus = os.cpus();
@@ -82,7 +249,6 @@ export class AdminService {
     const freeMem = os.freemem();
     const usedMem = totalMem - freeMem;
 
-    // Calculate approximate CPU usage
     let totalIdle = 0;
     let totalTick = 0;
     cpus.forEach((cpu) => {
@@ -94,7 +260,6 @@ export class AdminService {
     const idlePercent = totalTick > 0 ? (totalIdle / totalTick) * 100 : 0;
     const cpuUsagePercent = Math.max(0, Math.min(100, Math.round((100 - idlePercent) * 10) / 10));
 
-    // Disk calculation
     let diskStats = {
       totalGB: 50,
       usedGB: 15,
@@ -199,7 +364,6 @@ export class AdminService {
       return false;
     }
 
-    // Single use: delete after consumption
     terminalTickets.delete(ticket);
     return true;
   }

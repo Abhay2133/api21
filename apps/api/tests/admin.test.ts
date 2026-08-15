@@ -28,6 +28,9 @@ describe('Admin Authentication & Management Endpoints (Cookie + CSRF TDD)', () =
 
   describe('POST /api/v1/admin/login', () => {
     it('should authenticate master credentials and set persistent cookies', async () => {
+      // 1. findAdminUserByUsername -> empty for master fallback
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      // 2. createSession
       mockQuery.mockResolvedValueOnce({
         rows: [
           {
@@ -57,6 +60,7 @@ describe('Admin Authentication & Management Endpoints (Cookie + CSRF TDD)', () =
     });
 
     it('should reject invalid password with 401', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
       const res = await request(app)
         .post('/api/v1/admin/login')
         .send({ username: 'admin', password: 'wrong-password' });
@@ -78,6 +82,7 @@ describe('Admin Authentication & Management Endpoints (Cookie + CSRF TDD)', () =
 
   describe('GET /api/v1/admin/me', () => {
     it('should return admin profile when valid admin_session cookie is sent', async () => {
+      // 1. adminGuard -> findSessionByToken
       mockQuery.mockResolvedValueOnce({
         rows: [
           {
@@ -88,6 +93,19 @@ describe('Admin Authentication & Management Endpoints (Cookie + CSRF TDD)', () =
           },
         ],
       });
+      // 2. getMe -> findSessionByToken
+      mockQuery.mockResolvedValueOnce({
+        rows: [
+          {
+            id: 10,
+            token: 'valid-cookie-token',
+            username: 'admin',
+            is_active: true,
+          },
+        ],
+      });
+      // 3. getMe -> findAdminUserByUsername
+      mockQuery.mockResolvedValueOnce({ rows: [] });
 
       const res = await request(app)
         .get('/api/v1/admin/me')

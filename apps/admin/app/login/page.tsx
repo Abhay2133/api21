@@ -126,10 +126,6 @@ export default function LoginPage() {
             </CardFooter>
           </form>
         </Card>
-
-        <div className="mt-6 text-center text-xs text-zinc-500 font-mono">
-          Protected with pure cookie authentication & double-submit CSRF hardening
-        </div>
       </div>
     </div>
   );

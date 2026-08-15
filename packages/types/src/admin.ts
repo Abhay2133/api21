@@ -47,6 +47,8 @@ export interface AdminLoginResponse {
   csrfToken: string;
   user: {
     username: string;
+    role?: string;
+    name?: string | null;
   };
 }
 
@@ -62,4 +64,36 @@ export interface AdminDeploymentLogItem {
   deployment_id: string;
   message: string;
   created_at: string;
+}
+
+export interface AdminUser {
+  id: number | string;
+  username: string;
+  name?: string | null;
+  email?: string | null;
+  role: string;
+  is_active: boolean;
+  last_login_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateAdminUserDto {
+  username: string;
+  password: string;
+  name?: string;
+  email?: string;
+  role?: string;
+  is_active?: boolean;
+}
+
+export interface UpdateAdminUserDto {
+  name?: string;
+  email?: string;
+  role?: string;
+  is_active?: boolean;
+}
+
+export interface ResetAdminUserPasswordDto {
+  password: string;
 }

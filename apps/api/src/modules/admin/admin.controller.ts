@@ -57,6 +57,7 @@ router.post('/logout', adminGuard, async (req: AdminRequest, res: Response, next
 router.get('/me', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
   try {
     const session = req.adminSession!;
+    const userProfile = await adminService.getMe(session.token);
     const cookies = req.headers.cookie ? Object.fromEntries(req.headers.cookie.split(';').map((c) => {
       const [k, ...v] = c.trim().split('=');
       return [k, decodeURIComponent(v.join('='))];
@@ -66,10 +67,7 @@ router.get('/me', adminGuard, async (req: AdminRequest, res: Response, next: Nex
     return res.status(200).json({
       status: 'success',
       data: {
-        id: session.id,
-        username: session.username,
-        ip_address: session.ip_address,
-        created_at: session.created_at,
+        ...userProfile,
         csrfToken,
       },
     });
@@ -163,6 +161,102 @@ router.get('/sessions/:id', adminGuard, async (req: AdminRequest, res: Response,
 router.post('/sessions/:id/deactivate', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
   try {
     const data = await adminService.deactivateSession(req.params.id);
+    return res.status(200).json({
+      status: 'success',
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// --- Admin Users Management Endpoints ---
+
+// GET /api/v1/admin/users - List all admin accounts
+router.get('/users', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 100;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const data = await adminService.getAdminUsers(limit, offset);
+    return res.status(200).json({
+      status: 'success',
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/v1/admin/users/:id - Get specific admin user
+router.get('/users/:id', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
+  try {
+    const data = await adminService.getAdminUserById(req.params.id);
+    return res.status(200).json({
+      status: 'success',
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/v1/admin/users - Create new admin account
+router.post('/users', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
+  try {
+    const data = await adminService.createAdminUser(req.body);
+    return res.status(201).json({
+      status: 'success',
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PUT /api/v1/admin/users/:id - Update admin profile / role / status
+router.put('/users/:id', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
+  try {
+    const data = await adminService.updateAdminUser(req.params.id, req.body);
+    return res.status(200).json({
+      status: 'success',
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/v1/admin/users/:id/reset-password - Reset password for admin user
+router.post('/users/:id/reset-password', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
+  try {
+    const { password } = req.body || {};
+    const data = await adminService.resetAdminUserPassword(req.params.id, password);
+    return res.status(200).json({
+      status: 'success',
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/v1/admin/users/:id/toggle-status - Activate or revoke admin user
+router.post('/users/:id/toggle-status', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
+  try {
+    const data = await adminService.toggleAdminUserStatus(req.params.id);
+    return res.status(200).json({
+      status: 'success',
+      data,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /api/v1/admin/users/:id - Delete an admin user
+router.delete('/users/:id', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
+  try {
+    const data = await adminService.deleteAdminUser(req.params.id);
     return res.status(200).json({
       status: 'success',
       data,
