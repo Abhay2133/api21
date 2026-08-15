@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Activity, Radio, ExternalLink } from 'lucide-react';
+import { Activity, ExternalLink } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { SidebarTrigger } from '../ui/sidebar';
 
@@ -15,19 +15,19 @@ export function Topbar({ title, subtitle, children }: TopbarProps) {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
   return (
-    <header className="h-12 border-b border-slate-800/60 bg-[#070b12]/90 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-20">
-      <div className="flex items-center gap-2.5">
+    <header className="h-12 border-b border-slate-800/80 bg-[#070b12] px-4 flex items-center justify-between sticky top-0 z-20">
+      <div className="flex items-center gap-2">
         <SidebarTrigger className="h-7 w-7 text-slate-400 hover:text-white hover:bg-slate-800/60" />
-        <div className="h-4 w-[1px] bg-slate-800 mx-0.5" />
-        <div className="flex items-center gap-2">
-          <h1 className="text-xs font-semibold text-slate-100 tracking-tight">{title}</h1>
+        <div className="h-4 w-[1px] bg-slate-800" />
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs">
+          <span className="font-semibold text-slate-200">{title}</span>
           {subtitle && (
             <>
-              <span className="text-slate-600 text-xs">/</span>
-              <span className="text-[11px] text-slate-400 hidden sm:inline truncate max-w-xs">{subtitle}</span>
+              <span className="text-slate-600">/</span>
+              <span className="text-slate-400 hidden sm:inline">{subtitle}</span>
             </>
           )}
-        </div>
+        </nav>
       </div>
 
       <div className="flex items-center gap-2">
