@@ -62,33 +62,33 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-slate-800/80 bg-[#070b12] text-slate-200">
-      {/* 1. Shadcn Team/Project Switcher Header (exact h-12 height to match Topbar) */}
-      <SidebarHeader className="h-12 flex items-center justify-center p-2 border-b border-slate-800/80">
+      {/* 1. Shadcn Team/Project Switcher Header */}
+      <SidebarHeader className="h-14 flex items-center justify-center p-2.5 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5 p-1.5 rounded-lg hover:bg-slate-900/60 transition-colors cursor-pointer select-none w-full">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-sky-500 to-cyan-400 flex items-center justify-center text-slate-950 font-black text-[11px] shadow-sm shadow-sky-500/20 flex-shrink-0">
+          <div className="w-7 h-7 rounded-md bg-gradient-to-tr from-sky-500 to-cyan-400 flex items-center justify-center text-slate-950 font-black text-xs shadow-sm shadow-sky-500/20 flex-shrink-0">
             21
           </div>
           <div className="flex flex-col flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-            <div className="text-xs font-semibold text-slate-100 truncate flex items-center gap-1.5 leading-none">
+            <div className="text-sm font-bold text-slate-100 truncate flex items-center gap-1.5 leading-none">
               api21
-              <span className="text-[9px] px-1 py-0.2 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">
+              <span className="text-[10px] px-1 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono font-medium">
                 v1.0
               </span>
             </div>
-            <div className="text-[10px] text-slate-400 truncate mt-0.5 leading-none">System Control Panel</div>
+            <div className="text-xs text-slate-400 truncate mt-1 leading-none font-normal">System Control Panel</div>
           </div>
-          <ChevronsUpDown className="w-3 h-3 text-slate-500 ml-auto group-data-[collapsible=icon]:hidden flex-shrink-0" />
+          <ChevronsUpDown className="w-3.5 h-3.5 text-slate-400 ml-auto group-data-[collapsible=icon]:hidden flex-shrink-0" />
         </div>
       </SidebarHeader>
 
-      {/* 2. Compact Nav Menu */}
-      <SidebarContent className="px-2 py-2 gap-2.5">
+      {/* 2. Nav Menu */}
+      <SidebarContent className="px-2 py-3 gap-3">
         <SidebarGroup className="p-0">
-          <SidebarGroupLabel className="text-[10px] font-medium text-slate-400 uppercase tracking-wider px-2 h-6 mb-0.5">
+          <SidebarGroupLabel className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 h-7 mb-0.5">
             Platform
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-0.5">
+            <SidebarMenu className="gap-1">
               {mainNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.url || pathname.startsWith(`${item.url}/`);
@@ -99,17 +99,17 @@ export function AppSidebar() {
                       isActive={isActive}
                       tooltip={item.title}
                       size="sm"
-                      className="h-8 px-2.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-900/80 data-[active=true]:bg-slate-900 data-[active=true]:text-white data-[active=true]:font-medium data-[active=true]:shadow-sm data-[active=true]:border-slate-700/60"
+                      className="h-9 px-2.5 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900/80 data-[active=true]:bg-slate-900 data-[active=true]:text-white data-[active=true]:font-semibold data-[active=true]:shadow-sm data-[active=true]:border-slate-700/60"
                     >
                       <Link href={item.url} className="flex items-center gap-2.5 w-full">
                         <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-sky-400' : 'text-slate-400'}`} />
                         <span className="truncate flex-1">{item.title}</span>
                         {item.badge && (
                           <span
-                            className={`text-[9px] px-1.5 py-0.5 rounded font-mono group-data-[collapsible=icon]:hidden ${
+                            className={`text-xs px-1.5 py-0.5 rounded font-mono font-medium group-data-[collapsible=icon]:hidden ${
                               isActive
                                 ? 'bg-sky-500/20 text-sky-300'
-                                : 'bg-slate-800/80 text-slate-400'
+                                : 'bg-slate-800 text-slate-400'
                             }`}
                           >
                             {item.badge}
@@ -124,20 +124,20 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator className="bg-slate-800/60 my-0.5" />
+        <SidebarSeparator className="bg-slate-800/60 my-1" />
 
         <SidebarGroup className="p-0">
-          <SidebarGroupLabel className="text-[10px] font-medium text-slate-400 uppercase tracking-wider px-2 h-6 mb-0.5">
+          <SidebarGroupLabel className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 h-7 mb-0.5">
             Infrastructure
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-0.5">
+            <SidebarMenu className="gap-1">
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
                   size="sm"
                   tooltip="API Documentation"
-                  className="h-8 px-2.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-900/80"
+                  className="h-9 px-2.5 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900/80"
                 >
                   <a
                     href={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}
@@ -147,7 +147,7 @@ export function AppSidebar() {
                   >
                     <Server className="w-4 h-4 text-slate-400 flex-shrink-0" />
                     <span className="truncate flex-1">API Docs</span>
-                    <ChevronRight className="w-3 h-3 text-slate-600 ml-auto group-data-[collapsible=icon]:hidden" />
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 ml-auto group-data-[collapsible=icon]:hidden" />
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -156,7 +156,7 @@ export function AppSidebar() {
                   asChild
                   size="sm"
                   tooltip="BullMQ Queues"
-                  className="h-8 px-2.5 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-900/80"
+                  className="h-9 px-2.5 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-900/80"
                 >
                   <a
                     href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/admin/queues`}
@@ -166,7 +166,7 @@ export function AppSidebar() {
                   >
                     <Layers className="w-4 h-4 text-slate-400 flex-shrink-0" />
                     <span className="truncate flex-1">BullMQ Dashboard</span>
-                    <ChevronRight className="w-3 h-3 text-slate-600 ml-auto group-data-[collapsible=icon]:hidden" />
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 ml-auto group-data-[collapsible=icon]:hidden" />
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -176,15 +176,15 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* 3. Shadcn User Profile Footer */}
-      <SidebarFooter className="h-12 flex items-center p-2 border-t border-slate-800/80 mt-auto">
+      <SidebarFooter className="h-14 flex items-center p-2.5 border-t border-slate-800/80 mt-auto">
         <div className="flex items-center justify-between p-1 rounded-lg hover:bg-slate-900/60 transition-colors w-full">
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center text-slate-300 font-semibold text-xs border border-slate-700/60 flex-shrink-0">
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="w-7 h-7 rounded-md bg-slate-800 flex items-center justify-center text-slate-200 font-bold text-xs border border-slate-700/60 flex-shrink-0">
               {user?.username?.charAt(0).toUpperCase() || 'A'}
             </div>
             <div className="overflow-hidden group-data-[collapsible=icon]:hidden">
-              <div className="text-xs font-medium text-slate-200 truncate leading-none">{user?.username || 'admin'}</div>
-              <div className="text-[10px] text-slate-400 truncate flex items-center gap-1 font-mono mt-0.5 leading-none">
+              <div className="text-sm font-semibold text-slate-200 truncate leading-tight">{user?.username || 'admin'}</div>
+              <div className="text-xs text-slate-400 truncate flex items-center gap-1 font-mono mt-0.5 leading-none">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 authorized
               </div>
@@ -193,9 +193,9 @@ export function AppSidebar() {
           <button
             onClick={handleLogout}
             title="Sign out"
-            className="p-1 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors group-data-[collapsible=icon]:hidden flex-shrink-0"
+            className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors group-data-[collapsible=icon]:hidden flex-shrink-0"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </SidebarFooter>
