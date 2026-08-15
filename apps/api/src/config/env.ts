@@ -1,7 +1,22 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+function findEnvFile(): string {
+  let curr = process.cwd();
+  for (let i = 0; i < 5; i++) {
+    const candidate = path.join(curr, '.env');
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+    const parent = path.dirname(curr);
+    if (parent === curr) break;
+    curr = parent;
+  }
+  return path.resolve(process.cwd(), '.env');
+}
+
+dotenv.config({ path: findEnvFile() });
 
 export const config = {
   port: parseInt(process.env.PORT || '5000', 10),
