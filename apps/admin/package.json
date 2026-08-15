@@ -1,0 +1,21 @@
+{
+  "name": "@api21/admin",
+  "version": "1.0.0",
+  "description": "Admin dashboard skeleton for the api21 monorepo",
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "echo \"@api21/admin: skeleton ready\""
+  },
+  "dependencies": {
+    "@api21/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.2"
+  }
+}
