@@ -1,9 +1,16 @@
 packages:
-  - '.'
+  - 'apps/*'
+  - 'packages/*'
 
 allowBuilds:
   esbuild: true
   msgpackr-extract: true
+
+minimumReleaseAgeExclude:
+  - '@nestjs/common@11.2.1'
+  - '@nestjs/core@11.2.1'
+  - '@nestjs/platform-express@11.2.1'
+  - '@nestjs/testing@11.2.1'
 
 onlyBuiltDependencies:
   - esbuild

@@ -1,46 +1,47 @@
 {
-  "name": "api21",
+  "name": "api21-monorepo",
   "version": "1.0.0",
-  "description": "Standalone Express TypeScript REST API server",
+  "description": "Modular Monorepo for api21 (NestJS API, Chat skeleton, Admin skeleton & Shared Types)",
+  "private": true,
   "type": "module",
-  "main": "dist/server.js",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "build": "tsc && cp -r static dist/",
-    "start": "node dist/server.js",
-    "start:worker": "node dist/worker.js",
-    "dev": "tsx watch src/server.ts",
-    "dev:worker": "tsx watch src/worker.ts",
-    "test": "jest --runInBand --detectOpenHandles",
-    "migrate:latest": "knex migrate:latest --knexfile src/config/knexfile.ts",
-    "migrate:rollback": "knex migrate:rollback --knexfile src/config/knexfile.ts",
-    "migrate:make": "knex migrate:make --knexfile src/config/knexfile.ts"
-
-
+    "dev": "pnpm --filter @api21/api dev",
+    "dev:api": "pnpm --filter @api21/api dev",
+    "dev:worker": "pnpm --filter @api21/api dev:worker",
+    "dev:chat": "pnpm --filter @api21/chat dev",
+    "dev:admin": "pnpm --filter @api21/admin dev",
+    "build": "pnpm --filter @api21/types build && pnpm -r run build",
+    "build:api": "pnpm --filter @api21/types build && pnpm --filter @api21/api build",
+    "build:chat": "pnpm --filter @api21/types build && pnpm --filter @api21/chat build",
+    "build:admin": "pnpm --filter @api21/types build && pnpm --filter @api21/admin build",
+    "start": "node apps/api/dist/main.js",
+    "start:prod": "node apps/api/dist/main.js",
+    "start:worker": "node apps/api/dist/worker.js",
+    "test": "pnpm --filter @api21/types build && pnpm -r run test",
+    "test:api": "pnpm --filter @api21/types build && pnpm --filter @api21/api test",
+    "migrate:latest": "pnpm --filter @api21/api migrate:latest",
+    "migrate:rollback": "pnpm --filter @api21/api migrate:rollback",
+    "migrate:make": "pnpm --filter @api21/api migrate:make",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
   },
-  "keywords": [],
+  "keywords": [
+    "monorepo",
+    "nestjs",
+    "typescript",
+    "redis",
+    "bullmq",
+    "postgresql",
+    "knex"
+  ],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@bull-board/api": "^8.6.0",
-    "@bull-board/express": "^8.6.0",
-    "bullmq": "^6.0.9",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "ioredis": "^5.4.1",
-    "knex": "^3.3.0",
-    "pg": "^8.12.0"
-  },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20.14.9",
-    "@types/pg": "^8.11.6",
-    "@types/supertest": "^6.0.2",
-    "jest": "^29.7.0",
-    "supertest": "^7.0.0",
-    "ts-jest": "^29.1.5",
     "tsx": "^4.16.2",
     "typescript": "^5.5.2"
   }

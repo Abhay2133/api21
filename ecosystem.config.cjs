@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "api21-backend",
-      script: "./dist/server.js",
+      script: "./apps/api/dist/main.js",
       exec_mode: "cluster",
       instances: "max",
       autorestart: true,
@@ -14,7 +14,7 @@ module.exports = {
     },
     {
       name: "api21-worker",
-      script: "./dist/worker.js",
+      script: "./apps/api/dist/worker.js",
       exec_mode: "fork",
       instances: 1,
       autorestart: true,

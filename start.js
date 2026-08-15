@@ -92,11 +92,18 @@ function getBranchName() {
 
 function runHealthCheck(testPort, targetDir) {
   return new Promise((resolve) => {
+    const apiMainDistPath = path.join(targetDir, 'apps', 'api', 'dist', 'main.js');
+    const mainDistPath = path.join(targetDir, 'dist', 'main.js');
     const serverDistPath = path.join(targetDir, 'dist', 'server.js');
-    console.log(`[${getTimestamp()}] [HealthCheck] Testing compiled server at: ${serverDistPath} on port ${testPort}`);
+    const entrypoint = fs.existsSync(apiMainDistPath)
+      ? apiMainDistPath
+      : fs.existsSync(mainDistPath)
+        ? mainDistPath
+        : serverDistPath;
+    console.log(`[${getTimestamp()}] [HealthCheck] Testing compiled server at: ${entrypoint} on port ${testPort}`);
 
     const env = { ...process.env, PORT: String(testPort), NODE_ENV: 'production' };
-    const tempProcess = spawn('node', [serverDistPath], {
+    const tempProcess = spawn('node', [entrypoint], {
       env,
       stdio: ['ignore', 'pipe', 'pipe'],
       cwd: targetDir,
@@ -247,7 +254,7 @@ async function main() {
     }
     await logStep(deploymentId, 'Repository prepared successfully.');
 
-    // Ensure local .env, src, tsconfig, package.json, pnpm-lock.yaml are synced to tmpDir
+    // Ensure local .env, src, static, tsconfig, package.json, pnpm-lock.yaml are synced to tmpDir
     const filesToSync = ['.env', 'package.json', 'pnpm-lock.yaml', 'package-lock.json', 'tsconfig.json'];
     for (const file of filesToSync) {
       const srcPath = path.join(rootDir, file);
@@ -258,6 +265,9 @@ async function main() {
     if (fs.existsSync(path.join(rootDir, 'src'))) {
       fs.cpSync(path.join(rootDir, 'src'), path.join(tmpDir, 'src'), { recursive: true });
     }
+    if (fs.existsSync(path.join(rootDir, 'static'))) {
+      fs.cpSync(path.join(rootDir, 'static'), path.join(tmpDir, 'static'), { recursive: true });
+    }
 
     // Step 2: Install dependencies & Build
     await logStep(deploymentId, 'Installing dependencies in ./tmp/api21...', 'building');
@@ -266,18 +276,20 @@ async function main() {
       execSync('pnpm install --frozen-lockfile', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
     } catch {
       try {
-        execSync('npx -y pnpm install', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
+        execSync('pnpm install', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
       } catch {
-        execSync('npm install --include=dev', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
+        execSync('npm install --legacy-peer-deps --include=dev', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
       }
     }
 
     await logStep(deploymentId, 'Building TypeScript project in ./tmp/api21...');
     execSync('npm run build', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
     
+    const apiMainDistPath = path.join(tmpDir, 'apps', 'api', 'dist', 'main.js');
+    const mainDistPath = path.join(tmpDir, 'dist', 'main.js');
     const serverDistPath = path.join(tmpDir, 'dist', 'server.js');
-    if (!fs.existsSync(serverDistPath)) {
-      throw new Error(`Build failed: Compiled entrypoint not found at ${serverDistPath}`);
+    if (!fs.existsSync(apiMainDistPath) && !fs.existsSync(mainDistPath) && !fs.existsSync(serverDistPath)) {
+      throw new Error(`Build failed: Compiled entrypoint not found at ${apiMainDistPath}`);
     }
     
     await logStep(deploymentId, 'Build completed successfully.');
@@ -296,24 +308,30 @@ async function main() {
     // Step 4: Stop running processes, Swap dist directory, and start PM2 server
     await logStep(deploymentId, 'Promoting deployment: Swapping dist directory and restarting processes...');
 
+    // Swap monorepo apps/api/dist if monorepo, else root dist
+    const apiDistNew = path.join(tmpDir, 'apps', 'api', 'dist');
+    const apiDistCurrent = path.join(rootDir, 'apps', 'api', 'dist');
+    if (fs.existsSync(apiDistNew)) {
+      if (fs.existsSync(apiDistCurrent)) {
+        fs.rmSync(apiDistCurrent, { recursive: true, force: true });
+      }
+      fs.cpSync(apiDistNew, apiDistCurrent, { recursive: true });
+    }
+
     const distOld = path.join(rootDir, 'dist_old');
     const distCurrent = path.join(rootDir, 'dist');
     const distNew = path.join(tmpDir, 'dist');
 
-    if (!fs.existsSync(distNew)) {
-      throw new Error(`Compiled dist directory does not exist at: ${distNew}`);
+    if (fs.existsSync(distNew)) {
+      if (fs.existsSync(distOld)) {
+        fs.rmSync(distOld, { recursive: true, force: true });
+      }
+      if (fs.existsSync(distCurrent)) {
+        fs.cpSync(distCurrent, distOld, { recursive: true });
+        fs.rmSync(distCurrent, { recursive: true, force: true });
+      }
+      fs.cpSync(distNew, distCurrent, { recursive: true });
     }
-
-    if (fs.existsSync(distOld)) {
-      fs.rmSync(distOld, { recursive: true, force: true });
-    }
-
-    if (fs.existsSync(distCurrent)) {
-      fs.cpSync(distCurrent, distOld, { recursive: true });
-      fs.rmSync(distCurrent, { recursive: true, force: true });
-    }
-
-    fs.cpSync(distNew, distCurrent, { recursive: true });
 
     // Delete existing PM2 processes to clear any cached env variables in PM2
     try {
