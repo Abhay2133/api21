@@ -15,8 +15,11 @@ export interface Session {
   user_id?: number | null;
   username?: string;
   token: string;
+  ip_address?: string;
+  user_agent?: string;
+  session_hash?: string;
   is_active: boolean;
-  expires_at: string | Date;
+  expires_at?: string | Date;
   created_at?: string | Date;
   updated_at?: string | Date;
 }

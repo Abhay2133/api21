@@ -3,6 +3,7 @@ import { config } from './config/env.js';
 import { databaseService } from './core/database/database.service.js';
 import { redisService } from './core/redis/redis.service.js';
 import { bullMQService } from './core/bullmq/bullmq.service.js';
+import { setupTerminalWebSocket } from './modules/admin/terminal.ws.js';
 import http from 'http';
 
 async function bootstrap() {
@@ -15,8 +16,10 @@ async function bootstrap() {
   // 3. Build Express Application
   const app = createApp();
 
-  // 4. Create HTTP server and start listening
+  // 4. Create HTTP server, mount WebSockets, and start listening
   const server = http.createServer(app);
+  setupTerminalWebSocket(server);
+
   server.listen(config.port, () => {
     console.log(`[Server] api21 backend running on http://localhost:${config.port} in ${config.nodeEnv} mode.`);
   });
