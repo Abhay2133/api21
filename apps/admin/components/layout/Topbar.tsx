@@ -3,6 +3,7 @@
 import React from 'react';
 import { Activity, Radio, ExternalLink } from 'lucide-react';
 import { Badge } from '../ui/badge';
+import { SidebarTrigger } from '../ui/sidebar';
 
 interface TopbarProps {
   title: string;
@@ -13,10 +14,13 @@ export function Topbar({ title, subtitle }: TopbarProps) {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
   return (
-    <header className="h-16 border-b border-slate-800/80 bg-slate-950/40 backdrop-blur-md px-8 flex items-center justify-between sticky top-0 z-10">
-      <div>
-        <h1 className="text-base font-semibold text-white tracking-tight">{title}</h1>
-        {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+    <header className="h-16 border-b border-slate-800/80 bg-slate-950/40 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-10">
+      <div className="flex items-center gap-3">
+        <SidebarTrigger className="hidden md:inline-flex" />
+        <div>
+          <h1 className="text-base font-semibold text-white tracking-tight">{title}</h1>
+          {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+        </div>
       </div>
 
       <div className="flex items-center gap-3">

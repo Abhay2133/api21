@@ -33,19 +33,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full bg-[#090d16]">
-        <AppSidebar />
-        <SidebarInset>
-          {/* Header Mobile / Responsive Trigger Bar */}
-          <header className="flex h-12 shrink-0 items-center gap-2 border-b border-slate-800/80 px-4 md:hidden bg-slate-950/60 backdrop-blur-md">
-            <SidebarTrigger />
-            <div className="text-xs font-semibold text-white tracking-tight flex items-center gap-1.5">
-              api21 <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">ADMIN</span>
-            </div>
-          </header>
-          {children}
-        </SidebarInset>
-      </div>
+      <AppSidebar />
+      <SidebarInset>
+        {/* Header Mobile / Responsive Trigger Bar */}
+        <header className="flex h-12 shrink-0 items-center gap-2 border-b border-slate-800/80 px-4 md:hidden bg-slate-950/60 backdrop-blur-md">
+          <SidebarTrigger />
+          <div className="text-xs font-semibold text-white tracking-tight flex items-center gap-1.5">
+            api21 <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">ADMIN</span>
+          </div>
+        </header>
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 }
