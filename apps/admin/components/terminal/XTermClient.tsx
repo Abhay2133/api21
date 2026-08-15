@@ -6,7 +6,7 @@ import { FitAddon } from '@xterm/addon-fit';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { apiClient } from '../../lib/api-client';
 import { Button } from '../ui/button';
-import { RefreshCw, Terminal as TerminalIcon, AlertCircle, Maximize2, Minimize2, Play, SquareCode } from 'lucide-react';
+import { RefreshCw, Terminal as TerminalIcon, AlertCircle, Maximize2, Minimize2 } from 'lucide-react';
 
 export default function XTermClient() {
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -14,15 +14,20 @@ export default function XTermClient() {
   const fitAddonRef = useRef<FitAddon | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const isUnmountedRef = useRef(false);
+  const lastDimensionsRef = useRef<{ cols: number; rows: number }>({ cols: 0, rows: 0 });
 
   const [status, setStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('connecting');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [quickInput, setQuickInput] = useState('');
 
   const sendResize = () => {
     if (xtermInstance.current && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       const { cols, rows } = xtermInstance.current;
+      // Prevent redundant SIGWINCH resize signals that cause readline to reprint PS1 prompt
+      if (cols === lastDimensionsRef.current.cols && rows === lastDimensionsRef.current.rows) {
+        return;
+      }
+      lastDimensionsRef.current = { cols, rows };
       wsRef.current.send(JSON.stringify({ type: 'resize', cols, rows }));
     }
   };
@@ -32,13 +37,6 @@ export default function XTermClient() {
       wsRef.current.send(data);
       xtermInstance.current?.focus();
     }
-  };
-
-  const handleQuickSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!quickInput) return;
-    sendRawData(`${quickInput}\r`);
-    setQuickInput('');
   };
 
   const connectTerminal = async () => {
@@ -74,8 +72,6 @@ export default function XTermClient() {
         wsBase = `${isSecure ? 'wss' : 'ws'}://${host}`;
       }
 
-      const wsUrl = `${wsBase}/ws/admin/terminal?ticket=${ticket}`;
-
       // 3. Initialize xterm instance if not already initialized
       if (!xtermInstance.current && terminalRef.current) {
         terminalRef.current.innerHTML = '';
@@ -85,11 +81,11 @@ export default function XTermClient() {
           fontSize: 14,
           lineHeight: 1.25,
           theme: {
-            background: '#090d16',
+            background: '#09090b',
             foreground: '#f8fafc',
             cursor: '#38bdf8',
-            selectionBackground: '#1e293b',
-            black: '#0f172a',
+            selectionBackground: '#27272a',
+            black: '#18181b',
             red: '#ef4444',
             green: '#10b981',
             yellow: '#f59e0b',
@@ -128,8 +124,15 @@ export default function XTermClient() {
 
       const term = xtermInstance.current;
       if (term) {
-        term.clear();
+        fitAddonRef.current?.fit();
+        term.reset();
       }
+
+      const cols = term?.cols || 100;
+      const rows = term?.rows || 30;
+      lastDimensionsRef.current = { cols, rows };
+
+      const wsUrl = `${wsBase}/ws/admin/terminal?ticket=${ticket}&cols=${cols}&rows=${rows}`;
 
       // 4. Open WebSocket to real node-pty
       const ws = new WebSocket(wsUrl);
@@ -139,8 +142,6 @@ export default function XTermClient() {
         if (isUnmountedRef.current) return;
         setStatus('connected');
         if (term) {
-          fitAddonRef.current?.fit();
-          sendResize();
           term.focus();
         }
       };
@@ -223,30 +224,30 @@ export default function XTermClient() {
     <div
       className={
         isFullscreen
-          ? 'fixed inset-0 z-50 p-4 bg-[#070b12] flex flex-col space-y-3'
+          ? 'fixed inset-0 z-50 p-4 bg-[#09090b] flex flex-col space-y-3'
           : 'flex flex-col h-full space-y-3'
       }
     >
       {/* Terminal Header Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 rounded-lg border border-slate-800/80 bg-[#0c121d] backdrop-blur-md">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 rounded-lg border border-zinc-800 bg-[#09090b]">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <TerminalIcon className="w-4 h-4 text-sky-400" />
-            <span className="text-xs font-bold text-slate-100 font-mono">pty://host-bash</span>
+            <TerminalIcon className="size-4 text-zinc-400" />
+            <span className="text-xs font-semibold text-zinc-100 font-mono">pty://host-bash</span>
           </div>
-          <span className="text-slate-700">|</span>
+          <span className="text-zinc-700">|</span>
           <div className="flex items-center gap-1.5 text-xs font-mono">
             {status === 'connected' && (
               <span className="text-emerald-400 flex items-center gap-1.5 font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                Live PTY Session Active
+                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live PTY Active
               </span>
             )}
             {status === 'connecting' && <span className="text-amber-400 animate-pulse">Connecting...</span>}
-            {status === 'disconnected' && <span className="text-slate-400">Disconnected</span>}
+            {status === 'disconnected' && <span className="text-zinc-400">Disconnected</span>}
             {status === 'error' && (
               <span className="text-red-400 flex items-center gap-1">
-                <AlertCircle className="w-3.5 h-3.5" /> Error
+                <AlertCircle className="size-3.5" /> Error
               </span>
             )}
           </div>
@@ -254,12 +255,11 @@ export default function XTermClient() {
 
         {/* Quick Commands & Actions */}
         <div className="flex items-center gap-2">
-          {/* Quick Command Shortcuts */}
-          <div className="hidden md:flex items-center gap-1.5 bg-slate-950/60 p-0.5 rounded-md border border-slate-800/80">
+          <div className="hidden md:flex items-center gap-1 bg-zinc-900 p-0.5 rounded-md border border-zinc-800">
             <button
               onClick={() => sendRawData('htop\r')}
               disabled={status !== 'connected'}
-              className="px-2 py-1 text-xs font-mono text-sky-400 hover:text-sky-300 hover:bg-sky-500/10 rounded transition-colors"
+              className="px-2 py-1 text-xs font-mono text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 rounded transition-colors"
               title="Launch htop monitor"
             >
               htop
@@ -267,7 +267,7 @@ export default function XTermClient() {
             <button
               onClick={() => sendRawData('q')}
               disabled={status !== 'connected'}
-              className="px-2 py-1 text-xs font-mono text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 rounded transition-colors"
+              className="px-2 py-1 text-xs font-mono text-amber-400 hover:text-amber-300 hover:bg-zinc-800 rounded transition-colors"
               title="Send 'q' key (exit htop / less)"
             >
               q (exit)
@@ -275,7 +275,7 @@ export default function XTermClient() {
             <button
               onClick={() => sendRawData('\x03')}
               disabled={status !== 'connected'}
-              className="px-2 py-1 text-xs font-mono text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
+              className="px-2 py-1 text-xs font-mono text-red-400 hover:text-red-300 hover:bg-zinc-800 rounded transition-colors"
               title="Send Ctrl+C"
             >
               ^C
@@ -283,7 +283,7 @@ export default function XTermClient() {
             <button
               onClick={() => sendRawData('clear\r')}
               disabled={status !== 'connected'}
-              className="px-2 py-1 text-xs font-mono text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded transition-colors"
+              className="px-2 py-1 text-xs font-mono text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded transition-colors"
               title="Clear terminal screen"
             >
               clear
@@ -294,17 +294,17 @@ export default function XTermClient() {
             variant="outline"
             size="sm"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="h-7 text-xs gap-1.5 border-slate-700 hover:border-slate-600 text-slate-300"
+            className="h-7 text-xs gap-1.5 border-zinc-700 hover:bg-zinc-800 text-zinc-300"
             title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Enter Fullscreen'}
           >
             {isFullscreen ? (
               <>
-                <Minimize2 className="w-3.5 h-3.5" />
+                <Minimize2 className="size-3.5" />
                 <span>Exit Fullscreen</span>
               </>
             ) : (
               <>
-                <Maximize2 className="w-3.5 h-3.5" />
+                <Maximize2 className="size-3.5" />
                 <span>Fullscreen</span>
               </>
             )}
@@ -315,26 +315,26 @@ export default function XTermClient() {
             size="sm"
             onClick={connectTerminal}
             disabled={status === 'connecting'}
-            className="h-7 text-xs gap-1.5 border-slate-700 hover:border-slate-600 text-slate-200"
+            className="h-7 text-xs gap-1.5 border-zinc-700 hover:bg-zinc-800 text-zinc-200"
           >
-            <RefreshCw className={`w-3 h-3 ${status === 'connecting' ? 'animate-spin' : ''}`} />
-            <span>{status === 'connected' ? 'Restart' : 'Reconnect'}</span>
+            <RefreshCw className={`size-3 ${status === 'connecting' ? 'animate-spin' : ''}`} />
+            <span>Restart</span>
           </Button>
         </div>
       </div>
 
       {/* Terminal Canvas Container */}
       <div
-        className={`relative flex-1 w-full rounded-xl border border-slate-800/80 bg-[#090d16] p-3.5 shadow-2xl overflow-hidden ${
+        className={`relative flex-1 w-full rounded-xl border border-zinc-800 bg-[#09090b] p-3.5 shadow-2xl overflow-hidden ${
           isFullscreen ? 'min-h-0' : 'min-h-[550px]'
         }`}
         onClick={() => xtermInstance.current?.focus()}
       >
         {errorMessage && status === 'error' && (
-          <div className="absolute inset-0 z-20 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
-            <AlertCircle className="w-10 h-10 text-red-400 mb-3" />
+          <div className="absolute inset-0 z-20 bg-zinc-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+            <AlertCircle className="size-10 text-red-400 mb-3" />
             <h4 className="text-base font-semibold text-white mb-1">Terminal Connection Failed</h4>
-            <p className="text-xs text-slate-400 max-w-md mb-4">{errorMessage}</p>
+            <p className="text-xs text-zinc-400 max-w-md mb-4">{errorMessage}</p>
             <Button onClick={connectTerminal} size="sm">
               Retry Connection
             </Button>

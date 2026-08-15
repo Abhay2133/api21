@@ -57,17 +57,23 @@ export function setupTerminalWebSocket(server: HttpServer) {
     }
   });
 
-  wss.on('connection', (ws: WebSocket) => {
-    console.log('[TerminalWS] Client connected to real node-pty shell');
+  wss.on('connection', (ws: WebSocket, request: any) => {
+    const url = new URL(request?.url || '', `http://${request?.headers?.host || 'localhost'}`);
+    const initialCols = Math.max(10, parseInt(url.searchParams.get('cols') || '100', 10));
+    const initialRows = Math.max(5, parseInt(url.searchParams.get('rows') || '30', 10));
+
+    console.log(`[TerminalWS] Client connected to real node-pty shell (${initialCols}x${initialRows})`);
 
     const shell = process.env.SHELL || '/bin/bash';
     let ptyProcess: pty.IPty | null = null;
+    let currentCols = initialCols;
+    let currentRows = initialRows;
 
     try {
       ptyProcess = pty.spawn(shell, [], {
         name: 'xterm-256color',
-        cols: 100,
-        rows: 30,
+        cols: initialCols,
+        rows: initialRows,
         cwd: process.cwd(),
         env: {
           ...process.env,
@@ -98,7 +104,14 @@ export function setupTerminalWebSocket(server: HttpServer) {
           try {
             const parsed = JSON.parse(str);
             if (parsed.type === 'resize' && parsed.cols && parsed.rows) {
-              ptyProcess?.resize(Math.max(10, parsed.cols), Math.max(5, parsed.rows));
+              const newCols = Math.max(10, parsed.cols);
+              const newRows = Math.max(5, parsed.rows);
+              // Only resize and fire SIGWINCH when dimensions actually changed
+              if (newCols !== currentCols || newRows !== currentRows) {
+                currentCols = newCols;
+                currentRows = newRows;
+                ptyProcess?.resize(newCols, newRows);
+              }
               return;
             }
             if (parsed.type === 'ping') {
