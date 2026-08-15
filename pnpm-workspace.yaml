@@ -5,6 +5,7 @@ packages:
 allowBuilds:
   esbuild: true
   msgpackr-extract: true
+  node-pty: true
 
 minimumReleaseAgeExclude:
   - '@nestjs/common@11.2.1'
@@ -15,3 +16,5 @@ minimumReleaseAgeExclude:
 onlyBuiltDependencies:
   - esbuild
   - msgpackr-extract
+  - node-pty
+

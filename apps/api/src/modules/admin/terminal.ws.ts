@@ -1,6 +1,6 @@
 import { Server as HttpServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
-import { spawn } from 'child_process';
+import * as pty from 'node-pty';
 import { adminService } from './admin.service.js';
 import { adminModel } from './admin.model.js';
 import { redisService } from '../../core/redis/redis.service.js';
@@ -58,46 +58,49 @@ export function setupTerminalWebSocket(server: HttpServer) {
   });
 
   wss.on('connection', (ws: WebSocket) => {
-    console.log('[TerminalWS] Client connected to admin web terminal');
+    console.log('[TerminalWS] Client connected to real node-pty shell');
 
     const shell = process.env.SHELL || '/bin/bash';
-    const child = spawn(shell, ['-s'], {
-      env: {
-        ...process.env,
-        TERM: 'xterm-256color',
-        COLORTERM: 'truecolor',
-      },
-      cwd: process.cwd(),
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
+    let ptyProcess: pty.IPty | null = null;
 
-    const sendOutput = (data: Buffer | string) => {
+    try {
+      ptyProcess = pty.spawn(shell, [], {
+        name: 'xterm-256color',
+        cols: 100,
+        rows: 30,
+        cwd: process.cwd(),
+        env: {
+          ...process.env,
+          TERM: 'xterm-256color',
+          COLORTERM: 'truecolor',
+        } as { [key: string]: string },
+      });
+    } catch (err) {
+      console.error('[TerminalWS] Failed to spawn PTY process:', err);
+      ws.send(`\r\n\x1b[31mFailed to spawn terminal process: ${err}\x1b[0m\r\n`);
+      ws.close();
+      return;
+    }
+
+    // Direct PTY data output streaming
+    ptyProcess.onData((data: string) => {
       if (ws.readyState === WebSocket.OPEN) {
-        const text = data.toString().replace(/\n/g, '\r\n');
-        ws.send(text);
+        ws.send(data);
       }
-    };
-
-    child.stdout.on('data', sendOutput);
-    child.stderr.on('data', sendOutput);
-
-    // Initial banner & greeting
-    ws.send(`\r\n\x1b[36m====================================================\x1b[0m\r\n`);
-    ws.send(`\x1b[32m  Connected to api21 Admin Web Console (${shell})\x1b[0m\r\n`);
-    ws.send(`\x1b[90m  Type commands and press Enter to execute.\x1b[0m\r\n`);
-    ws.send(`\x1b[36m====================================================\x1b[0m\r\n\r\n`);
-    ws.send(`\x1b[34mapi21-admin\x1b[0m:\x1b[32m~\x1b[0m$ `);
-
-    let inputBuffer = '';
+    });
 
     ws.on('message', (message) => {
       try {
         const str = message.toString();
 
-        // Control JSON frame
+        // Check for control / resize frames
         if (str.startsWith('{') && str.endsWith('}')) {
           try {
             const parsed = JSON.parse(str);
+            if (parsed.type === 'resize' && parsed.cols && parsed.rows) {
+              ptyProcess?.resize(Math.max(10, parsed.cols), Math.max(5, parsed.rows));
+              return;
+            }
             if (parsed.type === 'ping') {
               ws.send(JSON.stringify({ type: 'pong' }));
               return;
@@ -105,56 +108,31 @@ export function setupTerminalWebSocket(server: HttpServer) {
           } catch {}
         }
 
-        // Echo characters back to terminal
-        for (let i = 0; i < str.length; i++) {
-          const char = str[i];
-          if (char === '\r' || char === '\n') {
-            ws.send('\r\n');
-            if (child.stdin && !child.stdin.destroyed) {
-              child.stdin.write(inputBuffer + '\n');
-            }
-            inputBuffer = '';
-            setTimeout(() => {
-              if (ws.readyState === WebSocket.OPEN) {
-                ws.send(`\x1b[34mapi21-admin\x1b[0m:\x1b[32m~\x1b[0m$ `);
-              }
-            }, 100);
-          } else if (char === '\x7f' || char === '\b') {
-            // Backspace
-            if (inputBuffer.length > 0) {
-              inputBuffer = inputBuffer.slice(0, -1);
-              ws.send('\b \b');
-            }
-          } else if (char === '\x03') {
-            // Ctrl+C
-            inputBuffer = '';
-            ws.send('^C\r\n\x1b[34mapi21-admin\x1b[0m:\x1b[32m~\x1b[0m$ ');
-          } else {
-            inputBuffer += char;
-            ws.send(char);
-          }
-        }
+        // Forward raw key/escape sequences directly to PTY (supports curses/htop/vim/Ctrl+C)
+        ptyProcess?.write(str);
       } catch (err) {
-        console.error('[TerminalWS] Error handling message:', err);
+        console.error('[TerminalWS] Error writing to pty:', err);
       }
     });
 
     const cleanup = () => {
       try {
-        if (!child.killed) {
-          child.kill('SIGTERM');
+        if (ptyProcess) {
+          ptyProcess.kill();
+          ptyProcess = null;
         }
       } catch {}
     };
 
-    child.on('exit', (code) => {
+    ptyProcess.onExit(({ exitCode }) => {
       if (ws.readyState === WebSocket.OPEN) {
-        ws.send(`\r\n\x1b[33m[Process exited with code ${code}]\x1b[0m\r\n`);
+        ws.send(`\r\n\x1b[33m[Process exited with code ${exitCode}]\x1b[0m\r\n`);
+        ws.close();
       }
     });
 
     ws.on('close', () => {
-      console.log('[TerminalWS] Client disconnected from terminal');
+      console.log('[TerminalWS] Terminal client disconnected');
       cleanup();
     });
 
