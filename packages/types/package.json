@@ -1,0 +1,27 @@
+{
+  "name": "@api21/types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types, DTOs, and interfaces for the api21 monorepo",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.2"
+  }
+}
