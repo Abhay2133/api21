@@ -3,6 +3,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { spawn } from 'child_process';
 import { adminService } from './admin.service.js';
 import { adminModel } from './admin.model.js';
+import { redisService } from '../../core/redis/redis.service.js';
 
 export function setupTerminalWebSocket(server: HttpServer) {
   const wss = new WebSocketServer({ noServer: true });
@@ -16,12 +17,25 @@ export function setupTerminalWebSocket(server: HttpServer) {
 
       let isAuthorized = false;
 
-      // 1. Verify single-use ticket
-      if (ticket && adminService.validateTerminalTicket(ticket)) {
-        isAuthorized = true;
+      // 1. Verify single-use ticket in Redis
+      if (ticket) {
+        try {
+          const redis = redisService.getClient();
+          if (redis) {
+            const savedToken = await redis.get(`ticket:${ticket}`);
+            if (savedToken) {
+              await redis.del(`ticket:${ticket}`);
+              isAuthorized = true;
+            }
+          }
+        } catch {}
+
+        if (!isAuthorized && adminService.validateTerminalTicket(ticket)) {
+          isAuthorized = true;
+        }
       }
 
-      // 2. Fallback: verify active admin session token
+      // 2. Fallback: verify active admin session token in PostgreSQL
       if (!isAuthorized && token) {
         try {
           const session = await adminModel.findSessionByToken(token);
@@ -47,34 +61,40 @@ export function setupTerminalWebSocket(server: HttpServer) {
     console.log('[TerminalWS] Client connected to admin web terminal');
 
     const shell = process.env.SHELL || '/bin/bash';
-    const child = spawn(shell, ['-i'], {
+    const child = spawn(shell, ['-s'], {
       env: {
         ...process.env,
         TERM: 'xterm-256color',
         COLORTERM: 'truecolor',
       },
       cwd: process.cwd(),
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
 
     const sendOutput = (data: Buffer | string) => {
       if (ws.readyState === WebSocket.OPEN) {
-        ws.send(data.toString());
+        const text = data.toString().replace(/\n/g, '\r\n');
+        ws.send(text);
       }
     };
 
     child.stdout.on('data', sendOutput);
     child.stderr.on('data', sendOutput);
 
-    // Initial banner
+    // Initial banner & greeting
     ws.send(`\r\n\x1b[36m====================================================\x1b[0m\r\n`);
     ws.send(`\x1b[32m  Connected to api21 Admin Web Console (${shell})\x1b[0m\r\n`);
     ws.send(`\x1b[90m  Type commands and press Enter to execute.\x1b[0m\r\n`);
     ws.send(`\x1b[36m====================================================\x1b[0m\r\n\r\n`);
+    ws.send(`\x1b[34mapi21-admin\x1b[0m:\x1b[32m~\x1b[0m$ `);
+
+    let inputBuffer = '';
 
     ws.on('message', (message) => {
       try {
         const str = message.toString();
-        // Check if message is a control JSON frame (e.g. resize or ping)
+
+        // Control JSON frame
         if (str.startsWith('{') && str.endsWith('}')) {
           try {
             const parsed = JSON.parse(str);
@@ -85,8 +105,34 @@ export function setupTerminalWebSocket(server: HttpServer) {
           } catch {}
         }
 
-        if (child.stdin && !child.stdin.destroyed) {
-          child.stdin.write(str);
+        // Echo characters back to terminal
+        for (let i = 0; i < str.length; i++) {
+          const char = str[i];
+          if (char === '\r' || char === '\n') {
+            ws.send('\r\n');
+            if (child.stdin && !child.stdin.destroyed) {
+              child.stdin.write(inputBuffer + '\n');
+            }
+            inputBuffer = '';
+            setTimeout(() => {
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(`\x1b[34mapi21-admin\x1b[0m:\x1b[32m~\x1b[0m$ `);
+              }
+            }, 100);
+          } else if (char === '\x7f' || char === '\b') {
+            // Backspace
+            if (inputBuffer.length > 0) {
+              inputBuffer = inputBuffer.slice(0, -1);
+              ws.send('\b \b');
+            }
+          } else if (char === '\x03') {
+            // Ctrl+C
+            inputBuffer = '';
+            ws.send('^C\r\n\x1b[34mapi21-admin\x1b[0m:\x1b[32m~\x1b[0m$ ');
+          } else {
+            inputBuffer += char;
+            ws.send(char);
+          }
         }
       } catch (err) {
         console.error('[TerminalWS] Error handling message:', err);
@@ -104,7 +150,6 @@ export function setupTerminalWebSocket(server: HttpServer) {
     child.on('exit', (code) => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(`\r\n\x1b[33m[Process exited with code ${code}]\x1b[0m\r\n`);
-        ws.close();
       }
     });
 

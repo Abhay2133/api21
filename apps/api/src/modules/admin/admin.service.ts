@@ -5,9 +5,21 @@ import { adminModel, AdminModel, DeploymentItem, DeploymentLogItem } from './adm
 import { config } from '../../config/env.js';
 import { AppError } from '../../common/middleware/error.middleware.js';
 import { jobsService } from '../jobs/jobs.service.js';
+import { redisService } from '../../core/redis/redis.service.js';
 
 // In-memory store for single-use terminal connection tickets (30-second expiry)
 const terminalTickets = new Map<string, { token: string; expiresAt: number }>();
+
+function safeCompare(a?: string, b?: string): boolean {
+  if (!a || !b) return false;
+  const bufA = Buffer.from(a, 'utf-8');
+  const bufB = Buffer.from(b, 'utf-8');
+  if (bufA.length !== bufB.length) {
+    crypto.timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 export class AdminService {
   constructor(private readonly model: AdminModel = adminModel) {}
@@ -20,8 +32,8 @@ export class AdminService {
     const [expectedUser, expectedPass] = config.masterCredentials.split(':');
     const secretPass = process.env.ADMIN_SECRET || 'securepassword';
 
-    const isValidUser = username === (expectedUser || 'admin');
-    const isValidPass = password === (expectedPass || 'securepassword') || password === secretPass;
+    const isValidUser = safeCompare(username, expectedUser || 'admin');
+    const isValidPass = safeCompare(password, expectedPass || 'securepassword') || safeCompare(password, secretPass);
 
     if (!isValidUser || !isValidPass) {
       throw new AppError('Invalid credentials', 401);
@@ -160,17 +172,16 @@ export class AdminService {
 
     const ticket = crypto.randomBytes(24).toString('hex');
     const expiresIn = 30; // 30 seconds
-    const expiresAt = Date.now() + expiresIn * 1000;
 
-    terminalTickets.set(ticket, { token: sessionToken, expiresAt });
-
-    // Clean expired tickets
-    const now = Date.now();
-    for (const [t, val] of terminalTickets.entries()) {
-      if (val.expiresAt < now) {
-        terminalTickets.delete(t);
+    try {
+      const redis = redisService.getClient();
+      if (redis) {
+        await redis.setex(`ticket:${ticket}`, expiresIn, sessionToken);
       }
-    }
+    } catch {}
+
+    const expiresAt = Date.now() + expiresIn * 1000;
+    terminalTickets.set(ticket, { token: sessionToken, expiresAt });
 
     return {
       ticket,

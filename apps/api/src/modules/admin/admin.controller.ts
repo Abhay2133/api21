@@ -13,11 +13,11 @@ router.post('/login', async (req: AdminRequest, res: Response, next: NextFunctio
 
     const data = await adminService.login(username, password, ip, userAgent);
 
-    // Set HttpOnly session cookie
-    res.setHeader(
-      'Set-Cookie',
-      `admin_session=${data.accessToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`
-    );
+    // Set HttpOnly session cookie and csrf_token cookie
+    res.setHeader('Set-Cookie', [
+      `admin_session=${data.accessToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`,
+      `csrf_token=${data.csrfToken}; Path=/; SameSite=Lax; Max-Age=86400`,
+    ]);
 
     return res.status(200).json({
       status: 'success',
@@ -35,7 +35,10 @@ router.post('/logout', async (req: AdminRequest, res: Response, next: NextFuncti
     const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : '';
     await adminService.logout(token);
 
-    res.setHeader('Set-Cookie', 'admin_session=; Path=/; HttpOnly; Max-Age=0');
+    res.setHeader('Set-Cookie', [
+      'admin_session=; Path=/; HttpOnly; Max-Age=0',
+      'csrf_token=; Path=/; Max-Age=0',
+    ]);
 
     return res.status(200).json({
       status: 'success',
