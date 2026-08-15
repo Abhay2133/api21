@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '../../components/layout/Sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '../../components/ui/sidebar';
+import { AppSidebar } from '../../components/layout/AppSidebar';
 import { useAuthStore } from '../../store/useAuthStore';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -31,11 +32,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-[#090d16]">
-      <Sidebar />
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        {children}
-      </main>
-    </div>
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex min-h-screen w-full bg-[#090d16]">
+        <AppSidebar />
+        <SidebarInset>
+          {/* Header Mobile / Responsive Trigger Bar */}
+          <header className="flex h-12 shrink-0 items-center gap-2 border-b border-slate-800/80 px-4 md:hidden bg-slate-950/60 backdrop-blur-md">
+            <SidebarTrigger />
+            <div className="text-xs font-semibold text-white tracking-tight flex items-center gap-1.5">
+              api21 <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">ADMIN</span>
+            </div>
+          </header>
+          {children}
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 }
