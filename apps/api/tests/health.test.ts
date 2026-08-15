@@ -1,31 +1,30 @@
 import request from 'supertest';
-import { INestApplication } from '@nestjs/common';
-import { createNestApp } from '../src/app.factory.js';
-import { DatabaseService } from '../src/core/database/database.service.js';
-import { RedisService } from '../src/core/redis/redis.service.js';
-import { BullMQService } from '../src/core/bullmq/bullmq.service.js';
+import { createApp } from '../src/app.js';
+import { databaseService, DatabaseService } from '../src/core/database/database.service.js';
+import { redisService, RedisService } from '../src/core/redis/redis.service.js';
+import { bullMQService, BullMQService } from '../src/core/bullmq/bullmq.service.js';
+import { Express } from 'express';
 
 describe('Health Endpoint', () => {
-  let app: INestApplication;
-  let httpServer: any;
+  let app: Express;
 
   beforeAll(async () => {
     jest.spyOn(DatabaseService.prototype, 'checkHealth').mockResolvedValue(true);
-    jest.spyOn(DatabaseService.prototype, 'onModuleInit').mockResolvedValue(undefined as any);
+    jest.spyOn(DatabaseService.prototype, 'init').mockResolvedValue(undefined as any);
     jest.spyOn(RedisService.prototype, 'checkHealth').mockResolvedValue(true);
     jest.spyOn(BullMQService.prototype, 'checkHealth').mockResolvedValue(true);
 
-    app = await createNestApp();
-    await app.init();
-    httpServer = app.getHttpServer();
+    app = createApp();
   });
 
   afterAll(async () => {
-    if (app) await app.close();
+    await databaseService.close();
+    await redisService.close();
+    await bullMQService.closeAllQueuesAndWorkers(500);
   });
 
   it('GET /api/v1/health should return status 200 and healthy details', async () => {
-    const res = await request(httpServer).get('/api/v1/health');
+    const res = await request(app).get('/api/v1/health');
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('healthy');
     expect(res.body.services).toEqual({

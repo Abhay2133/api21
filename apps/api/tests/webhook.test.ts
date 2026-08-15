@@ -1,21 +1,20 @@
 import request from 'supertest';
-import { INestApplication } from '@nestjs/common';
-import { createNestApp } from '../src/app.factory.js';
+import { createApp } from '../src/app.js';
 import { config } from '../src/config/env.js';
-import { DatabaseService } from '../src/core/database/database.service.js';
+import { databaseService, DatabaseService } from '../src/core/database/database.service.js';
+import { redisService } from '../src/core/redis/redis.service.js';
+import { bullMQService } from '../src/core/bullmq/bullmq.service.js';
+import { Express } from 'express';
 
 describe('Deploy Webhook Endpoint', () => {
-  let app: INestApplication;
-  let httpServer: any;
+  let app: Express;
   const mockQuery = jest.fn().mockResolvedValue({ rows: [] });
 
   beforeAll(async () => {
-    jest.spyOn(DatabaseService.prototype, 'onModuleInit').mockResolvedValue(undefined as any);
+    jest.spyOn(DatabaseService.prototype, 'init').mockResolvedValue(undefined as any);
     jest.spyOn(DatabaseService.prototype, 'query').mockImplementation((...args: any[]) => mockQuery(...args));
 
-    app = await createNestApp();
-    await app.init();
-    httpServer = app.getHttpServer();
+    app = createApp();
   });
 
   beforeEach(() => {
@@ -23,11 +22,13 @@ describe('Deploy Webhook Endpoint', () => {
   });
 
   afterAll(async () => {
-    if (app) await app.close();
+    await databaseService.close();
+    await redisService.close();
+    await bullMQService.closeAllQueuesAndWorkers(500);
   });
 
   it('POST /api/v1/webhooks/deploy with invalid token should return 401', async () => {
-    const res = await request(httpServer).post('/api/v1/webhooks/deploy?token=wrong-token');
+    const res = await request(app).post('/api/v1/webhooks/deploy?token=wrong-token');
     expect(res.status).toBe(401);
     expect(res.body.status).toBe('error');
     expect(res.body.message).toContain('Unauthorized');
@@ -35,7 +36,7 @@ describe('Deploy Webhook Endpoint', () => {
 
   it('POST /api/v1/webhooks/deploy with valid token should return 202 and trigger deploy process', async () => {
     const validToken = config.deployCiToken;
-    const res = await request(httpServer).post(`/api/v1/webhooks/deploy?token=${validToken}`);
+    const res = await request(app).post(`/api/v1/webhooks/deploy?token=${validToken}`);
 
     expect(res.status).toBe(202);
     expect(res.body.status).toBe('success');

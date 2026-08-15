@@ -1,41 +1,24 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
 import { spawn } from 'child_process';
 import { config } from '../../config/env.js';
-import { DatabaseService } from '../../core/database/database.service.js';
+import { webhooksModel, WebhooksModel } from './webhooks.model.js';
+import { AppError } from '../../common/middleware/error.middleware.js';
 
-@Injectable()
 export class WebhooksService {
-  private readonly logger = new Logger(WebhooksService.name);
-
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly model: WebhooksModel = webhooksModel) {}
 
   async handleDeployWebhook(token?: string) {
     if (!token || token !== config.deployCiToken) {
-      throw new UnauthorizedException({
-        status: 'error',
-        message: 'Unauthorized: Invalid or missing deployment token',
-      });
+      throw new AppError('Unauthorized: Invalid or missing deployment token', 401);
     }
 
     try {
       const deploymentId = `dep_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
       // Insert deployment record
-      await this.databaseService.query(
-        'INSERT INTO deployments (id, status, created_at, updated_at) VALUES ($1, $2, NOW(), NOW())',
-        [deploymentId, 'pending']
-      );
+      await this.model.createDeployment(deploymentId, 'pending');
 
       // Insert initial log
-      await this.databaseService.query(
-        'INSERT INTO deployment_logs (deployment_id, message, created_at) VALUES ($1, $2, NOW())',
-        [deploymentId, 'Deployment process triggered via CI webhook']
-      );
+      await this.model.addLog(deploymentId, 'Deployment process triggered via CI webhook');
 
       // Construct redeploy command
       const command = config.redeployScript
@@ -57,12 +40,11 @@ export class WebhooksService {
         message: 'Deployment process initiated successfully',
       };
     } catch (err: any) {
-      if (err instanceof UnauthorizedException) throw err;
-      this.logger.error('handleDeployWebhook error:', err);
-      throw new InternalServerErrorException({
-        status: 'error',
-        message: 'Failed to initiate deployment process',
-      });
+      if (err instanceof AppError) throw err;
+      console.error('[WebhooksService] handleDeployWebhook error:', err);
+      throw new AppError('Failed to initiate deployment process', 500);
     }
   }
 }
+
+export const webhooksService = new WebhooksService();

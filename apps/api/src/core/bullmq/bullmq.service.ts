@@ -1,10 +1,7 @@
-import { Injectable, OnApplicationShutdown, Logger } from '@nestjs/common';
 import { Queue, Worker, ConnectionOptions } from 'bullmq';
 import { config } from '../../config/env.js';
 
-@Injectable()
-export class BullMQService implements OnApplicationShutdown {
-  private readonly logger = new Logger(BullMQService.name);
+export class BullMQService {
   private registeredQueues: Queue[] = [];
   private registeredWorkers: Worker[] = [];
 
@@ -45,21 +42,20 @@ export class BullMQService implements OnApplicationShutdown {
   }
 
   async closeAllQueuesAndWorkers(timeoutMs: number = 5000): Promise<void> {
-    this.logger.log('Gracefully closing workers and queues...');
     const closePromise = (async () => {
       await Promise.all(this.registeredWorkers.map((worker) => worker.close().catch(() => {})));
       await Promise.all(this.registeredQueues.map((queue) => queue.close().catch(() => {})));
+      this.registeredWorkers = [];
+      this.registeredQueues = [];
     })();
 
     const timeoutPromise = new Promise<void>((resolve) => {
       setTimeout(() => {
-        this.logger.warn(`Closing workers/queues timed out after ${timeoutMs}ms.`);
         resolve();
       }, timeoutMs);
     });
 
     await Promise.race([closePromise, timeoutPromise]);
-    this.logger.log('All BullMQ workers and queues closed.');
   }
 
   async checkHealth(): Promise<boolean> {
@@ -86,7 +82,9 @@ export class BullMQService implements OnApplicationShutdown {
     }
   }
 
-  async onApplicationShutdown() {
+  async onApplicationShutdown(): Promise<void> {
     await this.closeAllQueuesAndWorkers(5000);
   }
 }
+
+export const bullMQService = new BullMQService();

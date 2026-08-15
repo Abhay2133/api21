@@ -1,36 +1,40 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
-import { JobsService } from './jobs.service.js';
-import { EnqueueJobDto } from './dto/enqueue-job.dto.js';
+import { Router, Request, Response, NextFunction } from 'express';
+import { jobsService } from './jobs.service.js';
+import { validateEnqueueJob, validateJobIdParam } from './jobs.middleware.js';
 
-@Controller('jobs')
-export class JobsController {
-  constructor(private readonly jobsService: JobsService) {}
+const router = Router();
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async enqueueJob(@Body() dto: EnqueueJobDto) {
-    return this.jobsService.enqueueJob(dto);
+// POST /api/v1/jobs - Enqueue background job
+router.post('/', validateEnqueueJob, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await jobsService.enqueueJob(req.body);
+    return res.status(201).json(result);
+  } catch (err) {
+    next(err);
   }
+});
 
-  @Get('metrics')
-  async getQueueMetrics() {
-    const metrics = await this.jobsService.getQueueMetrics();
-    return {
+// GET /api/v1/jobs/metrics - Retrieve queue metrics
+router.get('/metrics', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const metrics = await jobsService.getQueueMetrics();
+    return res.status(200).json({
       queue: 'sampleQueue',
       metrics,
-    };
+    });
+  } catch (err) {
+    next(err);
   }
+});
 
-  @Get(':jobId')
-  async getJobStatus(@Param('jobId') jobId: string) {
-    return this.jobsService.getJobStatus(jobId);
+// GET /api/v1/jobs/:jobId - Get job status and results
+router.get('/:jobId', validateJobIdParam, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await jobsService.getJobStatus(req.params.jobId);
+    return res.status(200).json(result);
+  } catch (err) {
+    next(err);
   }
-}
+});
+
+export const jobsRouter = router;

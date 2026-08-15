@@ -1,31 +1,29 @@
-import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module.js';
-import { DatabaseService } from './core/database/database.service.js';
-import { BullMQService } from './core/bullmq/bullmq.service.js';
-import { initSampleWorker } from './modules/jobs/sample.queue.js';
+import { databaseService } from './core/database/database.service.js';
+import { redisService } from './core/redis/redis.service.js';
+import { bullMQService } from './core/bullmq/bullmq.service.js';
+import { initSampleWorker } from './modules/jobs/jobs.job.js';
 
 const startWorker = async () => {
   try {
-    console.log('[Worker] Initializing standalone BullMQ worker process via NestJS context...');
-    const app = await NestFactory.createApplicationContext(AppModule, {
-      logger: ['log', 'error', 'warn'],
-    });
-    app.enableShutdownHooks();
+    console.log('[Worker] Initializing standalone BullMQ worker process...');
 
-    const bullmqService = app.get(BullMQService);
-    const worker = initSampleWorker(bullmqService);
+    await databaseService.init();
+    redisService.initClient();
+
+    const worker = initSampleWorker(bullMQService);
     console.log(`[Worker] BullMQ worker process active for queue: "${worker.name}".`);
 
-    const shutdown = async () => {
-      console.log('[Worker] Gracefully shutting down worker process...');
-      await app.close();
+    const shutdown = async (signal: string) => {
+      console.log(`[Worker] Received ${signal}. Gracefully shutting down worker process...`);
+      await bullMQService.closeAllQueuesAndWorkers(5000);
+      await redisService.close();
+      await databaseService.close();
       console.log('[Worker] Worker process terminated.');
       process.exit(0);
     };
 
-    process.on('SIGINT', shutdown);
-    process.on('SIGTERM', shutdown);
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
   } catch (err) {
     console.error('[Worker] Fatal error starting worker process:', err);
     process.exit(1);

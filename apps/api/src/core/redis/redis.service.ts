@@ -1,18 +1,11 @@
-import { Injectable, OnModuleInit, OnApplicationShutdown, Logger } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { config } from '../../config/env.js';
 
-@Injectable()
-export class RedisService implements OnModuleInit, OnApplicationShutdown {
-  private readonly logger = new Logger(RedisService.name);
+export class RedisService {
   private client: Redis | null = null;
-  private isConnected = false;
+  public isConnected = false;
 
-  onModuleInit() {
-    this.initClient();
-  }
-
-  private initClient(): Redis | null {
+  initClient(): Redis | null {
     if (this.client) return this.client;
 
     try {
@@ -29,17 +22,17 @@ export class RedisService implements OnModuleInit, OnApplicationShutdown {
 
       this.client.on('connect', () => {
         this.isConnected = true;
-        this.logger.log('Redis connected successfully.');
+        console.log('[Redis] Connected successfully.');
       });
 
       this.client.on('error', (err) => {
         this.isConnected = false;
-        this.logger.warn(`Redis connection warning: ${err.message}`);
+        console.warn(`[Redis] Warning: ${err.message}`);
       });
 
       return this.client;
     } catch (err) {
-      this.logger.warn(`Failed to initialize Redis client: ${err}`);
+      console.warn(`[Redis] Failed to initialize Redis client: ${err}`);
       return null;
     }
   }
@@ -52,6 +45,9 @@ export class RedisService implements OnModuleInit, OnApplicationShutdown {
   }
 
   async checkHealth(): Promise<boolean> {
+    if (!this.client) {
+      this.initClient();
+    }
     if (!this.client) return false;
     try {
       const pong = await this.client.ping();
@@ -61,14 +57,19 @@ export class RedisService implements OnModuleInit, OnApplicationShutdown {
     }
   }
 
-  async onApplicationShutdown() {
+  async close(): Promise<void> {
     if (this.client) {
-      this.logger.log('Closing Redis connection...');
       try {
         await this.client.quit();
       } catch (err) {
-        this.logger.warn(`Error disconnecting Redis: ${err}`);
+        console.warn(`[Redis] Error disconnecting: ${err}`);
       }
     }
   }
+
+  async onApplicationShutdown(): Promise<void> {
+    return this.close();
+  }
 }
+
+export const redisService = new RedisService();

@@ -1,12 +1,14 @@
 import request from 'supertest';
-import { INestApplication, NotFoundException } from '@nestjs/common';
-import { createNestApp } from '../src/app.factory.js';
-import { DatabaseService } from '../src/core/database/database.service.js';
-import { JobsService } from '../src/modules/jobs/jobs.service.js';
+import { createApp } from '../src/app.js';
+import { databaseService, DatabaseService } from '../src/core/database/database.service.js';
+import { redisService } from '../src/core/redis/redis.service.js';
+import { bullMQService } from '../src/core/bullmq/bullmq.service.js';
+import { jobsService } from '../src/modules/jobs/jobs.service.js';
+import { AppError } from '../src/common/middleware/error.middleware.js';
+import { Express } from 'express';
 
 describe('Job Queues Endpoints', () => {
-  let app: INestApplication;
-  let httpServer: any;
+  let app: Express;
 
   const mockJob = {
     id: 'job-12345',
@@ -23,9 +25,9 @@ describe('Job Queues Endpoints', () => {
   };
 
   beforeAll(async () => {
-    jest.spyOn(DatabaseService.prototype, 'onModuleInit').mockResolvedValue(undefined as any);
+    jest.spyOn(DatabaseService.prototype, 'init').mockResolvedValue(undefined as any);
 
-    jest.spyOn(JobsService.prototype, 'enqueueJob').mockImplementation(async (dto: any) => {
+    jest.spyOn(jobsService, 'enqueueJob').mockImplementation(async (dto: any) => {
       return {
         success: true,
         message: 'Job enqueued successfully',
@@ -39,7 +41,7 @@ describe('Job Queues Endpoints', () => {
       };
     });
 
-    jest.spyOn(JobsService.prototype, 'getJobStatus').mockImplementation(async (jobId: string) => {
+    jest.spyOn(jobsService, 'getJobStatus').mockImplementation(async (jobId: string) => {
       if (jobId === 'job-12345') {
         return {
           id: mockJob.id,
@@ -54,10 +56,10 @@ describe('Job Queues Endpoints', () => {
           attemptsMade: mockJob.attemptsMade,
         };
       }
-      throw new NotFoundException({ error: `Job with ID "${jobId}" not found` });
+      throw new AppError(`Job with ID "${jobId}" not found`, 404);
     });
 
-    jest.spyOn(JobsService.prototype, 'getQueueMetrics').mockResolvedValue({
+    jest.spyOn(jobsService, 'getQueueMetrics').mockResolvedValue({
       active: 0,
       completed: 5,
       failed: 1,
@@ -65,17 +67,17 @@ describe('Job Queues Endpoints', () => {
       waiting: 2,
     });
 
-    app = await createNestApp();
-    await app.init();
-    httpServer = app.getHttpServer();
+    app = createApp();
   });
 
   afterAll(async () => {
-    if (app) await app.close();
+    await databaseService.close();
+    await redisService.close();
+    await bullMQService.closeAllQueuesAndWorkers(500);
   });
 
   it('POST /api/v1/jobs should enqueue a valid job', async () => {
-    const res = await request(httpServer)
+    const res = await request(app)
       .post('/api/v1/jobs')
       .send({
         type: 'welcome_email',
@@ -89,13 +91,13 @@ describe('Job Queues Endpoints', () => {
   });
 
   it('POST /api/v1/jobs without job type should return 400', async () => {
-    const res = await request(httpServer).post('/api/v1/jobs').send({});
+    const res = await request(app).post('/api/v1/jobs').send({});
     expect(res.status).toBe(400);
     expect(res.body.message).toBeDefined();
   });
 
   it('GET /api/v1/jobs/:jobId should return job details and state', async () => {
-    const res = await request(httpServer).get('/api/v1/jobs/job-12345');
+    const res = await request(app).get('/api/v1/jobs/job-12345');
 
     expect(res.status).toBe(200);
     expect(res.body.id).toBe('job-12345');
@@ -104,14 +106,14 @@ describe('Job Queues Endpoints', () => {
   });
 
   it('GET /api/v1/jobs/:jobId for non-existent job should return 404', async () => {
-    const res = await request(httpServer).get('/api/v1/jobs/non-existent-job');
+    const res = await request(app).get('/api/v1/jobs/non-existent-job');
 
     expect(res.status).toBe(404);
-    expect(res.body.error).toContain('not found');
+    expect(res.body.message).toContain('not found');
   });
 
   it('GET /api/v1/jobs/metrics should return queue counts', async () => {
-    const res = await request(httpServer).get('/api/v1/jobs/metrics');
+    const res = await request(app).get('/api/v1/jobs/metrics');
 
     expect(res.status).toBe(200);
     expect(res.body.queue).toBe('sampleQueue');

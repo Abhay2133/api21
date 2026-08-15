@@ -1,50 +1,61 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Param,
-  Body,
-  HttpStatus,
-  HttpCode,
-} from '@nestjs/common';
-import { UsersService } from './users.service.js';
-import { CreateUserDto } from './dto/create-user.dto.js';
+import { Router, Request, Response, NextFunction } from 'express';
+import { usersService } from './users.service.js';
+import { validateCreateUser, validateUserIdParam } from './users.middleware.js';
 
-@Controller('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+const router = Router();
 
-  @Get()
-  async getUsers() {
-    const data = await this.usersService.findAll();
-    return {
+// GET /api/v1/users - Retrieve all users
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await usersService.getAllUsers();
+    return res.status(200).json({
       status: 'success',
       data,
-    };
+    });
+  } catch (err) {
+    next(err);
   }
+});
 
-  @Get(':id')
-  async getUserById(@Param('id') id: string) {
-    const data = await this.usersService.findById(id);
-    return {
+// GET /api/v1/users/:id - Retrieve user by ID
+router.get('/:id', validateUserIdParam, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const data = await usersService.getUserById(id);
+    return res.status(200).json({
       status: 'success',
       data,
-    };
+    });
+  } catch (err) {
+    next(err);
   }
+});
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async createUser(@Body() createUserDto: CreateUserDto) {
-    const data = await this.usersService.create(createUserDto);
-    return {
+// POST /api/v1/users - Create new user
+router.post('/', validateCreateUser, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await usersService.createUser(req.body);
+    return res.status(201).json({
       status: 'success',
       data,
-    };
+    });
+  } catch (err) {
+    next(err);
   }
+});
 
-  @Delete(':id')
-  async deleteUser(@Param('id') id: string) {
-    return this.usersService.delete(id);
+// DELETE /api/v1/users/:id - Delete user
+router.delete('/:id', validateUserIdParam, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const data = await usersService.deleteUser(id);
+    return res.status(200).json({
+      status: 'success',
+      data,
+    });
+  } catch (err) {
+    next(err);
   }
-}
+});
+
+export const usersRouter = router;

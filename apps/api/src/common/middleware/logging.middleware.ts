@@ -1,13 +1,4 @@
-import {
-  Injectable,
-  NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-  Logger,
-} from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { config } from '../../config/env.js';
 
 export const maskSensitiveData = (message: string): string => {
@@ -64,36 +55,18 @@ export const maskSensitiveData = (message: string): string => {
   return sanitized;
 };
 
-@Injectable()
-export class LoggingInterceptor implements NestInterceptor {
-  private readonly logger = new Logger('HTTP');
+export const loggingMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const startTime = Date.now();
+  const { method, originalUrl } = req;
+  const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const http = context.switchToHttp();
-    const req = http.getRequest<Request>();
-    const res = http.getResponse<Response>();
+  res.on('finish', () => {
+    const duration = Date.now() - startTime;
+    const statusCode = res.statusCode;
+    const sanitizedUrl = maskSensitiveData(originalUrl);
+    const logLine = maskSensitiveData(`[HTTP] ${method} ${sanitizedUrl} ${statusCode} - ${duration}ms - IP: ${ip}`);
+    console.log(logLine);
+  });
 
-    const startTime = Date.now();
-    const { method, originalUrl } = req;
-    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || 'unknown';
-
-    return next.handle().pipe(
-      tap({
-        next: () => {
-          const duration = Date.now() - startTime;
-          const statusCode = res.statusCode;
-          const sanitizedUrl = maskSensitiveData(originalUrl);
-          const logLine = maskSensitiveData(`[HTTP] ${method} ${sanitizedUrl} ${statusCode} - ${duration}ms - IP: ${ip}`);
-          console.log(logLine);
-        },
-        error: () => {
-          const duration = Date.now() - startTime;
-          const statusCode = res.statusCode || 500;
-          const sanitizedUrl = maskSensitiveData(originalUrl);
-          const logLine = maskSensitiveData(`[HTTP] ${method} ${sanitizedUrl} ${statusCode} - ${duration}ms - IP: ${ip}`);
-          console.log(logLine);
-        },
-      })
-    );
-  }
-}
+  next();
+};

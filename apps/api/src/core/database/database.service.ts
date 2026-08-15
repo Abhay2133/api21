@@ -1,15 +1,13 @@
-import { Injectable, OnModuleInit, OnApplicationShutdown, Logger } from '@nestjs/common';
 import dns from 'dns';
 import { Pool, QueryResult, QueryResultRow } from 'pg';
 import knex, { Knex } from 'knex';
+import path from 'path';
+import fs from 'fs';
 import { config } from '../../config/env.js';
 
 if (dns.setDefaultResultOrder) {
   dns.setDefaultResultOrder('ipv4first');
 }
-
-import path from 'path';
-import fs from 'fs';
 
 function getMigrationsDir(): string {
   const cwd = process.cwd();
@@ -22,9 +20,7 @@ function getMigrationsDir(): string {
   return candidates.find((p) => fs.existsSync(p)) || path.resolve(cwd, 'apps/api/src/migrations');
 }
 
-@Injectable()
-export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
-  private readonly logger = new Logger(DatabaseService.name);
+export class DatabaseService {
   private pool: Pool | null = null;
   public knex: Knex;
 
@@ -45,27 +41,35 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
     });
   }
 
-  async onModuleInit() {
+  async init(): Promise<void> {
     try {
       const client = await this.getDbPool().connect();
       client.release();
 
       // Run knex migrations
       await this.knex.migrate.latest();
-      this.logger.log('PostgreSQL initialized and Knex migrations applied successfully.');
+      console.log('[Database] PostgreSQL initialized and Knex migrations applied successfully.');
     } catch (err) {
-      this.logger.warn(`PostgreSQL connection / migration notice: ${err}`);
+      console.warn(`[Database] PostgreSQL connection / migration notice: ${err}`);
     }
   }
 
-  async onApplicationShutdown() {
-    this.logger.log('Closing database connection pools...');
+  // Alias for backward compatibility with tests
+  async onModuleInit(): Promise<void> {
+    return this.init();
+  }
+
+  async close(): Promise<void> {
     try {
       if (this.knex) await this.knex.destroy();
       if (this.pool) await this.pool.end();
     } catch (err) {
-      this.logger.warn(`Error closing database pools: ${err}`);
+      console.warn(`[Database] Error closing database pools: ${err}`);
     }
+  }
+
+  async onApplicationShutdown(): Promise<void> {
+    return this.close();
   }
 
   getDbPool(): Pool {
@@ -90,3 +94,5 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
     }
   }
 }
+
+export const databaseService = new DatabaseService();

@@ -1,28 +1,20 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
-import { Queue, Job } from 'bullmq';
-import { BullMQService } from '../../core/bullmq/bullmq.service.js';
-import { getSampleQueue, SampleJobData, SampleJobResult } from './sample.queue.js';
-import { EnqueueJobDto } from './dto/enqueue-job.dto.js';
+import { EnqueueJobDto } from '@api21/types';
+import { jobsModel, JobsModel } from './jobs.model.js';
+import { SampleJobData } from './jobs.job.js';
+import { AppError } from '../../common/middleware/error.middleware.js';
 
-@Injectable()
 export class JobsService {
-  private readonly logger = new Logger(JobsService.name);
-  private queue: Queue<SampleJobData, SampleJobResult>;
   private cachedMetrics: Record<string, number> | null = null;
   private lastMetricsFetchTime = 0;
   private readonly METRICS_CACHE_TTL_MS = 2500;
 
-  constructor(private readonly bullmqService: BullMQService) {
-    this.queue = getSampleQueue(this.bullmqService);
-  }
+  constructor(private readonly model: JobsModel = jobsModel) {}
 
   async enqueueJob(dto: EnqueueJobDto) {
+    if (!dto || !dto.type) {
+      throw new AppError('Job type is required', 400);
+    }
+
     try {
       const options: any = {};
       if (typeof dto.delay === 'number' && dto.delay > 0) {
@@ -38,7 +30,7 @@ export class JobsService {
         timestamp: new Date().toISOString(),
       };
 
-      const job = await this.queue.add(dto.type || 'default', payload, options);
+      const job = await this.model.addJob(dto.type || 'default', payload, options);
 
       return {
         success: true,
@@ -52,20 +44,20 @@ export class JobsService {
         },
       };
     } catch (err: any) {
-      this.logger.error('Error enqueuing job:', err);
-      throw new InternalServerErrorException({ error: 'Failed to enqueue job', message: err.message });
+      if (err instanceof AppError) throw err;
+      throw new AppError(`Failed to enqueue job: ${err.message}`, 500);
     }
   }
 
   async getJobStatus(jobId: string) {
     if (!jobId) {
-      throw new BadRequestException({ error: 'jobId parameter is required' });
+      throw new AppError('jobId parameter is required', 400);
     }
 
     try {
-      const job = await this.queue.getJob(jobId);
+      const job = await this.model.findJobById(jobId);
       if (!job) {
-        throw new NotFoundException({ error: `Job with ID "${jobId}" not found` });
+        throw new AppError(`Job with ID "${jobId}" not found`, 404);
       }
 
       const state = await job.getState();
@@ -83,11 +75,8 @@ export class JobsService {
         attemptsMade: job.attemptsMade,
       };
     } catch (err: any) {
-      if (err instanceof NotFoundException || err instanceof BadRequestException) {
-        throw err;
-      }
-      this.logger.error('Error getting job status:', err);
-      throw new InternalServerErrorException({ error: 'Failed to fetch job status', message: err.message });
+      if (err instanceof AppError) throw err;
+      throw new AppError(`Failed to fetch job status: ${err.message}`, 500);
     }
   }
 
@@ -98,7 +87,7 @@ export class JobsService {
     }
 
     try {
-      const metricsPromise = this.queue.getJobCounts('active', 'completed', 'failed', 'delayed', 'waiting');
+      const metricsPromise = this.model.getCounts();
       const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => reject(new Error('Redis metrics query timed out')), 2000);
       });
@@ -108,7 +97,7 @@ export class JobsService {
       this.lastMetricsFetchTime = Date.now();
       return counts;
     } catch (err) {
-      this.logger.warn('Failed to fetch queue metrics or query timed out:', err);
+      console.warn('Failed to fetch queue metrics or query timed out:', err);
       if (this.cachedMetrics) {
         return this.cachedMetrics;
       }
@@ -116,3 +105,5 @@ export class JobsService {
     }
   }
 }
+
+export const jobsService = new JobsService();

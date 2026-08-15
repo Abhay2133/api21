@@ -1,36 +1,18 @@
-import { Controller, Get, Res, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
-import { DatabaseService } from '../../core/database/database.service.js';
-import { RedisService } from '../../core/redis/redis.service.js';
-import { BullMQService } from '../../core/bullmq/bullmq.service.js';
+import { Router, Request, Response, NextFunction } from 'express';
+import { healthService } from './health.service.js';
+import { healthNoCacheMiddleware } from './health.middleware.js';
 
-@Controller('health')
-export class HealthController {
-  constructor(
-    private readonly databaseService: DatabaseService,
-    private readonly redisService: RedisService,
-    private readonly bullmqService: BullMQService
-  ) {}
+const router = Router();
 
-  @Get()
-  async getHealth(@Res() res: Response) {
-    const [dbHealthy, redisHealthy, queueHealthy] = await Promise.all([
-      this.databaseService.checkHealth(),
-      this.redisService.checkHealth(),
-      this.bullmqService.checkHealth(),
-    ]);
-
-    const isHealthy = dbHealthy; // DB is critical, Redis & Queue warning only
-    const statusCode = isHealthy ? HttpStatus.OK : HttpStatus.SERVICE_UNAVAILABLE;
-
-    return res.status(statusCode).json({
-      status: isHealthy ? 'healthy' : 'unhealthy',
-      timestamp: new Date().toISOString(),
-      services: {
-        database: dbHealthy ? 'connected' : 'disconnected',
-        redis: redisHealthy ? 'connected' : 'disconnected',
-        bullmq: queueHealthy ? 'connected' : 'disconnected',
-      },
-    });
+// GET /api/v1/health - System health check
+router.get('/', healthNoCacheMiddleware, async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const health = await healthService.getHealth();
+    const statusCode = health.status === 'healthy' ? 200 : 503;
+    return res.status(statusCode).json(health);
+  } catch (err) {
+    next(err);
   }
-}
+});
+
+export const healthRouter = router;

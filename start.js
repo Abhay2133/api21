@@ -254,16 +254,27 @@ async function main() {
     }
     await logStep(deploymentId, 'Repository prepared successfully.');
 
-    // Ensure local .env, src, static, tsconfig, package.json, pnpm-lock.yaml are synced to tmpDir
-    const filesToSync = ['.env', 'package.json', 'pnpm-lock.yaml', 'package-lock.json', 'tsconfig.json'];
+    // Ensure local .env, configs, and workspaces are synced to tmpDir
+    const filesToSync = [
+      '.env',
+      'package.json',
+      'pnpm-lock.yaml',
+      'package-lock.json',
+      'pnpm-workspace.yaml',
+      'tsconfig.json',
+      'ecosystem.config.cjs',
+    ];
     for (const file of filesToSync) {
       const srcPath = path.join(rootDir, file);
       if (fs.existsSync(srcPath)) {
         fs.copyFileSync(srcPath, path.join(tmpDir, file));
       }
     }
-    if (fs.existsSync(path.join(rootDir, 'src'))) {
-      fs.cpSync(path.join(rootDir, 'src'), path.join(tmpDir, 'src'), { recursive: true });
+    if (fs.existsSync(path.join(rootDir, 'packages'))) {
+      fs.cpSync(path.join(rootDir, 'packages'), path.join(tmpDir, 'packages'), { recursive: true });
+    }
+    if (fs.existsSync(path.join(rootDir, 'apps'))) {
+      fs.cpSync(path.join(rootDir, 'apps'), path.join(tmpDir, 'apps'), { recursive: true });
     }
     if (fs.existsSync(path.join(rootDir, 'static'))) {
       fs.cpSync(path.join(rootDir, 'static'), path.join(tmpDir, 'static'), { recursive: true });

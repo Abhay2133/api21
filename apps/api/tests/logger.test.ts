@@ -1,4 +1,4 @@
-import { maskSensitiveData } from '../src/common/interceptors/logging.interceptor.js';
+import { maskSensitiveData } from '../src/common/middleware/logging.middleware.js';
 import { config } from '../src/config/env.js';
 
 describe('Logger Masking Middleware', () => {
