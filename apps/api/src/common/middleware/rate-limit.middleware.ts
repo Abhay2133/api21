@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { redisService } from '../../core/redis/redis.service.js';
 
 const WINDOW_SIZE_IN_SECONDS = 15 * 60; // 15 minutes
-const MAX_REQUESTS = 200;
+const MAX_REQUESTS = 1000;
 
 export const rateLimitMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   // Apply rate limiting specifically to /api/v1 routes
@@ -18,6 +18,12 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
 
   try {
     const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+    
+    // In local development/testing, do not throttle localhost
+    if (ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' || process.env.NODE_ENV === 'test') {
+      return next();
+    }
+
     const key = `ratelimit:${ip}`;
     const now = Date.now();
     const windowStart = now - WINDOW_SIZE_IN_SECONDS * 1000;

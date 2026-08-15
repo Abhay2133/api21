@@ -56,110 +56,106 @@ export default function DeploymentsPage() {
   const getStatusBadge = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'completed':
-        return <Badge variant="success">Completed</Badge>;
+        return <Badge variant="success" className="text-[10px] py-0 px-1.5 font-mono">Completed</Badge>;
       case 'failed':
-        return <Badge variant="destructive">Failed</Badge>;
+        return <Badge variant="destructive" className="text-[10px] py-0 px-1.5 font-mono">Failed</Badge>;
       case 'pending':
       case 'cloning':
       case 'building':
       case 'health_checking':
-        return <Badge variant="warning">{status.replace('_', ' ')}</Badge>;
+        return <Badge variant="warning" className="text-[10px] py-0 px-1.5 font-mono">{status.replace('_', ' ')}</Badge>;
       default:
-        return <Badge variant="secondary">{status || 'Unknown'}</Badge>;
+        return <Badge variant="secondary" className="text-[10px] py-0 px-1.5 font-mono">{status || 'Unknown'}</Badge>;
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col">
-      <Topbar title="Deployments" subtitle="Zero-downtime deployment history and execution log inspector" />
+    <div className="flex-1 flex flex-col min-w-0">
+      <Topbar title="Deployments" subtitle="Zero-downtime pipeline history">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchDeployments}
+          disabled={isLoading}
+          className="h-7 text-[11px] gap-1 px-2 border-slate-800 bg-slate-900/60 text-slate-300"
+        >
+          <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
+          <span>Refresh</span>
+        </Button>
+        <Button
+          size="sm"
+          onClick={handleTriggerDeploy}
+          disabled={isTriggering}
+          className="h-7 text-[11px] gap-1 px-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold"
+        >
+          <Play className="w-3 h-3 fill-current" />
+          <span>{isTriggering ? 'Deploying...' : 'New Deploy'}</span>
+        </Button>
+      </Topbar>
 
-      <div className="p-8 space-y-6 max-w-7xl w-full">
-        {/* Actions Bar */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Rocket className="w-5 h-5 text-sky-400" />
-              Deployment Pipeline Records
-            </h2>
-            <p className="text-xs text-slate-400">All deployment jobs executed via start.js or CI webhooks</p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchDeployments}
-              disabled={isLoading}
-              className="gap-1.5 text-xs border-slate-800 bg-slate-900/60"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-
-            <Button
-              size="sm"
-              onClick={handleTriggerDeploy}
-              disabled={isTriggering}
-              className="gap-1.5 text-xs bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold"
-            >
-              <Play className="w-3.5 h-3.5 fill-current" />
-              {isTriggering ? 'Triggering...' : 'Trigger Deployment'}
-            </Button>
-          </div>
-        </div>
-
+      <div className="p-4 space-y-3 max-w-7xl w-full">
         {message && (
           <div
-            className={`p-3 rounded-lg border text-xs flex items-center gap-2 ${
+            className={`p-2.5 rounded-lg border text-xs flex items-center gap-2 ${
               message.type === 'success'
                 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
                 : 'bg-red-500/10 border-red-500/20 text-red-400'
             }`}
           >
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
             <span>{message.text}</span>
           </div>
         )}
 
         {/* Deployments Table Card */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Historical Deployments</CardTitle>
-            <CardDescription className="text-xs">Click any deployment row to inspect its detailed logs.</CardDescription>
+        <Card className="border-slate-800/80 bg-slate-950/60">
+          <CardHeader className="py-2.5 px-4 border-b border-slate-800/60">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                  <Rocket className="w-3.5 h-3.5 text-sky-400" />
+                  Deployment History
+                </CardTitle>
+                <CardDescription className="text-[10px] text-slate-400 mt-0.5">
+                  Click log inspector to view execution logs
+                </CardDescription>
+              </div>
+              <span className="text-[10px] font-mono text-slate-400">{deployments.length} records</span>
+            </div>
           </CardHeader>
           <CardContent className="p-0">
             {deployments.length === 0 && !isLoading ? (
-              <div className="p-12 text-center text-slate-500 text-xs">
-                No deployment records found in database.
+              <div className="p-8 text-center text-slate-500 text-xs">
+                No deployment records found.
               </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Deployment ID</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Triggered At</TableHead>
-                    <TableHead>Last Updated</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
+                  <TableRow className="border-slate-800/80 hover:bg-transparent">
+                    <TableHead className="h-8 text-[11px] text-slate-400 font-medium">Deployment ID</TableHead>
+                    <TableHead className="h-8 text-[11px] text-slate-400 font-medium">Status</TableHead>
+                    <TableHead className="h-8 text-[11px] text-slate-400 font-medium">Triggered At</TableHead>
+                    <TableHead className="h-8 text-[11px] text-slate-400 font-medium">Updated At</TableHead>
+                    <TableHead className="h-8 text-[11px] text-slate-400 font-medium text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {deployments.map((dep) => (
-                    <TableRow key={dep.id} className="hover:bg-slate-900/50">
-                      <TableCell className="font-mono text-xs font-semibold text-sky-400">
+                    <TableRow key={dep.id} className="border-slate-800/60 hover:bg-slate-900/40">
+                      <TableCell className="py-2 font-mono text-[11px] font-semibold text-sky-400">
                         {dep.id}
                       </TableCell>
-                      <TableCell>{getStatusBadge(dep.status)}</TableCell>
-                      <TableCell className="text-xs text-slate-400 font-mono">
-                        {new Date(dep.created_at).toLocaleString()}
+                      <TableCell className="py-2">{getStatusBadge(dep.status)}</TableCell>
+                      <TableCell className="py-2 text-[11px] text-slate-400 font-mono">
+                        {new Date(dep.created_at).toLocaleTimeString()} · {new Date(dep.created_at).toLocaleDateString()}
                       </TableCell>
-                      <TableCell className="text-xs text-slate-400 font-mono">
-                        {new Date(dep.updated_at).toLocaleString()}
+                      <TableCell className="py-2 text-[11px] text-slate-400 font-mono">
+                        {new Date(dep.updated_at).toLocaleTimeString()}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="py-2 text-right">
                         <Link href={`/deployments/${dep.id}`}>
-                          <Button variant="outline" size="sm" className="h-7 px-2.5 text-xs gap-1 border-slate-700">
-                            <Eye className="w-3.5 h-3.5 text-slate-400" />
+                          <Button variant="outline" size="sm" className="h-6 px-2 text-[11px] gap-1 border-slate-700 hover:border-slate-600">
+                            <Eye className="w-3 h-3 text-slate-400" />
                             <span>Logs</span>
                           </Button>
                         </Link>
