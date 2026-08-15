@@ -6,8 +6,8 @@ Welcome! This workspace configuration defines the context, conventions, and guid
 
 ## 1. Project Overview & Monorepo Architecture
 
-`api21` is a modular pnpm/npm monorepo consisting of:
-- **`apps/api` (`@api21/api`)**: Nest.js modular REST API server with PostgreSQL (Knex pool), Redis sliding-window rate limiter, BullMQ background jobs, and static interactive API documentation.
+`api21` is a modular pnpm monorepo consisting of:
+- **`apps/api` (`@api21/api`)**: High-performance Express TypeScript modular REST API server with PostgreSQL (Knex pool), Redis sliding-window rate limiter, BullMQ background jobs, and glassmorphic API documentation.
 - **`apps/chat` (`@api21/chat`)**: Chat application skeleton consuming backend services and shared types.
 - **`apps/admin` (`@api21/admin`)**: Admin dashboard application skeleton for monitoring health and queues.
 - **`packages/types` (`@api21/types`)**: Central shared package exporting DTOs (with `class-validator`), entity interfaces, and API response schemas used across all apps.
@@ -24,13 +24,18 @@ Welcome! This workspace configuration defines the context, conventions, and guid
 - [ecosystem.config.cjs](file:///home/abhay/pj/api21/ecosystem.config.cjs): PM2 cluster & worker multi-process config.
 
 ### API Application (`apps/api/`)
-- [apps/api/src/main.ts](file:///home/abhay/pj/api21/apps/api/src/main.ts): NestJS application bootstrap entry point.
-- [apps/api/src/app.module.ts](file:///home/abhay/pj/api21/apps/api/src/app.module.ts): Root application module.
-- [apps/api/src/app.factory.ts](file:///home/abhay/pj/api21/apps/api/src/app.factory.ts): Application factory.
+- [apps/api/src/main.ts](file:///home/abhay/pj/api21/apps/api/src/main.ts): Express TypeScript bootstrap entry point.
+- [apps/api/src/app.ts](file:///home/abhay/pj/api21/apps/api/src/app.ts): Express Application factory mounting modular routes and middlewares.
 - [apps/api/src/worker.ts](file:///home/abhay/pj/api21/apps/api/src/worker.ts): Standalone BullMQ worker process.
-- [apps/api/src/core/](file:///home/abhay/pj/api21/apps/api/src/core): `DatabaseModule`, `RedisModule`, `BullMQModule`.
-- [apps/api/src/common/](file:///home/abhay/pj/api21/apps/api/src/common): `AdminAuthGuard`, `RateLimitGuard`, `AllExceptionsFilter`, `LoggingInterceptor`, `SslMiddleware`.
-- [apps/api/src/modules/](file:///home/abhay/pj/api21/apps/api/src/modules): `UsersModule`, `SessionsModule`, `JobsModule`, `WebhooksModule`, `HealthModule`.
+- [apps/api/src/core/](file:///home/abhay/pj/api21/apps/api/src/core): `DatabaseService` (Knex pool + migrations), `RedisService`, `BullMQService`.
+- [apps/api/src/common/middleware/](file:///home/abhay/pj/api21/apps/api/src/common/middleware): `logging.middleware.ts`, `rate-limit.middleware.ts`, `validation.middleware.ts`, `admin-auth.middleware.ts`, `ssl.middleware.ts`, `error.middleware.ts`.
+- **Modular Domain Architecture (`apps/api/src/modules/`)**:
+  - `modules/users/`: `users.controller.ts`, `users.service.ts`, `users.model.ts`, `users.job.ts`, `users.middleware.ts`
+  - `modules/sessions/`: `sessions.controller.ts`, `sessions.service.ts`, `sessions.model.ts`, `sessions.job.ts`, `sessions.middleware.ts`
+  - `modules/jobs/`: `jobs.controller.ts`, `jobs.service.ts`, `jobs.model.ts`, `jobs.job.ts`, `jobs.middleware.ts`
+  - `modules/webhooks/`: `webhooks.controller.ts`, `webhooks.service.ts`, `webhooks.model.ts`, `webhooks.job.ts`, `webhooks.middleware.ts`
+  - `modules/health/`: `health.controller.ts`, `health.service.ts`, `health.model.ts`, `health.job.ts`, `health.middleware.ts`
+  - `modules/admin/`: `bull-board.setup.ts`, `admin.controller.ts`, `admin.service.ts`, `admin.model.ts`, `admin.job.ts`, `admin.middleware.ts`
 - [apps/api/static/index.html](file:///home/abhay/pj/api21/apps/api/static/index.html): Interactive documentation page.
 
 ### Shared Types (`packages/types/`)
