@@ -1,46 +1,72 @@
 # Workspace Agent Rules and Context: api21
 
-Welcome! This workspace configuration defines the context, conventions, and guidelines for AI agents working on the `api21` codebase.
+Welcome! This workspace configuration defines the context, conventions, and guidelines for AI agents working on the `api21` monorepo codebase.
 
 ---
 
-## 1. Project Overview & Architecture
+## 1. Project Overview & Monorepo Architecture
 
-`api21` is a standalone API server written in Express & TypeScript.
-- **Backend**: An Express.js REST API written in TypeScript.
-- **Relational DB**: PostgreSQL database, managed via PostgreSQL `pg` client pool with auto-migration.
-- **Cache & Rate Limiter**: Redis-backed sliding window rate limiter (200 requests per 15 minutes per IP) applied globally to all `/api/v1/` routes.
-- **Docs**: A static, dark-themed glassmorphic interactive API documentation page served at root `/`.
+`api21` is a modular pnpm/npm monorepo consisting of:
+- **`apps/api` (`@api21/api`)**: Nest.js modular REST API server with PostgreSQL (Knex pool), Redis sliding-window rate limiter, BullMQ background jobs, and static interactive API documentation.
+- **`apps/chat` (`@api21/chat`)**: Chat application skeleton consuming backend services and shared types.
+- **`apps/admin` (`@api21/admin`)**: Admin dashboard application skeleton for monitoring health and queues.
+- **`packages/types` (`@api21/types`)**: Central shared package exporting DTOs (with `class-validator`), entity interfaces, and API response schemas used across all apps.
 
 ---
 
 ## 2. Directory Layout & Key Files
 
-- [src/server.ts](file:///home/abhay/pj/api21/src/server.ts): Application entrypoint.
-- [src/app.ts](file:///home/abhay/pj/api21/src/app.ts): Express application bootstrap.
-- [src/config/env.ts](file:///home/abhay/pj/api21/src/config/env.ts): Settings loading from environment variables.
-- [src/config/database.ts](file:///home/abhay/pj/api21/src/config/database.ts): PostgreSQL pool & table migrations.
-- [src/config/redis.ts](file:///home/abhay/pj/api21/src/config/redis.ts): Redis client connection.
-- [src/config/bullmq.ts](file:///home/abhay/pj/api21/src/config/bullmq.ts): BullMQ queue connection & shutdown manager.
+### Root Configuration
+- [pnpm-workspace.yaml](file:///home/abhay/pj/api21/pnpm-workspace.yaml): Workspace definitions (`apps/*`, `packages/*`).
+- [package.json](file:///home/abhay/pj/api21/package.json): Root monorepo orchestrator.
+- [docker-compose.yml](file:///home/abhay/pj/api21/docker-compose.yml): Local PostgreSQL & Redis infrastructure.
+- [start.js](file:///home/abhay/pj/api21/start.js): Zero-downtime deployment runner.
+- [ecosystem.config.cjs](file:///home/abhay/pj/api21/ecosystem.config.cjs): PM2 cluster & worker multi-process config.
 
-- [src/middleware/](file:///home/abhay/pj/api21/src/middleware): Middleware filters (CORS, Logger, SSL, RateLimit, AdminAuth, ErrorHandler).
-- [src/controllers/](file:///home/abhay/pj/api21/src/controllers): Controller handlers for endpoints.
-- [static/index.html](file:///home/abhay/pj/api21/static/index.html): Interactive API reference page.
+### API Application (`apps/api/`)
+- [apps/api/src/main.ts](file:///home/abhay/pj/api21/apps/api/src/main.ts): NestJS application bootstrap entry point.
+- [apps/api/src/app.module.ts](file:///home/abhay/pj/api21/apps/api/src/app.module.ts): Root application module.
+- [apps/api/src/app.factory.ts](file:///home/abhay/pj/api21/apps/api/src/app.factory.ts): Application factory.
+- [apps/api/src/worker.ts](file:///home/abhay/pj/api21/apps/api/src/worker.ts): Standalone BullMQ worker process.
+- [apps/api/src/core/](file:///home/abhay/pj/api21/apps/api/src/core): `DatabaseModule`, `RedisModule`, `BullMQModule`.
+- [apps/api/src/common/](file:///home/abhay/pj/api21/apps/api/src/common): `AdminAuthGuard`, `RateLimitGuard`, `AllExceptionsFilter`, `LoggingInterceptor`, `SslMiddleware`.
+- [apps/api/src/modules/](file:///home/abhay/pj/api21/apps/api/src/modules): `UsersModule`, `SessionsModule`, `JobsModule`, `WebhooksModule`, `HealthModule`.
+- [apps/api/static/index.html](file:///home/abhay/pj/api21/apps/api/static/index.html): Interactive documentation page.
+
+### Shared Types (`packages/types/`)
+- [packages/types/src/index.ts](file:///home/abhay/pj/api21/packages/types/src/index.ts): Central export for all DTOs and interfaces (`CreateUserDto`, `CreateSessionDto`, `EnqueueJobDto`, `User`, `Session`, `HealthResponse`, etc.).
 
 ---
 
 ## 3. Development Workflow & Commands
 
 ```bash
-# Install dependencies
-npm install
+# Install dependencies across all workspace packages
+pnpm install
 
-# Run dev server with tsx watch
-npm run dev
+# Start local PostgreSQL and Redis containers
+pnpm docker:up
 
-# Build production bundle
-npm run build
+# Run API dev server
+pnpm dev
+# or: pnpm --filter @api21/api dev
 
-# Run unit tests
-npm test
+# Run BullMQ worker
+pnpm dev:worker
+
+# Run Chat or Admin skeletons
+pnpm dev:chat
+pnpm dev:admin
+
+# Build all workspace packages
+pnpm build
+
+# Run all test suites
+pnpm test
+
+# Run API database migrations
+pnpm migrate:latest
+
+# Stop containers
+pnpm docker:down
 ```
