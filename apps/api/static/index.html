@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive API Documentation for api21 - High performance REST server built with Express, TypeScript, PostgreSQL, Redis, and BullMQ.">
+    <title>api21 - Interactive API Documentation</title>
+
+    <script>
+        (function() {
+            var savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <style>
+        :root, [data-theme="dark"] {
+            --bg-main: #121214;
+            --bg-sidebar: #18181b;
+            --bg-card: #1f1f23;
+            --bg-code-pane: #141417;
+            --bg-code-block: #0b0b0d;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.16);
+            --accent-primary: #6366f1;
+            --accent-primary-glow: rgba(99, 102, 241, 0.25);
+            --accent-secondary: #38bdf8;
+            --accent-success: #10b981;
+            --accent-error: #f43f5e;
+            --text-primary: #f4f4f5;
+            --text-secondary: #9ca3af;
+            --text-heading: #ffffff;
+            --code-text: #e2e8f0;
+            --code-inline-bg: rgba(255, 255, 255, 0.06);
+            --logo-bg: linear-gradient(135deg, #6366f1, #38bdf8);
+            --logo-text-gradient: linear-gradient(135deg, #ffffff, #a1a1aa);
+            --heading-gradient: linear-gradient(135deg, #ffffff, #a5b4fc);
+            --sidebar-width: 280px;
+            --scrollbar-thumb: #27272a;
+            --nav-active-bg: rgba(99, 102, 241, 0.15);
+            --nav-hover-bg: rgba(255, 255, 255, 0.04);
+            --toggle-bg: #27272a;
+            --toggle-hover: #3f3f46;
+            --ambient-opacity: 0.12;
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg-main: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --bg-code-pane: #f1f5f9;
+            --bg-code-block: #ffffff;
+            --border-color: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --accent-primary: #4f46e5;
+            --accent-primary-glow: rgba(79, 70, 229, 0.12);
+            --accent-secondary: #0284c7;
+            --accent-success: #059669;
+            --accent-error: #e11d48;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-heading: #0f172a;
+            --code-text: #0f172a;
+            --code-inline-bg: #e2e8f0;
+            --logo-bg: linear-gradient(135deg, #4f46e5, #0284c7);
+            --logo-text-gradient: linear-gradient(135deg, #0f172a, #475569);
+            --heading-gradient: linear-gradient(135deg, #0f172a, #4338ca);
+            --scrollbar-thumb: #cbd5e1;
+            --nav-active-bg: rgba(79, 70, 229, 0.08);
+            --nav-hover-bg: #f8fafc;
+            --toggle-bg: #e2e8f0;
+            --toggle-hover: #cbd5e1;
+            --ambient-opacity: 0.03;
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            line-height: 1.5;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Ambient Glows */
+        .ambient-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-primary-glow) 0%, rgba(18,18,20,0) 70%);
+            top: -150px;
+            right: -100px;
+            z-index: 0;
+            pointer-events: none;
+            opacity: var(--ambient-opacity);
+            transition: opacity 0.25s ease;
+        }
+        .ambient-glow-2 {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(18,18,20,0) 70%);
+            bottom: -200px;
+            left: -200px;
+            z-index: 0;
+            pointer-events: none;
+            opacity: var(--ambient-opacity);
+            transition: opacity 0.25s ease;
+        }
+
+        /* Sidebar navigation */
+        aside {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            transition: background-color 0.25s ease, border-color 0.25s ease;
+        }
+
+        aside nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 0.35rem;
+            min-height: 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) transparent;
+        }
+
+        aside nav::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        aside nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        aside nav::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb);
+            border-radius: 3px;
+        }
+
+        aside nav::-webkit-scrollbar-thumb:hover {
+            background-color: var(--text-secondary);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .logo-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--logo-bg);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 0 15px var(--accent-primary-glow);
+        }
+
+        .logo-text {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: var(--logo-text-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .theme-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.6rem;
+            border-radius: 8px;
+            background-color: var(--toggle-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle-btn:hover {
+            background-color: var(--toggle-hover);
+            border-color: var(--border-hover);
+        }
+
+        [data-theme="dark"] .sun-icon { display: block; }
+        [data-theme="dark"] .moon-icon { display: none; }
+        [data-theme="light"] .sun-icon { display: none; }
+        [data-theme="light"] .moon-icon { display: block; }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .nav-header {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            margin-bottom: 0.35rem;
+            padding-left: 0.5rem;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.45rem 0.75rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.15s ease;
+        }
+
+        .nav-item a:hover {
+            color: var(--text-primary);
+            background-color: var(--nav-hover-bg);
+        }
+
+        .nav-item.active a {
+            color: var(--accent-primary);
+            background-color: var(--nav-active-bg);
+            font-weight: 600;
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        /* Main layout split */
+        main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content-section {
+            flex: 1.2;
+            padding: 3rem 3.5rem;
+            max-width: 820px;
+        }
+
+        .code-section {
+            flex: 0.8;
+            background-color: var(--bg-code-pane);
+            border-left: 1px solid var(--border-color);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            transition: background-color 0.25s ease, border-color 0.25s ease;
+        }
+
+        /* Typography & elements */
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.25rem;
+            background: var(--heading-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-top: 3rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            color: var(--text-heading);
+        }
+
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-top: 1.75rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-heading);
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1.25rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Endpoint badge */
+        .endpoint-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.65rem;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .endpoint-badge.get {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--accent-secondary);
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+
+        .endpoint-badge.post {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--accent-success);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .endpoint-badge.delete {
+            background-color: rgba(244, 63, 94, 0.1);
+            color: var(--accent-error);
+            border-color: rgba(244, 63, 94, 0.2);
+        }
+
+        /* Cards */
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-card);
+            transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.25rem 0;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.65rem 0.85rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-primary);
+            background-color: var(--nav-hover-bg);
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        .param-name {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-secondary);
+            font-weight: 500;
+        }
+
+        .param-type {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-primary);
+        }
+
+        /* Code Blocks */
+        pre {
+            background-color: var(--bg-code-block);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.825rem;
+            color: var(--code-text);
+            margin-bottom: 1rem;
+            transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875em;
+            color: var(--accent-primary);
+            background-color: var(--code-inline-bg);
+            padding: 0.15rem 0.35rem;
+            border-radius: 4px;
+        }
+
+        pre code {
+            color: inherit;
+            background-color: transparent;
+            padding: 0;
+        }
+
+        /* Code Tab Switchers */
+        .code-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .code-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .code-tab.active {
+            color: var(--accent-secondary);
+            border-bottom-color: var(--accent-secondary);
+        }
+
+        /* Status Indicator badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background-color: var(--nav-hover-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .status-badge.up {
+            color: var(--accent-success);
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .status-badge.down {
+            color: var(--accent-error);
+            background-color: rgba(244, 63, 94, 0.1);
+            border-color: rgba(244, 63, 94, 0.2);
+        }
+
+        .status-badge.checking {
+            color: var(--accent-secondary);
+            background-color: rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.2);
+        }
+
+        /* Pulse dot animation */
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: currentColor;
+            display: inline-block;
+            box-shadow: 0 0 6px currentColor;
+        }
+
+        .pulse-dot.animating {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Responsiveness */
+        @media (max-width: 1024px) {
+            body {
+                flex-direction: column;
+            }
+            aside {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1.25rem 1.5rem;
+            }
+            main {
+                margin-left: 0;
+                flex-direction: column;
+            }
+            .content-section {
+                padding: 2rem 1.5rem;
+            }
+            .code-section {
+                height: auto;
+                position: relative;
+                border-left: none;
+                border-top: 1px solid var(--border-color);
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
+
+    <!-- Sidebar navigation -->
+    <aside>
+        <div class="logo-section">
+            <div class="logo-brand">
+                <div class="logo-icon">21</div>
+                <span class="logo-text">api21 Engine</span>
+            </div>
+            <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Light / Dark mode" aria-label="Toggle Light / Dark mode">
+                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                <span class="theme-toggle-text">Dark</span>
+            </button>
+        </div>
+        
+        <nav>
+            <ul class="nav-links">
+                <li class="nav-header">Getting Started</li>
+                <li class="nav-item active"><a href="#overview" id="nav-overview">Overview</a></li>
+                <li class="nav-item"><a href="#rate-limiting" id="nav-rate-limiting">Rate Limiting</a></li>
+                
+                <li class="nav-header">System Health</li>
+                <li class="nav-item"><a href="#health-endpoint" id="nav-health">Health Status</a></li>
+                
+                <li class="nav-header">Core Endpoints</li>
+                <li class="nav-item"><a href="#users-list" id="nav-users-list">Get Users</a></li>
+                <li class="nav-item"><a href="#user-create" id="nav-user-create">Create User</a></li>
+                <li class="nav-item"><a href="#user-delete" id="nav-user-delete">Delete User</a></li>
+
+                <li class="nav-header">Background Jobs (BullMQ)</li>
+                <li class="nav-item"><a href="#job-enqueue" id="nav-job-enqueue">Enqueue Job</a></li>
+                <li class="nav-item"><a href="#job-status" id="nav-job-status">Job Status</a></li>
+                <li class="nav-item"><a href="#job-metrics" id="nav-job-metrics">Queue Metrics</a></li>
+                <li class="nav-item"><a href="/admin/queues" target="_blank" id="nav-bull-board">Bull Board UI ↗</a></li>
+            </ul>
+        </nav>
+        
+        <!-- Live Health Status Indicator in Sidebar -->
+        <div class="glass-card" style="margin-top: auto; margin-bottom: 0; padding: 1rem;">
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">SERVER STATUS</div>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; font-weight: 500;">PostgreSQL</span>
+                    <span id="postgres-indicator" class="status-badge checking"><span class="pulse-dot animating"></span>Checking</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; font-weight: 500;">Redis</span>
+                    <span id="redis-indicator" class="status-badge checking"><span class="pulse-dot animating"></span>Checking</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.85rem; font-weight: 500;">BullMQ</span>
+                    <span id="bullmq-indicator" class="status-badge checking"><span class="pulse-dot animating"></span>Checking</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main>
+        
+        <!-- Left content pane -->
+        <div class="content-section">
+            
+            <section id="overview">
+                <h1>API Reference</h1>
+                <p>Welcome to the official API documentation for <strong>api21</strong>. A minimal, high-performance REST API backend engine built with Express, TypeScript, PostgreSQL, Redis, and BullMQ background workers.</p>
+                
+                <div class="glass-card">
+                    <h3 style="margin-top: 0;">Architecture Summary</h3>
+                    <p>Designed for low latency, high concurrency, and complete horizontal scalability:</p>
+                    <ul style="margin-left: 1.25rem; color: var(--text-secondary); font-size: 0.9rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                        <li><strong>Server Framework:</strong> Express.js engine compiled via TypeScript.</li>
+                        <li><strong>Relational DB:</strong> PostgreSQL managed with `pg` client pool and auto-migration capabilities.</li>
+                        <li><strong>Caching & Rate Limiting:</strong> Redis-backed distributed sliding window rate limiter.</li>
+                        <li><strong>Background Queue:</strong> BullMQ queue engine for async background job execution with Bull Board metrics UI.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="rate-limiting">
+                <h2>Rate Limiting</h2>
+                <p>All endpoints under the <code>/api/v1/</code> path are protected by a sliding window rate limiter backed by Redis. This prevents service abuse and guarantees backend stability.</p>
+                <div class="glass-card">
+                    <table style="margin: 0;">
+                        <thead>
+                            <tr>
+                                <th>Header</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="param-name">X-RateLimit-Limit</td>
+                                <td>Maximum allowed requests per client IP in a 15-minute window (Default: <code>200</code>).</td>
+                            </tr>
+                            <tr>
+                                <td class="param-name">X-RateLimit-Remaining</td>
+                                <td>Number of remaining requests available for your client IP within the current window.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Exceeding the limit results in an HTTP Status <code>429 Too Many Requests</code> response payload:</p>
+                <pre><code>{
+  "error": "Too many requests, please slow down."
+}</code></pre>
+            </section>
+
+            <section id="health-endpoint">
+                <h2>Health Check</h2>
+                <div class="endpoint-badge get">GET</div>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/health</code>
+                <p style="margin-top: 1rem;">Returns system and connection diagnostics for core dependencies (PostgreSQL, Redis, BullMQ). Ideal for container orchestrator readiness checks.</p>
+                
+                <h3>Response Format</h3>
+                <pre><code>{
+  "status": "ok",
+  "services": {
+    "database": "connected",
+    "redis": "connected",
+    "bullmq": "connected"
+  }
+}</code></pre>
+            </section>
+
+            <section id="users-list">
+                <h2>Get Users</h2>
+                <div class="endpoint-badge get">GET</div>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/users</code>
+                <p style="margin-top: 1rem;">Retrieves an array of all registered user objects from the database.</p>
+
+                <h3>Query Parameters</h3>
+                <p>No query parameters required.</p>
+            </section>
+
+            <section id="user-create">
+                <h2>Create User</h2>
+                <div class="endpoint-badge post">POST</div>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/users</code>
+                <p style="margin-top: 1rem;">Creates a new user record in PostgreSQL. Body payload must be JSON.</p>
+
+                <h3>Request Body Parameters</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="param-name">name</td>
+                            <td class="param-type">string</td>
+                            <td style="color: var(--accent-error);">Yes</td>
+                            <td>Display name of the user (max 255 characters).</td>
+                        </tr>
+                        <tr>
+                            <td class="param-name">email</td>
+                            <td class="param-type">string</td>
+                            <td style="color: var(--accent-error);">Yes</td>
+                            <td>Unique valid email address.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="user-delete">
+                <h2>Delete User</h2>
+                <div class="endpoint-badge delete">DELETE</div>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/users/:id</code>
+                <p style="margin-top: 1rem;">Permanently deletes a user record by primary key ID.</p>
+
+                <h3>Path Parameters</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="param-name">id</td>
+                            <td class="param-type">integer</td>
+                            <td style="color: var(--accent-error);">Yes</td>
+                            <td>Unique primary key ID of the target user.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="job-enqueue">
+                <h2>Enqueue Job</h2>
+                <div class="endpoint-badge post">POST</div>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/jobs</code>
+                <p style="margin-top: 1rem;">Enqueues a new background job into BullMQ queue processor.</p>
+
+                <h3>Request Body Parameters</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="param-name">type</td>
+                            <td class="param-type">string</td>
+                            <td style="color: var(--accent-error);">Yes</td>
+                            <td>Name/type of the job operation to execute.</td>
+                        </tr>
+                        <tr>
+                            <td class="param-name">payload</td>
+                            <td class="param-type">object</td>
+                            <td style="color: var(--accent-secondary);">No</td>
+                            <td>JSON metadata or context payload passed to background worker.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="job-status">
+                <h2>Job Status</h2>
+                <div class="endpoint-badge get">GET</div>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/jobs/:jobId</code>
+                <p style="margin-top: 1rem;">Inspects the current state (active, completed, failed, delayed) of an enqueued background job.</p>
+
+                <h3>Path Parameters</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="param-name">jobId</td>
+                            <td class="param-type">string</td>
+                            <td style="color: var(--accent-error);">Yes</td>
+                            <td>Unique job identifier returned upon enqueuing.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="job-metrics">
+                <h2>Queue Metrics</h2>
+                <div class="endpoint-badge get">GET</div>
+                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/jobs/metrics</code>
+                <p style="margin-top: 1rem;">Returns real-time BullMQ queue metrics including active, completed, failed, and waiting counts.</p>
+            </section>
+            
+        </div>
+
+        <!-- Right code preview pane -->
+        <div class="code-section">
+            <div>
+                <h3 style="margin-top: 0; color: var(--text-heading);">Request Sandbox Examples</h3>
+                <p style="font-size: 0.85rem; margin-bottom: 1.5rem;">Interactive snippets to execute test requests against the backend endpoints.</p>
+            </div>
+
+            <!-- Health check codes -->
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem;">Get Health Check</div>
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchCode('health', 'curl')">cURL</button>
+                    <button class="code-tab" onclick="switchCode('health', 'js')">JavaScript</button>
+                    <button class="code-tab" onclick="switchCode('health', 'go')">Go</button>
+                </div>
+                <pre><code id="code-health-curl">curl -X GET http://localhost:3000/api/v1/health</code><code id="code-health-js" style="display:none;">fetch('http://localhost:3000/api/v1/health')
+  .then(res => res.json())
+  .then(data => console.log(data));</code><code id="code-health-go" style="display:none;">package main
+
+import (
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	resp, err := http.Get("http://localhost:3000/api/v1/health")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
+}</code></pre>
+            </div>
+
+            <!-- Get users codes -->
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem;">Get Users</div>
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchCode('getusers', 'curl')">cURL</button>
+                    <button class="code-tab" onclick="switchCode('getusers', 'js')">JavaScript</button>
+                    <button class="code-tab" onclick="switchCode('getusers', 'go')">Go</button>
+                </div>
+                <pre><code id="code-getusers-curl">curl -X GET http://localhost:3000/api/v1/users</code><code id="code-getusers-js" style="display:none;">fetch('http://localhost:3000/api/v1/users')
+  .then(res => res.json())
+  .then(data => console.log(data));</code><code id="code-getusers-go" style="display:none;">package main
+
+import (
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	resp, err := http.Get("http://localhost:3000/api/v1/users")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
+}</code></pre>
+            </div>
+
+            <!-- Create user codes -->
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem;">Create User</div>
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchCode('createuser', 'curl')">cURL</button>
+                    <button class="code-tab" onclick="switchCode('createuser', 'js')">JavaScript</button>
+                    <button class="code-tab" onclick="switchCode('createuser', 'go')">Go</button>
+                </div>
+                <pre><code id="code-createuser-curl">curl -X POST http://localhost:3000/api/v1/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Alice Smith", "email": "alice@example.com"}'</code><code id="code-createuser-js" style="display:none;">fetch('http://localhost:3000/api/v1/users', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name: 'Alice Smith',
+    email: 'alice@example.com'
+  })
+})
+.then(res => res.json())
+.then(data => console.log(data));</code><code id="code-createuser-go" style="display:none;">package main
+
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	payload := []byte(`{"name": "Alice Smith", "email": "alice@example.com"}`)
+	resp, err := http.Post(
+		"http://localhost:3000/api/v1/users", 
+		"application/json", 
+		bytes.NewBuffer(payload),
+	)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
+}</code></pre>
+            </div>
+
+            <!-- Enqueue Job codes -->
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem;">Enqueue Job</div>
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchCode('enqueuejob', 'curl')">cURL</button>
+                    <button class="code-tab" onclick="switchCode('enqueuejob', 'js')">JavaScript</button>
+                </div>
+                <pre><code id="code-enqueuejob-curl">curl -X POST http://localhost:3000/api/v1/jobs \
+  -H "Content-Type: application/json" \
+  -d '{"type": "sendEmail", "payload": {"to": "user@example.com"}}'</code><code id="code-enqueuejob-js" style="display:none;">fetch('http://localhost:3000/api/v1/jobs', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    type: 'sendEmail',
+    payload: { to: 'user@example.com' }
+  })
+})
+.then(res => res.json())
+.then(data => console.log(data));</code></pre>
+            </div>
+
+            <!-- Queue Metrics codes -->
+            <div>
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem;">Queue Metrics</div>
+                <div class="code-tabs">
+                    <button class="code-tab active" onclick="switchCode('jobmetrics', 'curl')">cURL</button>
+                    <button class="code-tab" onclick="switchCode('jobmetrics', 'js')">JavaScript</button>
+                </div>
+                <pre><code id="code-jobmetrics-curl">curl -X GET http://localhost:3000/api/v1/jobs/metrics</code><code id="code-jobmetrics-js" style="display:none;">fetch('http://localhost:3000/api/v1/jobs/metrics')
+  .then(res => res.json())
+  .then(data => console.log(data));</code></pre>
+            </div>
+            
+        </div>
+        
+    </main>
+
+    <!-- Scripts for interactive updates -->
+    <script>
+        // Theme Switcher Logic
+        function updateToggleText(theme) {
+            const textEl = document.querySelector('.theme-toggle-text');
+            if (textEl) {
+                textEl.textContent = theme === 'dark' ? 'Dark' : 'Light';
+            }
+        }
+
+        document.getElementById('theme-toggle')?.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', nextTheme);
+            localStorage.setItem('theme', nextTheme);
+            updateToggleText(nextTheme);
+        });
+
+        // Initialize toggle text on load
+        updateToggleText(document.documentElement.getAttribute('data-theme') || 'dark');
+
+        // Language tabs switcher
+        function switchCode(endpoint, lang) {
+            const container = event.target.parentElement;
+            container.querySelectorAll('.code-tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const preBlock = container.nextElementSibling;
+            preBlock.querySelectorAll('code').forEach(code => code.style.display = 'none');
+
+            const targetCode = document.getElementById(`code-${endpoint}-${lang}`);
+            if (targetCode) {
+                targetCode.style.display = 'block';
+            }
+        }
+
+        // Live Health Status Query
+        async function updateHealthStatus() {
+            const pgIndicator = document.getElementById('postgres-indicator');
+            const redisIndicator = document.getElementById('redis-indicator');
+            const bullmqIndicator = document.getElementById('bullmq-indicator');
+
+            try {
+                const response = await fetch('/api/v1/health');
+                const result = await response.json();
+                
+                const services = result.services || result.data || {};
+
+                const pg = services.database || services.postgres;
+                const redis = services.redis;
+                const bullmq = services.bullmq;
+
+                if (pg === 'connected' || pg === 'up') {
+                    pgIndicator.className = 'status-badge up';
+                    pgIndicator.innerHTML = '<span class="pulse-dot"></span>Connected';
+                } else {
+                    pgIndicator.className = 'status-badge down';
+                    pgIndicator.innerHTML = '<span class="pulse-dot"></span>Offline';
+                }
+
+                if (redis === 'connected' || redis === 'up') {
+                    redisIndicator.className = 'status-badge up';
+                    redisIndicator.innerHTML = '<span class="pulse-dot"></span>Connected';
+                } else {
+                    redisIndicator.className = 'status-badge down';
+                    redisIndicator.innerHTML = '<span class="pulse-dot"></span>Offline';
+                }
+
+                if (bullmq === 'connected' || bullmq === 'up') {
+                    bullmqIndicator.className = 'status-badge up';
+                    bullmqIndicator.innerHTML = '<span class="pulse-dot"></span>Connected';
+                } else {
+                    bullmqIndicator.className = 'status-badge down';
+                    bullmqIndicator.innerHTML = '<span class="pulse-dot"></span>Offline';
+                }
+            } catch (e) {
+                pgIndicator.className = 'status-badge down';
+                pgIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
+                redisIndicator.className = 'status-badge down';
+                redisIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
+                bullmqIndicator.className = 'status-badge down';
+                bullmqIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
+            }
+        }
+
+        // Update health on load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateHealthStatus();
+            setInterval(updateHealthStatus, 10000);
+        });
+
+        // Intersection Observer for active nav highlighting
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                    const activeLink = document.querySelector(`.nav-item a[href="#${id}"]`);
+                    if (activeLink) {
+                        activeLink.parentElement.classList.add('active');
+                    }
+                }
+            });
+        }, { threshold: 0.3 });
+
+        document.querySelectorAll('section[id]').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
