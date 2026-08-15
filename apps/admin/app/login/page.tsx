@@ -121,7 +121,7 @@ export default function LoginPage() {
                   <span>Authenticating...</span>
                 ) : (
                   <>
-                    <span>Enter Control Plane</span>
+                    <span>Enter Control Panel</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}

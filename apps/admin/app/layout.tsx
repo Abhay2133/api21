@@ -1,8 +1,9 @@
 import './globals.css';
 import React from 'react';
+import type { Metadata } from 'next';
 
-export const metadata = {
-  title: 'api21 Admin | System Control Plane',
+export const metadata: Metadata = {
+  title: 'api21 Admin | System Control Panel',
   description: 'Administrative dashboard, system metrics, terminal console, and deployment inspector for api21',
 };
 
