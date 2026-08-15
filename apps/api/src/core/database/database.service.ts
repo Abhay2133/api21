@@ -8,6 +8,13 @@ if (dns.setDefaultResultOrder) {
   dns.setDefaultResultOrder('ipv4first');
 }
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const migrationsDir = path.resolve(__dirname, '../../migrations');
+
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
   private readonly logger = new Logger(DatabaseService.name);
@@ -24,7 +31,7 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
       connection: config.databaseUrl,
       pool: { min: 2, max: 10 },
       migrations: {
-        directory: './src/migrations',
+        directory: migrationsDir,
         extension: 'ts',
         loadExtensions: ['.ts', '.js'],
       },
