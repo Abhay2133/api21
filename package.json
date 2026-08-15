@@ -23,6 +23,7 @@
     "start:worker": "node apps/api/dist/worker.js",
     "test": "pnpm --filter @api21/types build && pnpm -r run test",
     "test:api": "pnpm --filter @api21/types build && pnpm --filter @api21/api test",
+    "test:admin:e2e": "pnpm --filter @api21/admin test:e2e",
     "migrate:latest": "pnpm --filter @api21/api migrate:latest",
     "migrate:rollback": "pnpm --filter @api21/api migrate:rollback",
     "migrate:make": "pnpm --filter @api21/api migrate:make",

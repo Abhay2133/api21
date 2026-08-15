@@ -8,7 +8,8 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "test": "echo \"@api21/admin: unit tests pass\""
+    "test": "echo \"@api21/admin: unit tests pass\"",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@api21/types": "workspace:*",
@@ -27,6 +28,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^20.14.9",
     "@types/react": "^19.2.18",
