@@ -6,7 +6,6 @@ import { useParams } from 'next/navigation';
 import { Topbar } from '../../../../components/layout/Topbar';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../../../components/ui/card';
 import { Button } from '../../../../components/ui/button';
-import { Input } from '../../../../components/ui/input';
 import { apiClient } from '../../../../lib/api-client';
 import { ArrowLeft, RefreshCw, Copy, Check, Search, FileText, Terminal } from 'lucide-react';
 
@@ -48,76 +47,74 @@ export default function DeploymentLogsPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col">
-      <Topbar title={`Deployment: ${deploymentId}`} subtitle="Step-by-step pipeline execution logs" />
+    <div className="flex-1 flex flex-col min-w-0">
+      <Topbar title={`Deployment: ${deploymentId}`} subtitle="Step-by-step pipeline execution logs">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleCopyAll}
+          disabled={logs.length === 0}
+          className="h-8 text-xs gap-1.5 px-3 border-zinc-800 bg-zinc-900/60 text-zinc-200 hover:text-white hover:bg-zinc-800 font-medium"
+        >
+          {copied ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5 text-zinc-400" />}
+          <span>{copied ? 'Copied' : 'Copy All'}</span>
+        </Button>
 
-      <div className="p-8 space-y-6 max-w-7xl w-full">
-        {/* Navigation & Actions Header */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchLogs}
+          disabled={isLoading}
+          className="h-8 text-xs gap-1.5 px-3 border-zinc-800 bg-zinc-900/60 text-zinc-200 hover:text-white hover:bg-zinc-800 font-medium"
+        >
+          <RefreshCw className={`size-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+          <span>Refresh</span>
+        </Button>
+      </Topbar>
+
+      <div className="p-5 space-y-4 max-w-7xl w-full">
+        {/* Navigation Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/deployments">
-              <Button variant="outline" size="sm" className="h-8 gap-1.5 border-slate-800 bg-slate-900/60">
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Back to Deployments
+              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 border-zinc-800 bg-zinc-900/60 text-zinc-200 hover:text-white hover:bg-zinc-800">
+                <ArrowLeft className="size-3.5 text-zinc-400" />
+                <span>Back to Deployments</span>
               </Button>
             </Link>
-            <h2 className="text-base font-bold text-white font-mono flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-sky-400" />
+            <h2 className="text-sm font-semibold text-zinc-100 font-mono flex items-center gap-2">
+              <Terminal className="size-4 text-zinc-400" />
               {deploymentId}
             </h2>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCopyAll}
-              disabled={logs.length === 0}
-              className="h-8 gap-1.5 text-xs border-slate-800 bg-slate-900/60"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? 'Copied' : 'Copy All'}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchLogs}
-              disabled={isLoading}
-              className="h-8 gap-1.5 text-xs border-slate-800 bg-slate-900/60"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
           </div>
         </div>
 
         {/* Log Viewer Card */}
-        <Card className="border-slate-800 bg-slate-950/80">
-          <CardHeader className="pb-4 border-b border-slate-800/80 flex flex-row items-center justify-between">
+        <Card className="border-zinc-800 bg-[#09090b]">
+          <CardHeader className="py-3 px-4 border-b border-zinc-800 flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-sm flex items-center gap-2">
-                <FileText className="w-4 h-4 text-sky-400" />
+              <CardTitle className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+                <FileText className="size-4 text-zinc-400" />
                 Execution Log Output ({filteredLogs.length} entries)
               </CardTitle>
-              <CardDescription className="text-xs">Recorded during zero-downtime deployment runner steps</CardDescription>
+              <CardDescription className="text-xs text-zinc-400 mt-0.5">Recorded during zero-downtime deployment runner steps</CardDescription>
             </div>
 
             <div className="w-64 relative">
-              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <Input
+              <Search className="size-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
                 type="text"
                 placeholder="Filter logs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-8 pl-8 text-xs bg-slate-900 border-slate-800"
+                className="w-full pl-8 pr-3 py-1.5 bg-zinc-900/60 border border-zinc-800 rounded-md text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-700"
               />
             </div>
           </CardHeader>
 
           <CardContent className="p-4">
             {filteredLogs.length === 0 ? (
-              <div className="p-12 text-center text-slate-500 text-xs font-mono">
+              <div className="p-10 text-center text-zinc-500 text-xs font-mono">
                 {isLoading ? 'Loading logs...' : 'No logs found matching filter.'}
               </div>
             ) : (
@@ -125,12 +122,12 @@ export default function DeploymentLogsPage() {
                 {filteredLogs.map((log) => (
                   <div
                     key={log.id}
-                    className="p-2.5 rounded bg-slate-900/70 border border-slate-800/60 flex items-start gap-3 hover:border-slate-700 transition-colors"
+                    className="p-2.5 rounded bg-zinc-900/60 border border-zinc-800/80 flex items-start gap-3 hover:border-zinc-700 transition-colors"
                   >
-                    <span className="text-[11px] text-slate-500 flex-shrink-0 select-none">
+                    <span className="text-[11px] text-zinc-500 flex-shrink-0 select-none">
                       {new Date(log.created_at).toLocaleTimeString()}
                     </span>
-                    <span className="text-slate-300 break-all leading-relaxed">
+                    <span className="text-zinc-300 break-all leading-relaxed">
                       {log.message}
                     </span>
                   </div>

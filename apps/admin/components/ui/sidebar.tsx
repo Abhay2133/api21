@@ -2,24 +2,27 @@
 
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { VariantProps, cva } from 'class-variance-authority';
 import { PanelLeft } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from './button';
 
-const SIDEBAR_COOKIE_NAME = 'sidebar_state';
+const SIDEBAR_COOKIE_NAME = 'sidebar:state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+const SIDEBAR_WIDTH = '16rem';
+const SIDEBAR_WIDTH_MOBILE = '18rem';
+const SIDEBAR_WIDTH_ICON = '4rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
-type SidebarContextProps = {
+interface SidebarContextProps {
   state: 'expanded' | 'collapsed';
   open: boolean;
-  setOpen: (open: boolean | ((value: boolean) => boolean)) => void;
+  setOpen: (open: boolean) => void;
   openMobile: boolean;
-  setOpenMobile: (open: boolean | ((value: boolean) => boolean)) => void;
+  setOpenMobile: (open: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
-};
+}
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
 
@@ -45,18 +48,17 @@ export const SidebarProvider = React.forwardRef<
       open: openProp,
       onOpenChange: setOpenProp,
       className,
+      style,
       children,
       ...props
     },
     ref
   ) => {
-    const [isMobile, setIsMobile] = React.useState(false);
-    const [openMobile, setOpenMobile] = React.useState(false);
-
-    // Track internal open state
     const [_open, _setOpen] = React.useState(defaultOpen);
-    const open = openProp !== undefined ? openProp : _open;
+    const [openMobile, setOpenMobile] = React.useState(false);
+    const [isMobile, setIsMobile] = React.useState(false);
 
+    const open = openProp ?? _open;
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
         const openState = typeof value === 'function' ? value(open) : value;
@@ -65,11 +67,7 @@ export const SidebarProvider = React.forwardRef<
         } else {
           _setOpen(openState);
         }
-
-        // Set cookie for persistence
-        if (typeof document !== 'undefined') {
-          document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
-        }
+        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
       },
       [setOpenProp, open]
     );
@@ -123,7 +121,7 @@ export const SidebarProvider = React.forwardRef<
       <SidebarContext.Provider value={contextValue}>
         <div
           className={cn(
-            'group/sidebar-wrapper flex min-h-screen w-full bg-[#090d16] text-slate-100',
+            'group/sidebar-wrapper flex min-h-screen w-full bg-[#09090b] text-zinc-100',
             className
           )}
           ref={ref}
@@ -162,7 +160,7 @@ export const Sidebar = React.forwardRef<
       return (
         <aside
           className={cn(
-            'flex h-screen sticky top-0 w-64 flex-shrink-0 flex-col bg-slate-950/80 text-slate-100 border-r border-slate-800/80',
+            'flex h-screen sticky top-0 w-64 flex-shrink-0 flex-col bg-[#09090b] text-zinc-100 border-r border-zinc-800',
             className
           )}
           ref={ref}
@@ -186,7 +184,7 @@ export const Sidebar = React.forwardRef<
           <aside
             ref={ref}
             className={cn(
-              'relative flex h-full w-72 max-w-[85vw] flex-col bg-slate-950 p-0 text-slate-100 shadow-2xl border-r border-slate-800 animate-in slide-in-from-left z-50',
+              'relative flex h-full w-72 max-w-[85vw] flex-col bg-[#09090b] p-0 text-zinc-100 shadow-2xl border-r border-zinc-800 animate-in slide-in-from-left z-50',
               className
             )}
             {...props}
@@ -205,7 +203,7 @@ export const Sidebar = React.forwardRef<
         data-variant={variant}
         data-side={side}
         className={cn(
-          'group peer hidden md:flex flex-col h-screen sticky top-0 flex-shrink-0 duration-200 transition-[width] ease-linear border-r border-slate-800/80 bg-slate-950/80 backdrop-blur-xl z-20',
+          'group peer hidden md:flex flex-col h-screen sticky top-0 flex-shrink-0 duration-200 transition-[width] ease-linear border-r border-zinc-800 bg-[#09090b] z-20',
           state === 'expanded' ? 'w-64' : 'w-16',
           className
         )}
@@ -213,7 +211,7 @@ export const Sidebar = React.forwardRef<
       >
         <div
           data-sidebar="sidebar"
-          className="flex h-full w-full flex-col bg-slate-950/60 justify-between overflow-hidden"
+          className="flex h-full w-full flex-col bg-[#09090b] justify-between overflow-hidden"
         >
           {children}
         </div>
@@ -235,14 +233,14 @@ export const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn('h-8 w-8 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60', className)}
+      className={cn('size-8 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800', className)}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
       }}
       {...props}
     >
-      <PanelLeft className="h-4 w-4" />
+      <PanelLeft className="size-4" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );
@@ -269,7 +267,7 @@ export const SidebarRail = React.forwardRef<
       )}
       {...props}
     >
-      <div className="w-[2px] h-full bg-slate-800 hover:bg-sky-500 transition-colors" />
+      <div className="w-[1px] h-full bg-zinc-800 hover:bg-zinc-600 transition-colors" />
     </button>
   );
 });
@@ -283,7 +281,7 @@ export const SidebarInset = React.forwardRef<
     <main
       ref={ref}
       className={cn(
-        'relative flex min-h-screen flex-1 flex-col bg-[#090d16] min-w-0 overflow-y-auto',
+        'relative flex min-h-screen flex-1 flex-col bg-[#09090b] min-w-0 overflow-y-auto',
         className
       )}
       {...props}
@@ -300,7 +298,7 @@ export const SidebarHeader = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="header"
-      className={cn('flex flex-col gap-2 p-4 border-b border-slate-800/80', className)}
+      className={cn('flex flex-col gap-2 p-3 border-b border-zinc-800', className)}
       {...props}
     />
   );
@@ -315,7 +313,7 @@ export const SidebarFooter = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="footer"
-      className={cn('flex flex-col gap-2 p-4 border-t border-slate-800/80 mt-auto', className)}
+      className={cn('flex flex-col gap-2 p-3 border-t border-zinc-800 mt-auto', className)}
       {...props}
     />
   );
@@ -330,7 +328,7 @@ export const SidebarSeparator = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="separator"
-      className={cn('mx-2 my-1 h-[1px] bg-slate-800/80', className)}
+      className={cn('mx-2 my-1 h-[1px] bg-zinc-800', className)}
       {...props}
     />
   );
@@ -346,7 +344,7 @@ export const SidebarContent = React.forwardRef<
       ref={ref}
       data-sidebar="content"
       className={cn(
-        'flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3 group-data-[collapsible=icon]:overflow-hidden',
+        'flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2 group-data-[collapsible=icon]:overflow-hidden',
         className
       )}
       {...props}
@@ -381,7 +379,7 @@ export const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       className={cn(
-        'duration-200 flex h-7 shrink-0 items-center rounded-md px-2 text-[11px] font-semibold text-slate-500 uppercase tracking-wider outline-none transition-[margin,opacity] ease-linear group-data-[collapsible=icon]:hidden',
+        'duration-200 flex h-7 shrink-0 items-center rounded-md px-2 text-xs font-medium text-zinc-400 outline-none transition-[margin,opacity] ease-linear group-data-[collapsible=icon]:hidden',
         className
       )}
       {...props}
@@ -430,18 +428,18 @@ export const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = 'SidebarMenuItem';
 
 const sidebarMenuButtonVariants = cva(
-  'peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-lg p-2.5 text-left text-sm font-medium outline-none transition-all hover:bg-slate-900/70 hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-sky-400 active:bg-slate-900/90 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sky-500/10 data-[active=true]:font-medium data-[active=true]:text-sky-400 data-[active=true]:border data-[active=true]:border-sky-500/20 group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&>span]:group-data-[collapsible=icon]:hidden [&>svg]:size-4 [&>svg]:shrink-0',
+  'peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-md p-2 text-left text-sm font-normal outline-none transition-colors hover:bg-zinc-800/60 hover:text-zinc-100 focus-visible:ring-1 focus-visible:ring-zinc-700 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-zinc-800 data-[active=true]:font-medium data-[active=true]:text-zinc-100 group-data-[collapsible=icon]:!size-9 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&>span]:group-data-[collapsible=icon]:hidden [&>svg]:size-4 [&>svg]:shrink-0',
   {
     variants: {
       variant: {
-        default: 'text-slate-400 hover:text-slate-200',
+        default: 'text-zinc-300 hover:text-zinc-100',
         outline:
-          'bg-slate-950 shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-slate-900',
+          'bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-100',
       },
       size: {
-        default: 'h-10 text-sm',
+        default: 'h-9 text-sm',
         sm: 'h-8 text-xs',
-        lg: 'h-12 text-sm',
+        lg: 'h-10 text-sm',
       },
     },
     defaultVariants: {

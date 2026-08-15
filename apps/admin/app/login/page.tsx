@@ -50,43 +50,40 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-[#090d16] relative overflow-hidden">
-      {/* Background Ambient Glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-[#09090b] relative overflow-hidden">
       <div className="w-full max-w-md relative z-10">
         {/* Brand Icon */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-600 to-cyan-400 flex items-center justify-center shadow-xl shadow-sky-500/20 text-slate-950 font-black text-2xl mb-3">
+          <div className="size-11 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-100 font-bold text-lg mb-3 shadow-lg">
             21
           </div>
-          <h2 className="text-xl font-bold text-white tracking-tight">api21 Admin Portal</h2>
-          <p className="text-xs text-slate-400 mt-1">Authenticate with system master credentials</p>
+          <h2 className="text-xl font-bold text-zinc-100 tracking-tight">api21 Admin Portal</h2>
+          <p className="text-xs text-zinc-400 mt-1">Authenticate with system master credentials</p>
         </div>
 
-        <Card className="border-slate-800/80 bg-slate-950/70 backdrop-blur-xl shadow-2xl">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Shield className="w-4 h-4 text-sky-400" />
+        <Card className="border-zinc-800 bg-[#09090b] shadow-2xl">
+          <CardHeader className="space-y-1 pb-4 border-b border-zinc-800">
+            <CardTitle className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+              <Shield className="size-4 text-zinc-400" />
               Administrative Login
             </CardTitle>
-            <CardDescription className="text-xs text-slate-400">
+            <CardDescription className="text-xs text-zinc-400">
               Access restricted to authorized maintainers only.
             </CardDescription>
           </CardHeader>
 
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-4">
               {error && (
                 <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <AlertCircle className="size-4 flex-shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-slate-500" />
+                <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
+                  <User className="size-3.5 text-zinc-500" />
                   Username
                 </label>
                 <Input
@@ -100,8 +97,8 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-slate-500" />
+                <label className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
+                  <Lock className="size-3.5 text-zinc-500" />
                   Password
                 </label>
                 <Input
@@ -116,13 +113,13 @@ export default function LoginPage() {
             </CardContent>
 
             <CardFooter className="pt-2">
-              <Button type="submit" className="w-full gap-2" disabled={isLoading}>
+              <Button type="submit" className="w-full gap-2 font-medium" disabled={isLoading}>
                 {isLoading ? (
                   <span>Authenticating...</span>
                 ) : (
                   <>
                     <span>Enter Control Panel</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="size-4" />
                   </>
                 )}
               </Button>
@@ -130,7 +127,7 @@ export default function LoginPage() {
           </form>
         </Card>
 
-        <div className="mt-6 text-center text-[11px] text-slate-600 font-mono">
+        <div className="mt-6 text-center text-xs text-zinc-500 font-mono">
           Protected with pure cookie authentication & double-submit CSRF hardening
         </div>
       </div>

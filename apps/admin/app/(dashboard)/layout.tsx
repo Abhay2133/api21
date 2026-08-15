@@ -22,10 +22,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!mounted || isCheckingAuth || !isAuthenticated) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-[#090d16]">
+      <div className="min-h-screen w-full flex items-center justify-center bg-[#09090b]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
-          <p className="text-xs text-slate-500 font-mono">Verifying administrative credentials...</p>
+          <div className="size-6 rounded-full border-2 border-zinc-500 border-t-transparent animate-spin" />
+          <p className="text-xs text-zinc-500 font-mono">Verifying administrative credentials...</p>
         </div>
       </div>
     );
@@ -36,10 +36,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <AppSidebar />
       <SidebarInset>
         {/* Header Mobile / Responsive Trigger Bar */}
-        <header className="flex h-12 shrink-0 items-center gap-2 border-b border-slate-800/80 px-4 md:hidden bg-slate-950/60 backdrop-blur-md">
+        <header className="flex h-12 shrink-0 items-center gap-2 border-b border-zinc-800 px-4 md:hidden bg-[#09090b]">
           <SidebarTrigger />
-          <div className="text-xs font-semibold text-white tracking-tight flex items-center gap-1.5">
-            api21 <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">ADMIN</span>
+          <div className="text-xs font-semibold text-zinc-100 tracking-tight flex items-center gap-1.5">
+            api21 <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono">ADMIN</span>
           </div>
         </header>
         {children}
