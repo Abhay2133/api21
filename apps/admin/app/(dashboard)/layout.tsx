@@ -7,17 +7,19 @@ import { useAuthStore } from '../../store/useAuthStore';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isCheckingAuth, checkAuth } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    if (!isAuthenticated) {
-      router.replace('/login');
-    }
-  }, [isAuthenticated, router]);
+    checkAuth().then((authed) => {
+      if (!authed) {
+        router.replace('/login');
+      }
+    });
+  }, [checkAuth, router]);
 
-  if (!mounted || !isAuthenticated) {
+  if (!mounted || isCheckingAuth || !isAuthenticated) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-[#090d16]">
         <div className="flex flex-col items-center gap-3">

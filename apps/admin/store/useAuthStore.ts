@@ -1,60 +1,72 @@
 import { create } from 'zustand';
+import { apiClient } from '../lib/api-client';
 
 export interface AdminUser {
   username: string;
   id?: number;
   created_at?: string;
+  ip_address?: string;
 }
 
 interface AuthState {
   user: AdminUser | null;
-  accessToken: string | null;
-  csrfToken: string | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
-  setAuth: (data: { user: AdminUser; accessToken: string; csrfToken?: string }) => void;
-  logout: () => void;
-  setLoading: (loading: boolean) => void;
+  isCheckingAuth: boolean;
+  checkAuth: () => Promise<boolean>;
+  setAuth: (user: AdminUser) => void;
+  logout: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: typeof window !== 'undefined' ? JSON.parse(sessionStorage.getItem('admin_user') || 'null') : null,
-  accessToken: typeof window !== 'undefined' ? sessionStorage.getItem('admin_token') : null,
-  csrfToken: typeof window !== 'undefined' ? sessionStorage.getItem('admin_csrf') : null,
-  isAuthenticated: typeof window !== 'undefined' ? !!sessionStorage.getItem('admin_token') : false,
-  isLoading: false,
+export const useAuthStore = create<AuthState>((set, get) => ({
+  user: null,
+  isAuthenticated: false,
+  isCheckingAuth: true,
 
-  setAuth: ({ user, accessToken, csrfToken }) => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('admin_token', accessToken);
-      sessionStorage.setItem('admin_user', JSON.stringify(user));
-      if (csrfToken) {
-        sessionStorage.setItem('admin_csrf', csrfToken);
+  checkAuth: async () => {
+    try {
+      set({ isCheckingAuth: true });
+      const res = await apiClient.get('/api/v1/admin/me');
+      if (res.status === 'success' && res.data) {
+        set({
+          user: res.data,
+          isAuthenticated: true,
+          isCheckingAuth: false,
+        });
+        return true;
       }
+    } catch {
+      // 401 or network error -> not authenticated
     }
-    set({
-      user,
-      accessToken,
-      csrfToken: csrfToken || null,
-      isAuthenticated: true,
-      isLoading: false,
-    });
-  },
 
-  logout: () => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('admin_token');
-      sessionStorage.removeItem('admin_user');
-      sessionStorage.removeItem('admin_csrf');
-    }
     set({
       user: null,
-      accessToken: null,
-      csrfToken: null,
       isAuthenticated: false,
-      isLoading: false,
+      isCheckingAuth: false,
+    });
+    return false;
+  },
+
+  setAuth: (user: AdminUser) => {
+    set({
+      user,
+      isAuthenticated: true,
+      isCheckingAuth: false,
     });
   },
 
-  setLoading: (isLoading) => set({ isLoading }),
+  logout: async () => {
+    try {
+      await apiClient.post('/api/v1/admin/logout');
+    } catch {}
+
+    set({
+      user: null,
+      isAuthenticated: false,
+      isCheckingAuth: false,
+    });
+
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+  },
 }));

@@ -1,69 +1,100 @@
-import { useAuthStore } from '../store/useAuthStore';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-
-export class ApiError extends Error {
-  constructor(public status: number, message: string, public data?: any) {
-    super(message);
-    this.name = 'ApiError';
-  }
+export interface ApiResponse<T = any> {
+  status: 'success' | 'error';
+  data?: T;
+  message?: string;
 }
 
-async function request<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
-  const { accessToken, csrfToken, logout } = useAuthStore.getState();
+let inMemoryCsrfToken: string | null = null;
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
-  };
+export function setApiCsrfToken(token: string | null) {
+  inMemoryCsrfToken = token;
+}
 
-  if (accessToken) {
-    headers['Authorization'] = `Bearer ${accessToken}`;
+export function getCsrfToken(): string | null {
+  if (inMemoryCsrfToken) return inMemoryCsrfToken;
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^|;\\s*)csrf_token=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+class ApiClient {
+  private get baseUrl(): string {
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
   }
 
-  if (csrfToken) {
-    headers['X-CSRF-Token'] = csrfToken;
-  }
+  private async request<T = any>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<ApiResponse<T>> {
+    const url = `${this.baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-    credentials: 'include',
-  });
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...((options.headers as Record<string, string>) || {}),
+    };
 
-  let responseData: any;
-  const contentType = response.headers.get('content-type');
-  if (contentType && contentType.includes('application/json')) {
-    responseData = await response.json().catch(() => null);
-  } else {
-    responseData = await response.text().catch(() => '');
-  }
-
-  if (!response.ok) {
-    if (response.status === 401 && !endpoint.includes('/login')) {
-      logout();
+    // Double submit CSRF protection: attach X-CSRF-Token for mutating methods
+    const method = (options.method || 'GET').toUpperCase();
+    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+      const csrfToken = getCsrfToken();
+      if (csrfToken) {
+        headers['X-CSRF-Token'] = csrfToken;
+      }
     }
-    const errorMsg = responseData?.message || `Request failed with status ${response.status}`;
-    throw new ApiError(response.status, errorMsg, responseData);
+
+    try {
+      const res = await fetch(url, {
+        ...options,
+        headers,
+        credentials: 'include', // Always send cookies cross-domain
+      });
+
+      const contentType = res.headers.get('content-type');
+      let data: any = {};
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      }
+
+      if (!res.ok) {
+        const errorMsg = data?.message || `Request failed with status ${res.status}`;
+        throw new Error(errorMsg);
+      }
+
+      // If response delivers a csrfToken, automatically capture it
+      if (data?.data?.csrfToken) {
+        setApiCsrfToken(data.data.csrfToken);
+      }
+
+      return data;
+    } catch (err: any) {
+      throw err;
+    }
   }
 
-  return responseData;
+  get<T = any>(endpoint: string, headers?: Record<string, string>) {
+    return this.request<T>(endpoint, { method: 'GET', headers });
+  }
+
+  post<T = any>(endpoint: string, body?: any, headers?: Record<string, string>) {
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
+      headers,
+    });
+  }
+
+  put<T = any>(endpoint: string, body?: any, headers?: Record<string, string>) {
+    return this.request<T>(endpoint, {
+      method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined,
+      headers,
+    });
+  }
+
+  delete<T = any>(endpoint: string, headers?: Record<string, string>) {
+    return this.request<T>(endpoint, { method: 'DELETE', headers });
+  }
 }
 
-export const apiClient = {
-  get: <T = any>(endpoint: string, options?: RequestInit) => request<T>(endpoint, { ...options, method: 'GET' }),
-  post: <T = any>(endpoint: string, body?: any, options?: RequestInit) =>
-    request<T>(endpoint, {
-      ...options,
-      method: 'POST',
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    }),
-  put: <T = any>(endpoint: string, body?: any, options?: RequestInit) =>
-    request<T>(endpoint, {
-      ...options,
-      method: 'PUT',
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    }),
-  delete: <T = any>(endpoint: string, options?: RequestInit) => request<T>(endpoint, { ...options, method: 'DELETE' }),
-};
+export const apiClient = new ApiClient();

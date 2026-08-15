@@ -36,7 +36,7 @@ export default function DeploymentsPage() {
       const res = await apiClient.post('/api/v1/webhooks/deploy');
       setMessage({
         type: 'success',
-        text: `Redeployment initiated with ID: ${res.deployment_id}`,
+        text: `Redeployment initiated with ID: ${res.data?.deployment_id || (res as any).deployment_id || 'deploy_task'}`,
       });
       fetchDeployments();
     } catch (err: any) {

@@ -1,12 +1,11 @@
 import request from 'supertest';
 import { createApp } from '../src/app.js';
-import { config } from '../src/config/env.js';
 import { databaseService, DatabaseService } from '../src/core/database/database.service.js';
 import { redisService } from '../src/core/redis/redis.service.js';
 import { bullMQService } from '../src/core/bullmq/bullmq.service.js';
 import { Express } from 'express';
 
-describe('Admin Authentication & Management Endpoints (TDD)', () => {
+describe('Admin Authentication & Management Endpoints (Cookie + CSRF TDD)', () => {
   let app: Express;
   const mockQuery = jest.fn();
 
@@ -28,8 +27,7 @@ describe('Admin Authentication & Management Endpoints (TDD)', () => {
   });
 
   describe('POST /api/v1/admin/login', () => {
-    it('should authenticate valid master credentials and return tokens', async () => {
-      // Mock session insert
+    it('should authenticate master credentials and set persistent cookies', async () => {
       mockQuery.mockResolvedValueOnce({
         rows: [
           {
@@ -47,10 +45,15 @@ describe('Admin Authentication & Management Endpoints (TDD)', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('success');
-      expect(res.body.data.accessToken).toBeDefined();
       expect(res.body.data.csrfToken).toBeDefined();
       expect(res.body.data.user.username).toBe('admin');
-      expect(res.headers['set-cookie']).toBeDefined();
+      
+      const cookies = res.headers['set-cookie'] as unknown as string[];
+      expect(cookies).toBeDefined();
+      expect(cookies.some((c) => c.includes('admin_session='))).toBe(true);
+      expect(cookies.some((c) => c.includes('csrf_token='))).toBe(true);
+      expect(cookies.some((c) => c.includes('HttpOnly'))).toBe(true);
+      expect(cookies.some((c) => c.includes('Max-Age=604800'))).toBe(true);
     });
 
     it('should reject invalid password with 401', async () => {
@@ -74,12 +77,12 @@ describe('Admin Authentication & Management Endpoints (TDD)', () => {
   });
 
   describe('GET /api/v1/admin/me', () => {
-    it('should return admin profile when valid session token is provided', async () => {
+    it('should return admin profile when valid admin_session cookie is sent', async () => {
       mockQuery.mockResolvedValueOnce({
         rows: [
           {
             id: 10,
-            token: 'valid-admin-token',
+            token: 'valid-cookie-token',
             username: 'admin',
             is_active: true,
           },
@@ -88,14 +91,14 @@ describe('Admin Authentication & Management Endpoints (TDD)', () => {
 
       const res = await request(app)
         .get('/api/v1/admin/me')
-        .set('Authorization', 'Bearer valid-admin-token');
+        .set('Cookie', 'admin_session=valid-cookie-token');
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('success');
       expect(res.body.data.username).toBe('admin');
     });
 
-    it('should return 401 when token is missing', async () => {
+    it('should return 401 when cookie is missing', async () => {
       const res = await request(app).get('/api/v1/admin/me');
       expect(res.status).toBe(401);
       expect(res.body.status).toBe('error');
@@ -110,7 +113,7 @@ describe('Admin Authentication & Management Endpoints (TDD)', () => {
 
       const res = await request(app)
         .get('/api/v1/admin/system-metrics')
-        .set('Authorization', 'Bearer valid-token');
+        .set('Cookie', 'admin_session=valid-token');
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('success');
@@ -124,11 +127,9 @@ describe('Admin Authentication & Management Endpoints (TDD)', () => {
 
   describe('GET /api/v1/admin/deployments', () => {
     it('should return list of deployments from database', async () => {
-      // 1. Mock session auth
       mockQuery.mockResolvedValueOnce({
         rows: [{ id: 10, token: 'valid-token', username: 'admin', is_active: true }],
       });
-      // 2. Mock deployments select
       mockQuery.mockResolvedValueOnce({
         rows: [
           {
@@ -148,7 +149,7 @@ describe('Admin Authentication & Management Endpoints (TDD)', () => {
 
       const res = await request(app)
         .get('/api/v1/admin/deployments')
-        .set('Authorization', 'Bearer valid-token');
+        .set('Cookie', 'admin_session=valid-token');
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('success');
@@ -159,11 +160,9 @@ describe('Admin Authentication & Management Endpoints (TDD)', () => {
 
   describe('GET /api/v1/admin/deployments/:id/logs', () => {
     it('should return logs for specific deployment ID', async () => {
-      // 1. Mock session auth
       mockQuery.mockResolvedValueOnce({
         rows: [{ id: 10, token: 'valid-token', username: 'admin', is_active: true }],
       });
-      // 2. Mock deployment logs select
       mockQuery.mockResolvedValueOnce({
         rows: [
           { id: 1, deployment_id: 'dep_1', message: 'Step 1: Cloning', created_at: new Date().toISOString() },
@@ -173,7 +172,7 @@ describe('Admin Authentication & Management Endpoints (TDD)', () => {
 
       const res = await request(app)
         .get('/api/v1/admin/deployments/dep_1/logs')
-        .set('Authorization', 'Bearer valid-token');
+        .set('Cookie', 'admin_session=valid-token');
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('success');
@@ -182,21 +181,55 @@ describe('Admin Authentication & Management Endpoints (TDD)', () => {
     });
   });
 
-  describe('POST /api/v1/admin/terminal/ticket', () => {
-    it('should generate a short-lived single-use ticket for WebSocket terminal connection', async () => {
-      // Mock session auth
+  describe('POST /api/v1/admin/terminal/ticket (Double Submit CSRF Verification)', () => {
+    it('should generate ticket when valid cookie and matching X-CSRF-Token are provided', async () => {
       mockQuery.mockResolvedValueOnce({
         rows: [{ id: 10, token: 'valid-token', username: 'admin', is_active: true }],
       });
 
       const res = await request(app)
         .post('/api/v1/admin/terminal/ticket')
-        .set('Authorization', 'Bearer valid-token');
+        .set('Cookie', 'admin_session=valid-token; csrf_token=csrf_secret_999')
+        .set('X-CSRF-Token', 'csrf_secret_999');
 
       expect(res.status).toBe(201);
       expect(res.body.status).toBe('success');
       expect(res.body.data.ticket).toBeDefined();
-      expect(res.body.data.expiresIn).toBeDefined();
+    });
+
+    it('should reject mutating request with 403 when CSRF token is missing or mismatched', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id: 10, token: 'valid-token', username: 'admin', is_active: true }],
+      });
+
+      const res = await request(app)
+        .post('/api/v1/admin/terminal/ticket')
+        .set('Cookie', 'admin_session=valid-token; csrf_token=csrf_secret_999')
+        .set('X-CSRF-Token', 'wrong_csrf_token');
+
+      expect(res.status).toBe(403);
+      expect(res.body.status).toBe('error');
+      expect(res.body.message).toContain('CSRF token verification failed');
+    });
+  });
+
+  describe('POST /api/v1/admin/logout', () => {
+    it('should clear cookies and revoke active session', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id: 10, token: 'valid-token', username: 'admin', is_active: true }],
+      });
+      mockQuery.mockResolvedValueOnce({ rowCount: 1 });
+
+      const res = await request(app)
+        .post('/api/v1/admin/logout')
+        .set('Cookie', 'admin_session=valid-token; csrf_token=csrf_secret_999')
+        .set('X-CSRF-Token', 'csrf_secret_999');
+
+      expect(res.status).toBe(200);
+      expect(res.body.status).toBe('success');
+      
+      const cookies = res.headers['set-cookie'] as unknown as string[];
+      expect(cookies.some((c) => c.includes('admin_session=;') || c.includes('Max-Age=0'))).toBe(true);
     });
   });
 });

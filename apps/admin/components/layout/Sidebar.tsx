@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { LayoutDashboard, Terminal, Rocket, LogOut, Shield } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -27,17 +27,13 @@ const navItems = [
 ];
 
 export function Sidebar() {
+  const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
 
   const handleLogout = async () => {
-    try {
-      await apiClient.post('/api/v1/admin/logout');
-    } catch {}
-    logout();
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login';
-    }
+    await logout();
+    router.replace('/login');
   };
 
   return (

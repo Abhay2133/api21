@@ -44,7 +44,6 @@ export interface SystemMetricsResponse {
 }
 
 export interface AdminLoginResponse {
-  accessToken: string;
   csrfToken: string;
   user: {
     username: string;

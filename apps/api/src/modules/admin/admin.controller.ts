@@ -13,15 +13,18 @@ router.post('/login', async (req: AdminRequest, res: Response, next: NextFunctio
 
     const data = await adminService.login(username, password, ip, userAgent);
 
-    // Set HttpOnly session cookie and csrf_token cookie
+    // Set HttpOnly session cookie and readable csrf_token cookie (7-day persistence)
     res.setHeader('Set-Cookie', [
-      `admin_session=${data.accessToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400`,
-      `csrf_token=${data.csrfToken}; Path=/; SameSite=Lax; Max-Age=86400`,
+      `admin_session=${data.token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`,
+      `csrf_token=${data.csrfToken}; Path=/; SameSite=Lax; Max-Age=604800`,
     ]);
 
     return res.status(200).json({
       status: 'success',
-      data,
+      data: {
+        csrfToken: data.csrfToken,
+        user: data.user,
+      },
     });
   } catch (err) {
     next(err);
@@ -29,15 +32,16 @@ router.post('/login', async (req: AdminRequest, res: Response, next: NextFunctio
 });
 
 // POST /api/v1/admin/logout - Clear session
-router.post('/logout', async (req: AdminRequest, res: Response, next: NextFunction) => {
+router.post('/logout', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : '';
-    await adminService.logout(token);
+    const token = req.adminSession?.token;
+    if (token) {
+      await adminService.logout(token);
+    }
 
     res.setHeader('Set-Cookie', [
-      'admin_session=; Path=/; HttpOnly; Max-Age=0',
-      'csrf_token=; Path=/; Max-Age=0',
+      'admin_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0',
+      'csrf_token=; Path=/; SameSite=Lax; Max-Age=0',
     ]);
 
     return res.status(200).json({
@@ -53,6 +57,12 @@ router.post('/logout', async (req: AdminRequest, res: Response, next: NextFuncti
 router.get('/me', adminGuard, async (req: AdminRequest, res: Response, next: NextFunction) => {
   try {
     const session = req.adminSession!;
+    const cookies = req.headers.cookie ? Object.fromEntries(req.headers.cookie.split(';').map((c) => {
+      const [k, ...v] = c.trim().split('=');
+      return [k, decodeURIComponent(v.join('='))];
+    })) : {};
+    const csrfToken = cookies['csrf_token'] || '';
+
     return res.status(200).json({
       status: 'success',
       data: {
@@ -60,6 +70,7 @@ router.get('/me', adminGuard, async (req: AdminRequest, res: Response, next: Nex
         username: session.username,
         ip_address: session.ip_address,
         created_at: session.created_at,
+        csrfToken,
       },
     });
   } catch (err) {

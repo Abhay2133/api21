@@ -47,7 +47,7 @@ export class AdminService {
     const session = await this.model.createAdminSession(token, username, ip, userAgent, sessionHash);
 
     return {
-      accessToken: session.token,
+      token: session.token,
       csrfToken,
       user: {
         username: session.username,

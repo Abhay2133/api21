@@ -52,8 +52,7 @@ export default function XTermClient() {
         wsBase = `${isSecure ? 'wss' : 'ws'}://${host}`;
       }
 
-      const { accessToken } = useAuthStore.getState();
-      const wsUrl = `${wsBase}/ws/admin/terminal?ticket=${ticket}&token=${accessToken || ''}`;
+      const wsUrl = `${wsBase}/ws/admin/terminal?ticket=${ticket}`;
 
       // 3. Initialize xterm instance if not already initialized
       if (!xtermInstance.current && terminalRef.current) {

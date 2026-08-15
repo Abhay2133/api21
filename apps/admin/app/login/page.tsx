@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
@@ -11,12 +11,20 @@ import { Shield, Lock, User, AlertCircle, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setAuth } = useAuthStore();
+  const { setAuth, checkAuth } = useAuthStore();
 
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    checkAuth().then((authed) => {
+      if (authed) {
+        router.replace('/overview');
+      }
+    });
+  }, [checkAuth, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,14 +38,9 @@ export default function LoginPage() {
 
     try {
       const res = await apiClient.post('/api/v1/admin/login', { username, password });
-      const { accessToken, csrfToken, user } = res.data;
+      const user = res.data?.user || { username };
 
-      setAuth({
-        accessToken,
-        csrfToken,
-        user: user || { username },
-      });
-
+      setAuth(user);
       router.push('/overview');
     } catch (err: any) {
       setError(err.message || 'Invalid username or master credentials.');
@@ -128,7 +131,7 @@ export default function LoginPage() {
         </Card>
 
         <div className="mt-6 text-center text-[11px] text-slate-600 font-mono">
-          Protected with CSRF verification & session token hardening
+          Protected with pure cookie authentication & double-submit CSRF hardening
         </div>
       </div>
     </div>
