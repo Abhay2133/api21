@@ -9,11 +9,18 @@ if (dns.setDefaultResultOrder) {
 }
 
 import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'fs';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const migrationsDir = path.resolve(__dirname, '../../migrations');
+function getMigrationsDir(): string {
+  const cwd = process.cwd();
+  const candidates = [
+    path.resolve(cwd, 'apps/api/src/migrations'),
+    path.resolve(cwd, 'src/migrations'),
+    path.resolve(cwd, 'apps/api/dist/migrations'),
+    path.resolve(cwd, 'dist/migrations'),
+  ];
+  return candidates.find((p) => fs.existsSync(p)) || path.resolve(cwd, 'apps/api/src/migrations');
+}
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
@@ -31,7 +38,7 @@ export class DatabaseService implements OnModuleInit, OnApplicationShutdown {
       connection: config.databaseUrl,
       pool: { min: 2, max: 10 },
       migrations: {
-        directory: migrationsDir,
+        directory: getMigrationsDir(),
         extension: 'ts',
         loadExtensions: ['.ts', '.js'],
       },

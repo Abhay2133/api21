@@ -43,9 +43,13 @@ export async function createNestApp(): Promise<INestApplication> {
 
   // Static HTML documentation served at root /
   const expressApp = app.getHttpAdapter().getInstance();
-  const staticPathInDist = path.resolve(process.cwd(), 'dist', 'static');
-  const staticPathInRoot = path.resolve(process.cwd(), 'static');
-  const staticPath = fs.existsSync(staticPathInDist) ? staticPathInDist : staticPathInRoot;
+  const candidates = [
+    path.resolve(process.cwd(), 'apps/api/dist/static'),
+    path.resolve(process.cwd(), 'apps/api/static'),
+    path.resolve(process.cwd(), 'dist', 'static'),
+    path.resolve(process.cwd(), 'static'),
+  ];
+  const staticPath = candidates.find((p) => fs.existsSync(p)) || path.resolve(process.cwd(), 'apps/api/static');
 
   expressApp.use(express.static(staticPath));
   expressApp.get('/', (req: any, res: any) => {

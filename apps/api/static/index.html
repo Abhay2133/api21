@@ -2,8 +2,8 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Interactive API Documentation for api21 - High performance REST server built with Express, TypeScript, PostgreSQL, Redis, and BullMQ.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Interactive API Documentation for api21 - High performance REST server built with NestJS, TypeScript, PostgreSQL, Redis, and BullMQ.">
     <title>api21 - Interactive API Documentation</title>
 
     <script>
@@ -85,6 +85,13 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            min-width: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            max-width: 100vw;
+            overflow-x: hidden;
         }
 
         body {
@@ -92,13 +99,30 @@
             background-color: var(--bg-main);
             color: var(--text-primary);
             min-height: 100vh;
+            max-width: 100vw;
+            width: 100%;
             overflow-x: hidden;
             display: flex;
             line-height: 1.5;
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
-        /* Ambient Glows */
+        p, span, a, h1, h2, h3, h4, td, th {
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        /* Ambient Glows strictly enclosed */
+        .ambient-wrapper {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
         .ambient-glow {
             position: absolute;
             width: 400px;
@@ -107,11 +131,10 @@
             background: radial-gradient(circle, var(--accent-primary-glow) 0%, rgba(18,18,20,0) 70%);
             top: -150px;
             right: -100px;
-            z-index: 0;
-            pointer-events: none;
             opacity: var(--ambient-opacity);
             transition: opacity 0.25s ease;
         }
+
         .ambient-glow-2 {
             position: absolute;
             width: 500px;
@@ -120,10 +143,54 @@
             background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(18,18,20,0) 70%);
             bottom: -200px;
             left: -200px;
-            z-index: 0;
-            pointer-events: none;
             opacity: var(--ambient-opacity);
             transition: opacity 0.25s ease;
+        }
+
+        /* Top Mobile Header */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1rem;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+        }
+
+        .mobile-menu-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background-color: var(--toggle-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        /* Mobile Backdrop */
+        .mobile-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 60;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .mobile-backdrop.open {
+            display: block;
+            opacity: 1;
         }
 
         /* Sidebar navigation */
@@ -139,10 +206,10 @@
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            z-index: 10;
+            z-index: 70;
             backdrop-filter: blur(10px);
             overflow: hidden;
-            transition: background-color 0.25s ease, border-color 0.25s ease;
+            transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
         }
 
         aside nav {
@@ -283,14 +350,19 @@
             flex: 1;
             display: flex;
             min-height: 100vh;
+            width: calc(100% - var(--sidebar-width));
+            max-width: calc(100% - var(--sidebar-width));
             position: relative;
             z-index: 1;
+            min-width: 0;
         }
 
         .content-section {
             flex: 1.2;
             padding: 3rem 3.5rem;
             max-width: 820px;
+            min-width: 0;
+            width: 100%;
         }
 
         .code-section {
@@ -305,6 +377,9 @@
             top: 0;
             height: 100vh;
             overflow-y: auto;
+            overflow-x: hidden;
+            min-width: 0;
+            width: 100%;
             transition: background-color 0.25s ease, border-color 0.25s ease;
         }
 
@@ -346,6 +421,14 @@
         }
 
         /* Endpoint badge */
+        .endpoint-wrapper {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
         .endpoint-badge {
             display: inline-flex;
             align-items: center;
@@ -355,7 +438,6 @@
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.8rem;
             font-weight: 700;
-            margin-bottom: 1.25rem;
             border: 1px solid var(--border-color);
         }
 
@@ -377,6 +459,13 @@
             border-color: rgba(244, 63, 94, 0.2);
         }
 
+        .endpoint-path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
         /* Cards */
         .glass-card {
             background: var(--bg-card);
@@ -385,19 +474,42 @@
             padding: 1.25rem 1.5rem;
             margin-bottom: 1.5rem;
             box-shadow: var(--shadow-card);
+            max-width: 100%;
+            overflow: hidden;
             transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
         }
 
-        /* Tables */
+        /* Responsive Table Container */
+        .table-responsive {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 1.25rem 0;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) transparent;
+        }
+
+        .table-responsive::-webkit-scrollbar {
+            height: 6px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb);
+            border-radius: 3px;
+        }
+
         table {
             width: 100%;
+            min-width: 480px;
             border-collapse: collapse;
-            margin: 1.25rem 0;
             font-size: 0.875rem;
+            margin: 0;
         }
 
         th, td {
-            padding: 0.65rem 0.85rem;
+            padding: 0.75rem 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
         }
@@ -406,6 +518,7 @@
             font-weight: 600;
             color: var(--text-primary);
             background-color: var(--nav-hover-bg);
+            white-space: nowrap;
         }
 
         td {
@@ -416,12 +529,14 @@
             font-family: 'JetBrains Mono', monospace;
             color: var(--accent-secondary);
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .param-type {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.8rem;
             color: var(--accent-primary);
+            white-space: nowrap;
         }
 
         /* Code Blocks */
@@ -431,11 +546,23 @@
             border-radius: 8px;
             padding: 1rem;
             overflow-x: auto;
+            max-width: 100%;
+            width: 100%;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.825rem;
             color: var(--code-text);
             margin-bottom: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) transparent;
             transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+
+        pre::-webkit-scrollbar {
+            height: 6px;
+        }
+        pre::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb);
+            border-radius: 3px;
         }
 
         code {
@@ -445,12 +572,17 @@
             background-color: var(--code-inline-bg);
             padding: 0.15rem 0.35rem;
             border-radius: 4px;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         pre code {
             color: inherit;
             background-color: transparent;
             padding: 0;
+            overflow-wrap: normal;
+            word-break: normal;
+            white-space: pre;
         }
 
         /* Code Tab Switchers */
@@ -458,6 +590,9 @@
             display: flex;
             gap: 0.5rem;
             margin-bottom: 0.75rem;
+            overflow-x: auto;
+            max-width: 100%;
+            -webkit-overflow-scrolling: touch;
         }
 
         .code-tab {
@@ -469,6 +604,7 @@
             padding: 0.25rem 0.5rem;
             cursor: pointer;
             border-bottom: 2px solid transparent;
+            white-space: nowrap;
             transition: all 0.2s ease;
         }
 
@@ -488,6 +624,7 @@
             font-weight: 600;
             background-color: var(--nav-hover-bg);
             border: 1px solid var(--border-color);
+            white-space: nowrap;
         }
 
         .status-badge.up {
@@ -528,46 +665,98 @@
             100% { transform: scale(0.9); opacity: 0.6; }
         }
 
-        /* Smooth scroll behavior */
-        html {
-            scroll-behavior: smooth;
-        }
-
         /* Responsiveness */
         @media (max-width: 1024px) {
             body {
                 flex-direction: column;
+                padding-top: 60px;
             }
+
+            .mobile-header {
+                display: flex;
+            }
+
             aside {
-                width: 100%;
-                height: auto;
-                position: relative;
-                padding: 1.25rem 1.5rem;
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 280px;
+                max-width: 85vw;
+                height: 100vh;
+                transform: translateX(-100%);
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+                z-index: 100;
             }
+
+            aside.open {
+                transform: translateX(0);
+            }
+
             main {
                 margin-left: 0;
+                width: 100%;
+                max-width: 100vw;
                 flex-direction: column;
             }
+
             .content-section {
-                padding: 2rem 1.5rem;
+                padding: 1.75rem 1.25rem;
+                max-width: 100%;
+                width: 100%;
             }
+
             .code-section {
                 height: auto;
                 position: relative;
                 border-left: none;
                 border-top: 1px solid var(--border-color);
-                padding: 2rem 1.5rem;
+                padding: 2rem 1.25rem;
+                max-width: 100%;
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 1.85rem;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+                margin-top: 2rem;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="ambient-glow"></div>
-    <div class="ambient-glow-2"></div>
+    <!-- Ambient Glow container -->
+    <div class="ambient-wrapper" aria-hidden="true">
+        <div class="ambient-glow"></div>
+        <div class="ambient-glow-2"></div>
+    </div>
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="logo-brand">
+            <div class="logo-icon">21</div>
+            <span class="logo-text">api21</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button id="mobile-theme-toggle" class="theme-toggle-btn" title="Toggle Light / Dark mode" aria-label="Toggle Light / Dark mode">
+                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+            <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Open Navigation Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Drawer Backdrop -->
+    <div id="mobile-backdrop" class="mobile-backdrop"></div>
 
     <!-- Sidebar navigation -->
-    <aside>
+    <aside id="sidebar-drawer">
         <div class="logo-section">
             <div class="logo-brand">
                 <div class="logo-icon">21</div>
@@ -630,14 +819,14 @@
             
             <section id="overview">
                 <h1>API Reference</h1>
-                <p>Welcome to the official API documentation for <strong>api21</strong>. A minimal, high-performance REST API backend engine built with Express, TypeScript, PostgreSQL, Redis, and BullMQ background workers.</p>
+                <p>Welcome to the official API documentation for <strong>api21</strong>. A minimal, high-performance REST API backend engine built with NestJS, TypeScript, PostgreSQL, Redis, and BullMQ background workers.</p>
                 
                 <div class="glass-card">
                     <h3 style="margin-top: 0;">Architecture Summary</h3>
                     <p>Designed for low latency, high concurrency, and complete horizontal scalability:</p>
                     <ul style="margin-left: 1.25rem; color: var(--text-secondary); font-size: 0.9rem; display: flex; flex-direction: column; gap: 0.4rem;">
-                        <li><strong>Server Framework:</strong> Express.js engine compiled via TypeScript.</li>
-                        <li><strong>Relational DB:</strong> PostgreSQL managed with `pg` client pool and auto-migration capabilities.</li>
+                        <li><strong>Server Framework:</strong> NestJS modular architecture compiled via TypeScript.</li>
+                        <li><strong>Relational DB:</strong> PostgreSQL managed with Knex connection pooling and auto-migration capabilities.</li>
                         <li><strong>Caching & Rate Limiting:</strong> Redis-backed distributed sliding window rate limiter.</li>
                         <li><strong>Background Queue:</strong> BullMQ queue engine for async background job execution with Bull Board metrics UI.</li>
                     </ul>
@@ -647,8 +836,8 @@
             <section id="rate-limiting">
                 <h2>Rate Limiting</h2>
                 <p>All endpoints under the <code>/api/v1/</code> path are protected by a sliding window rate limiter backed by Redis. This prevents service abuse and guarantees backend stability.</p>
-                <div class="glass-card">
-                    <table style="margin: 0;">
+                <div class="table-responsive">
+                    <table>
                         <thead>
                             <tr>
                                 <th>Header</th>
@@ -675,13 +864,15 @@
 
             <section id="health-endpoint">
                 <h2>Health Check</h2>
-                <div class="endpoint-badge get">GET</div>
-                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/health</code>
-                <p style="margin-top: 1rem;">Returns system and connection diagnostics for core dependencies (PostgreSQL, Redis, BullMQ). Ideal for container orchestrator readiness checks.</p>
+                <div class="endpoint-wrapper">
+                    <div class="endpoint-badge get">GET</div>
+                    <code class="endpoint-path">/api/v1/health</code>
+                </div>
+                <p>Returns system and connection diagnostics for core dependencies (PostgreSQL, Redis, BullMQ). Ideal for container orchestrator readiness checks.</p>
                 
                 <h3>Response Format</h3>
                 <pre><code>{
-  "status": "ok",
+  "status": "healthy",
   "services": {
     "database": "connected",
     "redis": "connected",
@@ -692,9 +883,11 @@
 
             <section id="users-list">
                 <h2>Get Users</h2>
-                <div class="endpoint-badge get">GET</div>
-                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/users</code>
-                <p style="margin-top: 1rem;">Retrieves an array of all registered user objects from the database.</p>
+                <div class="endpoint-wrapper">
+                    <div class="endpoint-badge get">GET</div>
+                    <code class="endpoint-path">/api/v1/users</code>
+                </div>
+                <p>Retrieves an array of all registered user objects from the database.</p>
 
                 <h3>Query Parameters</h3>
                 <p>No query parameters required.</p>
@@ -702,129 +895,147 @@
 
             <section id="user-create">
                 <h2>Create User</h2>
-                <div class="endpoint-badge post">POST</div>
-                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/users</code>
-                <p style="margin-top: 1rem;">Creates a new user record in PostgreSQL. Body payload must be JSON.</p>
+                <div class="endpoint-wrapper">
+                    <div class="endpoint-badge post">POST</div>
+                    <code class="endpoint-path">/api/v1/users</code>
+                </div>
+                <p>Creates a new user record in PostgreSQL. Body payload must be JSON.</p>
 
                 <h3>Request Body Parameters</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Type</th>
-                            <th>Required</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="param-name">name</td>
-                            <td class="param-type">string</td>
-                            <td style="color: var(--accent-error);">Yes</td>
-                            <td>Display name of the user (max 255 characters).</td>
-                        </tr>
-                        <tr>
-                            <td class="param-name">email</td>
-                            <td class="param-type">string</td>
-                            <td style="color: var(--accent-error);">Yes</td>
-                            <td>Unique valid email address.</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="param-name">name</td>
+                                <td class="param-type">string</td>
+                                <td style="color: var(--accent-error);">Yes</td>
+                                <td>Display name of the user (max 255 characters).</td>
+                            </tr>
+                            <tr>
+                                <td class="param-name">email</td>
+                                <td class="param-type">string</td>
+                                <td style="color: var(--accent-error);">Yes</td>
+                                <td>Unique valid email address.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <section id="user-delete">
                 <h2>Delete User</h2>
-                <div class="endpoint-badge delete">DELETE</div>
-                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/users/:id</code>
-                <p style="margin-top: 1rem;">Permanently deletes a user record by primary key ID.</p>
+                <div class="endpoint-wrapper">
+                    <div class="endpoint-badge delete">DELETE</div>
+                    <code class="endpoint-path">/api/v1/users/:id</code>
+                </div>
+                <p>Permanently deletes a user record by primary key ID.</p>
 
                 <h3>Path Parameters</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Type</th>
-                            <th>Required</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="param-name">id</td>
-                            <td class="param-type">integer</td>
-                            <td style="color: var(--accent-error);">Yes</td>
-                            <td>Unique primary key ID of the target user.</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="param-name">id</td>
+                                <td class="param-type">integer</td>
+                                <td style="color: var(--accent-error);">Yes</td>
+                                <td>Unique primary key ID of the target user.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <section id="job-enqueue">
                 <h2>Enqueue Job</h2>
-                <div class="endpoint-badge post">POST</div>
-                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/jobs</code>
-                <p style="margin-top: 1rem;">Enqueues a new background job into BullMQ queue processor.</p>
+                <div class="endpoint-wrapper">
+                    <div class="endpoint-badge post">POST</div>
+                    <code class="endpoint-path">/api/v1/jobs</code>
+                </div>
+                <p>Enqueues a new background job into BullMQ queue processor.</p>
 
                 <h3>Request Body Parameters</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Type</th>
-                            <th>Required</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="param-name">type</td>
-                            <td class="param-type">string</td>
-                            <td style="color: var(--accent-error);">Yes</td>
-                            <td>Name/type of the job operation to execute.</td>
-                        </tr>
-                        <tr>
-                            <td class="param-name">payload</td>
-                            <td class="param-type">object</td>
-                            <td style="color: var(--accent-secondary);">No</td>
-                            <td>JSON metadata or context payload passed to background worker.</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="param-name">type</td>
+                                <td class="param-type">string</td>
+                                <td style="color: var(--accent-error);">Yes</td>
+                                <td>Name/type of the job operation to execute.</td>
+                            </tr>
+                            <tr>
+                                <td class="param-name">payload</td>
+                                <td class="param-type">object</td>
+                                <td style="color: var(--accent-secondary);">No</td>
+                                <td>JSON metadata or context payload passed to background worker.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <section id="job-status">
                 <h2>Job Status</h2>
-                <div class="endpoint-badge get">GET</div>
-                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/jobs/:jobId</code>
-                <p style="margin-top: 1rem;">Inspects the current state (active, completed, failed, delayed) of an enqueued background job.</p>
+                <div class="endpoint-wrapper">
+                    <div class="endpoint-badge get">GET</div>
+                    <code class="endpoint-path">/api/v1/jobs/:jobId</code>
+                </div>
+                <p>Inspects the current state (active, completed, failed, delayed) of an enqueued background job.</p>
 
                 <h3>Path Parameters</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Type</th>
-                            <th>Required</th>
-                            <th>Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="param-name">jobId</td>
-                            <td class="param-type">string</td>
-                            <td style="color: var(--accent-error);">Yes</td>
-                            <td>Unique job identifier returned upon enqueuing.</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="param-name">jobId</td>
+                                <td class="param-type">string</td>
+                                <td style="color: var(--accent-error);">Yes</td>
+                                <td>Unique job identifier returned upon enqueuing.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <section id="job-metrics">
                 <h2>Queue Metrics</h2>
-                <div class="endpoint-badge get">GET</div>
-                <code style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">/api/v1/jobs/metrics</code>
-                <p style="margin-top: 1rem;">Returns real-time BullMQ queue metrics including active, completed, failed, and waiting counts.</p>
+                <div class="endpoint-wrapper">
+                    <div class="endpoint-badge get">GET</div>
+                    <code class="endpoint-path">/api/v1/jobs/metrics</code>
+                </div>
+                <p>Returns real-time BullMQ queue metrics including active, completed, failed, and waiting counts.</p>
             </section>
             
         </div>
@@ -844,7 +1055,7 @@
                     <button class="code-tab" onclick="switchCode('health', 'js')">JavaScript</button>
                     <button class="code-tab" onclick="switchCode('health', 'go')">Go</button>
                 </div>
-                <pre><code id="code-health-curl">curl -X GET http://localhost:3000/api/v1/health</code><code id="code-health-js" style="display:none;">fetch('http://localhost:3000/api/v1/health')
+                <pre><code id="code-health-curl">curl -X GET http://localhost:5000/api/v1/health</code><code id="code-health-js" style="display:none;">fetch('http://localhost:5000/api/v1/health')
   .then(res => res.json())
   .then(data => console.log(data));</code><code id="code-health-go" style="display:none;">package main
 
@@ -855,7 +1066,7 @@ import (
 )
 
 func main() {
-	resp, err := http.Get("http://localhost:3000/api/v1/health")
+	resp, err := http.Get("http://localhost:5000/api/v1/health")
 	if err != nil {
 		panic(err)
 	}
@@ -873,7 +1084,7 @@ func main() {
                     <button class="code-tab" onclick="switchCode('getusers', 'js')">JavaScript</button>
                     <button class="code-tab" onclick="switchCode('getusers', 'go')">Go</button>
                 </div>
-                <pre><code id="code-getusers-curl">curl -X GET http://localhost:3000/api/v1/users</code><code id="code-getusers-js" style="display:none;">fetch('http://localhost:3000/api/v1/users')
+                <pre><code id="code-getusers-curl">curl -X GET http://localhost:5000/api/v1/users</code><code id="code-getusers-js" style="display:none;">fetch('http://localhost:5000/api/v1/users')
   .then(res => res.json())
   .then(data => console.log(data));</code><code id="code-getusers-go" style="display:none;">package main
 
@@ -884,7 +1095,7 @@ import (
 )
 
 func main() {
-	resp, err := http.Get("http://localhost:3000/api/v1/users")
+	resp, err := http.Get("http://localhost:5000/api/v1/users")
 	if err != nil {
 		panic(err)
 	}
@@ -902,9 +1113,9 @@ func main() {
                     <button class="code-tab" onclick="switchCode('createuser', 'js')">JavaScript</button>
                     <button class="code-tab" onclick="switchCode('createuser', 'go')">Go</button>
                 </div>
-                <pre><code id="code-createuser-curl">curl -X POST http://localhost:3000/api/v1/users \
+                <pre><code id="code-createuser-curl">curl -X POST http://localhost:5000/api/v1/users \
   -H "Content-Type: application/json" \
-  -d '{"name": "Alice Smith", "email": "alice@example.com"}'</code><code id="code-createuser-js" style="display:none;">fetch('http://localhost:3000/api/v1/users', {
+  -d '{"name": "Alice Smith", "email": "alice@example.com"}'</code><code id="code-createuser-js" style="display:none;">fetch('http://localhost:5000/api/v1/users', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -925,7 +1136,7 @@ import (
 func main() {
 	payload := []byte(`{"name": "Alice Smith", "email": "alice@example.com"}`)
 	resp, err := http.Post(
-		"http://localhost:3000/api/v1/users", 
+		"http://localhost:5000/api/v1/users", 
 		"application/json", 
 		bytes.NewBuffer(payload),
 	)
@@ -945,9 +1156,9 @@ func main() {
                     <button class="code-tab active" onclick="switchCode('enqueuejob', 'curl')">cURL</button>
                     <button class="code-tab" onclick="switchCode('enqueuejob', 'js')">JavaScript</button>
                 </div>
-                <pre><code id="code-enqueuejob-curl">curl -X POST http://localhost:3000/api/v1/jobs \
+                <pre><code id="code-enqueuejob-curl">curl -X POST http://localhost:5000/api/v1/jobs \
   -H "Content-Type: application/json" \
-  -d '{"type": "sendEmail", "payload": {"to": "user@example.com"}}'</code><code id="code-enqueuejob-js" style="display:none;">fetch('http://localhost:3000/api/v1/jobs', {
+  -d '{"type": "sendEmail", "payload": {"to": "user@example.com"}}'</code><code id="code-enqueuejob-js" style="display:none;">fetch('http://localhost:5000/api/v1/jobs', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -966,7 +1177,7 @@ func main() {
                     <button class="code-tab active" onclick="switchCode('jobmetrics', 'curl')">cURL</button>
                     <button class="code-tab" onclick="switchCode('jobmetrics', 'js')">JavaScript</button>
                 </div>
-                <pre><code id="code-jobmetrics-curl">curl -X GET http://localhost:3000/api/v1/jobs/metrics</code><code id="code-jobmetrics-js" style="display:none;">fetch('http://localhost:3000/api/v1/jobs/metrics')
+                <pre><code id="code-jobmetrics-curl">curl -X GET http://localhost:5000/api/v1/jobs/metrics</code><code id="code-jobmetrics-js" style="display:none;">fetch('http://localhost:5000/api/v1/jobs/metrics')
   .then(res => res.json())
   .then(data => console.log(data));</code></pre>
             </div>
@@ -985,12 +1196,42 @@ func main() {
             }
         }
 
-        document.getElementById('theme-toggle')?.addEventListener('click', () => {
+        function toggleTheme() {
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
             const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', nextTheme);
             localStorage.setItem('theme', nextTheme);
             updateToggleText(nextTheme);
+        }
+
+        document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
+        document.getElementById('mobile-theme-toggle')?.addEventListener('click', toggleTheme);
+
+        // Mobile Drawer Toggle Logic
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebarDrawer = document.getElementById('sidebar-drawer');
+        const mobileBackdrop = document.getElementById('mobile-backdrop');
+
+        function toggleMobileMenu(open) {
+            if (open) {
+                sidebarDrawer?.classList.add('open');
+                mobileBackdrop?.classList.add('open');
+            } else {
+                sidebarDrawer?.classList.remove('open');
+                mobileBackdrop?.classList.remove('open');
+            }
+        }
+
+        mobileMenuBtn?.addEventListener('click', () => toggleMobileMenu(true));
+        mobileBackdrop?.addEventListener('click', () => toggleMobileMenu(false));
+
+        // Auto close drawer when nav links tapped on mobile
+        document.querySelectorAll('aside nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    toggleMobileMenu(false);
+                }
+            });
         });
 
         // Initialize toggle text on load
@@ -998,9 +1239,10 @@ func main() {
 
         // Language tabs switcher
         function switchCode(endpoint, lang) {
-            const container = event.target.parentElement;
-            container.querySelectorAll('.code-tab').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            const btn = event.currentTarget || event.target;
+            const container = btn.parentElement;
+            container.querySelectorAll('.code-tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
 
             const preBlock = container.nextElementSibling;
             preBlock.querySelectorAll('code').forEach(code => code.style.display = 'none');
@@ -1051,12 +1293,18 @@ func main() {
                     bullmqIndicator.innerHTML = '<span class="pulse-dot"></span>Offline';
                 }
             } catch (e) {
-                pgIndicator.className = 'status-badge down';
-                pgIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
-                redisIndicator.className = 'status-badge down';
-                redisIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
-                bullmqIndicator.className = 'status-badge down';
-                bullmqIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
+                if (pgIndicator) {
+                    pgIndicator.className = 'status-badge down';
+                    pgIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
+                }
+                if (redisIndicator) {
+                    redisIndicator.className = 'status-badge down';
+                    redisIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
+                }
+                if (bullmqIndicator) {
+                    bullmqIndicator.className = 'status-badge down';
+                    bullmqIndicator.innerHTML = '<span class="pulse-dot"></span>Unreachable';
+                }
             }
         }
 
