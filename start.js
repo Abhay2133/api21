@@ -294,7 +294,7 @@ async function main() {
     }
 
     await logStep(deploymentId, 'Building TypeScript project in ./tmp/api21...');
-    execSync('npm run build', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
+    execSync('npm run build:api', { cwd: tmpDir, env: buildEnv, stdio: 'inherit' });
     
     const apiMainDistPath = path.join(tmpDir, 'apps', 'api', 'dist', 'main.js');
     const mainDistPath = path.join(tmpDir, 'dist', 'main.js');

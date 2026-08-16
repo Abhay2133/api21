@@ -20,3 +20,4 @@ tmp/
 
 # Tooling
 .playwright-mcp/
+tmp
