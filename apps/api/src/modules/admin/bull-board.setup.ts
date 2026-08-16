@@ -3,6 +3,7 @@ import { createBullBoard } from '@bull-board/api';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
 import { getSampleQueue } from '../jobs/jobs.job.js';
+import { getMaintenanceQueue } from '../jobs/maintenance.job.js';
 import { databaseService } from '../../core/database/database.service.js';
 import { config } from '../../config/env.js';
 
@@ -23,9 +24,10 @@ export const setupBullBoard = (app: Express | any) => {
   serverAdapter.setBasePath('/admin/queues');
 
   const sampleQueue = getSampleQueue();
+  const maintenanceQueue = getMaintenanceQueue();
 
   createBullBoard({
-    queues: [new BullMQAdapter(sampleQueue)],
+    queues: [new BullMQAdapter(sampleQueue), new BullMQAdapter(maintenanceQueue)],
     serverAdapter,
   });
 

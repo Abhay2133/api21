@@ -2,6 +2,7 @@ import { databaseService } from './core/database/database.service.js';
 import { redisService } from './core/redis/redis.service.js';
 import { bullMQService } from './core/bullmq/bullmq.service.js';
 import { initSampleWorker } from './modules/jobs/jobs.job.js';
+import { initMaintenanceWorker, scheduleNightlyPm2Restart } from './modules/jobs/maintenance.job.js';
 
 const startWorker = async () => {
   try {
@@ -10,8 +11,13 @@ const startWorker = async () => {
     await databaseService.init();
     redisService.initClient();
 
-    const worker = initSampleWorker(bullMQService);
-    console.log(`[Worker] BullMQ worker process active for queue: "${worker.name}".`);
+    const sampleWorker = initSampleWorker(bullMQService);
+    const maintenanceWorker = initMaintenanceWorker(bullMQService);
+    await scheduleNightlyPm2Restart();
+
+    console.log(
+      `[Worker] BullMQ workers active: ["${sampleWorker.name}", "${maintenanceWorker.name}"].`
+    );
 
     const shutdown = async (signal: string) => {
       console.log(`[Worker] Received ${signal}. Gracefully shutting down worker process...`);
