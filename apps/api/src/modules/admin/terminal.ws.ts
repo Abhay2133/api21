@@ -1,6 +1,6 @@
 import { Server as HttpServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
-import * as pty from 'node-pty';
+import { spawn, IPty, getPtyProviderStatus } from '@api21/pty';
 import { adminService } from './admin.service.js';
 import { adminModel } from './admin.model.js';
 import { redisService } from '../../core/redis/redis.service.js';
@@ -62,15 +62,17 @@ export function setupTerminalWebSocket(server: HttpServer) {
     const initialCols = Math.max(10, parseInt(url.searchParams.get('cols') || '100', 10));
     const initialRows = Math.max(5, parseInt(url.searchParams.get('rows') || '30', 10));
 
-    console.log(`[TerminalWS] Client connected to real node-pty shell (${initialCols}x${initialRows})`);
+    const providerStatus = getPtyProviderStatus();
+    console.log(
+      `[TerminalWS] Client connected (engine: ${providerStatus.provider}, platform: ${providerStatus.platform}, ${initialCols}x${initialRows})`
+    );
 
-    const shell = process.env.SHELL || '/bin/bash';
-    let ptyProcess: pty.IPty | null = null;
+    let ptyProcess: IPty | null = null;
     let currentCols = initialCols;
     let currentRows = initialRows;
 
     try {
-      ptyProcess = pty.spawn(shell, [], {
+      ptyProcess = spawn(undefined, [], {
         name: 'xterm-256color',
         cols: initialCols,
         rows: initialRows,

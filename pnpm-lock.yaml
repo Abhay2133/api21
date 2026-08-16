@@ -112,6 +112,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@api21/pty':
+        specifier: workspace:*
+        version: link:../../packages/pty
       '@api21/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -148,9 +151,6 @@ importers:
       knex:
         specifier: ^3.3.0
         version: 3.3.0(pg@8.22.0)(supports-color@8.1.1)
-      node-pty:
-        specifier: ^1.1.0
-        version: 1.1.0
       pg:
         specifier: ^8.12.0
         version: 8.22.0
@@ -216,6 +216,22 @@ importers:
       typescript:
         specifier: ^5.5.2
         version: 5.9.3
+
+  packages/pty:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.9
+        version: 20.19.43
+      typescript:
+        specifier: ^5.5.2
+        version: 5.9.3
+    optionalDependencies:
+      '@mmmbuto/node-pty-android-arm64':
+        specifier: ^1.1.2
+        version: 1.1.2
+      node-pty:
+        specifier: ^1.0.0
+        version: 1.1.0
 
   packages/types:
     dependencies:
@@ -832,6 +848,11 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@mmmbuto/node-pty-android-arm64@1.1.2':
+    resolution: {integrity: sha512-8ePAMNECp+uy2P+m7xULxIdyRlPtIebI4wWLoNvKjMfqCwpPxCpdD/gbDzXTSftWXtjHeEQTvQD7t/lS8geFNw==}
+    cpu: [arm64]
+    os: [android]
 
   '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4':
     resolution: {integrity: sha512-LCkGo6JDfaBhgST7UpPWgNgLINpcpabaHfyz5OBx75nUYxBsaEPxjnyNjWpeb/xBup/682QnBfRBy2/LvPutZQ==}
@@ -3735,6 +3756,9 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@mmmbuto/node-pty-android-arm64@1.1.2':
+    optional: true
+
   '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4':
     optional: true
 
@@ -5479,7 +5503,8 @@ snapshots:
 
   node-abort-controller@3.1.1: {}
 
-  node-addon-api@7.1.1: {}
+  node-addon-api@7.1.1:
+    optional: true
 
   node-gyp-build-optional-packages@5.2.2:
     dependencies:
@@ -5491,6 +5516,7 @@ snapshots:
   node-pty@1.1.0:
     dependencies:
       node-addon-api: 7.1.1
+    optional: true
 
   node-releases@2.0.53: {}
 

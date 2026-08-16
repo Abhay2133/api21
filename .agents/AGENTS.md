@@ -11,6 +11,7 @@ Welcome! This workspace configuration defines the context, conventions, and guid
 - **`apps/chat` (`@api21/chat`)**: Chat application skeleton consuming backend services and shared types.
 - **`apps/admin` (`@api21/admin`)**: Admin dashboard application skeleton for monitoring health and queues.
 - **`packages/types` (`@api21/types`)**: Central shared package exporting DTOs (with `class-validator`), entity interfaces, and API response schemas used across all apps.
+- **`packages/pty` (`@api21/pty`)**: Universal cross-platform pseudo-terminal (PTY) engine with dynamic multi-provider resolution (Termux Bionic, Windows ConPTY, Linux/macOS glibc, and pure child_process fallback).
 
 ---
 
@@ -35,11 +36,12 @@ Welcome! This workspace configuration defines the context, conventions, and guid
   - `modules/jobs/`: `jobs.controller.ts`, `jobs.service.ts`, `jobs.model.ts`, `jobs.job.ts`, `jobs.middleware.ts`
   - `modules/webhooks/`: `webhooks.controller.ts`, `webhooks.service.ts`, `webhooks.model.ts`, `webhooks.job.ts`, `webhooks.middleware.ts`
   - `modules/health/`: `health.controller.ts`, `health.service.ts`, `health.model.ts`, `health.job.ts`, `health.middleware.ts`
-  - `modules/admin/`: `bull-board.setup.ts`, `admin.controller.ts`, `admin.service.ts`, `admin.model.ts`, `admin.job.ts`, `admin.middleware.ts`
+  - `modules/admin/`: `bull-board.setup.ts`, `admin.controller.ts`, `admin.service.ts`, `admin.model.ts`, `admin.job.ts`, `admin.middleware.ts`, `terminal.ws.ts`
 - [apps/api/static/index.html](file:///home/abhay/pj/api21/apps/api/static/index.html): Interactive documentation page.
 
-### Shared Types (`packages/types/`)
+### Shared Packages (`packages/`)
 - [packages/types/src/index.ts](file:///home/abhay/pj/api21/packages/types/src/index.ts): Central export for all DTOs and interfaces (`CreateUserDto`, `CreateSessionDto`, `EnqueueJobDto`, `User`, `Session`, `HealthResponse`, etc.).
+- [packages/pty/src/index.ts](file:///home/abhay/pj/api21/packages/pty/src/index.ts): Universal cross-platform PTY engine (`spawn`, `IPty`, `getPtyProviderStatus`, `NativePtyAdapter`, `ChildProcessPtyAdapter`).
 
 ---
 

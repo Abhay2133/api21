@@ -14,15 +14,15 @@
     "dev:worker": "pnpm --filter @api21/api dev:worker",
     "dev:chat": "pnpm --filter @api21/chat dev",
     "dev:admin": "pnpm --filter @api21/admin dev",
-    "build": "pnpm --filter @api21/types build && pnpm -r run build",
-    "build:api": "pnpm --filter @api21/types build && pnpm --filter @api21/api build",
+    "build": "pnpm --filter @api21/types build && pnpm --filter @api21/pty build && pnpm -r run build",
+    "build:api": "pnpm --filter @api21/types build && pnpm --filter @api21/pty build && pnpm --filter @api21/api build",
     "build:chat": "pnpm --filter @api21/types build && pnpm --filter @api21/chat build",
     "build:admin": "pnpm --filter @api21/types build && pnpm --filter @api21/admin build",
     "start": "node apps/api/dist/main.js",
     "start:prod": "node apps/api/dist/main.js",
     "start:worker": "node apps/api/dist/worker.js",
-    "test": "pnpm --filter @api21/types build && pnpm -r run test",
-    "test:api": "pnpm --filter @api21/types build && pnpm --filter @api21/api test",
+    "test": "pnpm --filter @api21/types build && pnpm --filter @api21/pty build && pnpm -r run test",
+    "test:api": "pnpm --filter @api21/types build && pnpm --filter @api21/pty build && pnpm --filter @api21/api test",
     "test:admin:e2e": "pnpm --filter @api21/admin test:e2e",
     "migrate:latest": "pnpm --filter @api21/api migrate:latest",
     "migrate:rollback": "pnpm --filter @api21/api migrate:rollback",
@@ -53,10 +53,5 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.16.2",
     "typescript": "^5.5.2"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "node-pty"
-    ]
   }
 }

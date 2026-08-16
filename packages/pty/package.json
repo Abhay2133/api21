@@ -1,0 +1,28 @@
+{
+  "name": "@api21/pty",
+  "version": "1.0.0",
+  "description": "Universal cross-platform pseudo-terminal (PTY) engine with dynamic native and fallback providers for Termux, Windows, Linux, and macOS",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "optionalDependencies": {
+    "@mmmbuto/node-pty-android-arm64": "^1.1.2",
+    "node-pty": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "typescript": "^5.5.2"
+  }
+}
