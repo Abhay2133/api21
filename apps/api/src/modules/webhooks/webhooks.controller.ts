@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { webhooksService } from './webhooks.service.js';
 import { validateDeployToken } from './webhooks.middleware.js';
 
-const router = Router();
+const router: Router = Router();
 
 // POST /api/v1/webhooks/deploy - Trigger CI/CD zero-downtime redeployment
 router.post('/deploy', validateDeployToken, async (req: Request, res: Response, next: NextFunction) => {
@@ -15,4 +15,4 @@ router.post('/deploy', validateDeployToken, async (req: Request, res: Response, 
   }
 });
 
-export const webhooksRouter = router;
+export const webhooksRouter: Router = router;

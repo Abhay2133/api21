@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { usersService } from './users.service.js';
 import { validateCreateUser, validateUserIdParam } from './users.middleware.js';
 
-const router = Router();
+const router: Router = Router();
 
 // GET /api/v1/users - Retrieve all users
 router.get('/', async (req: Request, res: Response, next: NextFunction) => {
@@ -58,4 +58,4 @@ router.delete('/:id', validateUserIdParam, async (req: Request, res: Response, n
   }
 });
 
-export const usersRouter = router;
+export const usersRouter: Router = router;

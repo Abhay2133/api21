@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { jobsService } from './jobs.service.js';
 import { validateEnqueueJob, validateJobIdParam } from './jobs.middleware.js';
 
-const router = Router();
+const router: Router = Router();
 
 // POST /api/v1/jobs - Enqueue background job
 router.post('/', validateEnqueueJob, async (req: Request, res: Response, next: NextFunction) => {
@@ -37,4 +37,4 @@ router.get('/:jobId', validateJobIdParam, async (req: Request, res: Response, ne
   }
 });
 
-export const jobsRouter = router;
+export const jobsRouter: Router = router;

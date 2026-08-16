@@ -2,7 +2,7 @@ import { Router, Response, NextFunction } from 'express';
 import { adminService } from './admin.service.js';
 import { adminGuard, AdminRequest } from './admin.middleware.js';
 
-const router = Router();
+const router: Router = Router();
 
 // POST /api/v1/admin/login - Authenticate admin credentials
 router.post('/login', async (req: AdminRequest, res: Response, next: NextFunction) => {
@@ -279,4 +279,4 @@ router.get('/summary', adminGuard, async (_req: AdminRequest, res: Response, nex
   }
 });
 
-export const adminRouter = router;
+export const adminRouter: Router = router;

@@ -2,7 +2,7 @@ import { Router, Response, NextFunction } from 'express';
 import { sessionsService } from './sessions.service.js';
 import { validateCreateSession, extractClientMetadata, RequestWithClientMeta } from './sessions.middleware.js';
 
-const router = Router();
+const router: Router = Router();
 
 // POST /api/v1/sessions - Create new session
 router.post('/', validateCreateSession, extractClientMetadata, async (req: RequestWithClientMeta, res: Response, next: NextFunction) => {
@@ -61,4 +61,4 @@ router.delete('/:id', async (req: RequestWithClientMeta, res: Response, next: Ne
   }
 });
 
-export const sessionsRouter = router;
+export const sessionsRouter: Router = router;

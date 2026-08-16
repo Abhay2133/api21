@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { healthService } from './health.service.js';
 import { healthNoCacheMiddleware } from './health.middleware.js';
 
-const router = Router();
+const router: Router = Router();
 
 // GET /api/v1/health - System health check
 router.get('/', healthNoCacheMiddleware, async (_req: Request, res: Response, next: NextFunction) => {
@@ -15,4 +15,4 @@ router.get('/', healthNoCacheMiddleware, async (_req: Request, res: Response, ne
   }
 });
 
-export const healthRouter = router;
+export const healthRouter: Router = router;
