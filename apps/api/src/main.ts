@@ -1,3 +1,4 @@
+import './instrument.js';
 import { createApp } from './app.js';
 import { config } from './config/env.js';
 import { databaseService } from './core/database/database.service.js';

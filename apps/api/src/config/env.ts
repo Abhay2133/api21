@@ -27,6 +27,7 @@ export const config = {
   masterCredentials: process.env.MASTER_CREDENTIALS || 'admin:securepassword',
   deployCiToken: process.env.DEPLOY_CI_TOKEN || 'secret-ci-token',
   redeployScript: process.env.REDEPLOY_SCRIPT || 'node start.js ${deployment_id}',
+  sentryDsn: process.env.SENTRY_DSN || '',
   isProduction: (process.env.NODE_ENV || process.env.GO_ENV) === 'production',
   isTest: (process.env.NODE_ENV || process.env.GO_ENV) === 'test',
 };

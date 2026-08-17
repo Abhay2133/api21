@@ -8,12 +8,14 @@ export class BullMQService {
   getConnectionOptions(): ConnectionOptions {
     try {
       const url = new URL(config.redisUrl);
+      const isTls = url.protocol === 'rediss:';
       return {
         host: url.hostname || '127.0.0.1',
         port: url.port ? parseInt(url.port, 10) : 6379,
         username: url.username || undefined,
         password: url.password || undefined,
         db: url.pathname ? parseInt(url.pathname.replace('/', ''), 10) || 0 : 0,
+        tls: isTls ? {} : undefined,
         maxRetriesPerRequest: null,
         enableOfflineQueue: false,
       };

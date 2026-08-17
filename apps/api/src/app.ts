@@ -2,6 +2,7 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
+import * as Sentry from '@sentry/node';
 import { loggingMiddleware } from './common/middleware/logging.middleware.js';
 import { sslMiddleware } from './common/middleware/ssl.middleware.js';
 import { rateLimitMiddleware } from './common/middleware/rate-limit.middleware.js';
@@ -74,6 +75,14 @@ export const createApp = (): Express => {
   app.use('/api/v1/jobs', jobsRouter);
   app.use('/api/v1/webhooks', webhooksRouter);
   app.use('/api/v1/admin', adminRouter);
+
+  // Sentry debug route to test error reporting
+  app.get('/debug-sentry', () => {
+    throw new Error('api21 test Sentry error');
+  });
+
+  // The Sentry error handler must be registered before any other error middleware and after all controllers
+  Sentry.setupExpressErrorHandler(app);
 
   // 404 handler for API routes
   app.use('/api', (req, res) => {

@@ -1,3 +1,4 @@
+import './instrument.js';
 import { databaseService } from './core/database/database.service.js';
 import { redisService } from './core/redis/redis.service.js';
 import { bullMQService } from './core/bullmq/bullmq.service.js';

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import * as Sentry from '@sentry/node';
 
 export class AppError extends Error {
   public statusCode: number;
@@ -19,11 +20,15 @@ export const errorHandler = (err: any, req: Request, res: Response, _next: NextF
 
   if (statusCode >= 500) {
     console.error(`[Error] ${req.method} ${req.originalUrl}:`, err);
+    Sentry.captureException(err);
   }
+
+  const sentryId = (res as any).sentry;
 
   return res.status(statusCode).json({
     status: 'error',
     message,
+    ...(sentryId ? { sentryId } : {}),
     ...(err.details ? { details: err.details } : {}),
     ...(process.env.NODE_ENV === 'development' && statusCode >= 500 ? { stack: err.stack } : {}),
   });

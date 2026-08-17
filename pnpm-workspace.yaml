@@ -3,6 +3,8 @@ packages:
   - 'packages/*'
 
 allowBuilds:
+  '@sentry/cli': true
+  '@sentry/node-cpu-profiler': true
   esbuild: true
   msgpackr-extract: true
   node-pty: true
@@ -17,4 +19,3 @@ onlyBuiltDependencies:
   - esbuild
   - msgpackr-extract
   - node-pty
-

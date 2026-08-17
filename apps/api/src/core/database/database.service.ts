@@ -20,18 +20,30 @@ function getMigrationsDir(): string {
   return candidates.find((p) => fs.existsSync(p)) || path.resolve(cwd, 'apps/api/src/migrations');
 }
 
+function getDatabaseSslConfig(url: string) {
+  if (url.includes('127.0.0.1') || url.includes('localhost') || url.includes('sslmode=disable')) {
+    return undefined;
+  }
+  return { rejectUnauthorized: false };
+}
+
 export class DatabaseService {
   private pool: Pool | null = null;
   public knex: Knex;
 
   constructor() {
+    const ssl = getDatabaseSslConfig(config.databaseUrl);
     this.pool = new Pool({
       connectionString: config.databaseUrl,
+      ssl,
     });
 
     this.knex = knex({
       client: 'pg',
-      connection: config.databaseUrl,
+      connection: {
+        connectionString: config.databaseUrl,
+        ssl,
+      },
       pool: { min: 2, max: 10 },
       migrations: {
         directory: getMigrationsDir(),
@@ -74,7 +86,8 @@ export class DatabaseService {
 
   getDbPool(): Pool {
     if (!this.pool) {
-      this.pool = new Pool({ connectionString: config.databaseUrl });
+      const ssl = getDatabaseSslConfig(config.databaseUrl);
+      this.pool = new Pool({ connectionString: config.databaseUrl, ssl });
     }
     return this.pool;
   }

@@ -44,4 +44,19 @@ describe('ErrorMiddleware - Unit Tests', () => {
       })
     );
   });
+
+  it('errorHandler captures unhandled 500 errors and includes sentryId if present', () => {
+    (res as any).sentry = 'test-sentry-event-id-123';
+    const serverError = new Error('Unexpected crash');
+    errorHandler(serverError, req as Request, res as Response, next);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'error',
+        message: 'Unexpected crash',
+        sentryId: 'test-sentry-event-id-123',
+      })
+    );
+  });
 });
