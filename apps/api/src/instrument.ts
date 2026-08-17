@@ -1,7 +1,12 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import dns from 'dns';
 import * as Sentry from '@sentry/node';
+
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 function findEnvFile(): string {
   let curr = process.cwd();
@@ -28,6 +33,9 @@ if (sentryDsn) {
     tracesSampleRate: 1.0,
     sendDefaultPii: false,
   });
+  console.log('[Sentry] Initialized successfully for environment:', process.env.NODE_ENV || 'development');
+} else {
+  console.warn('[Sentry] SENTRY_DSN is missing from .env! Sentry tracking is disabled on this machine.');
 }
 
 export { Sentry };
