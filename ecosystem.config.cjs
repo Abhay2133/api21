@@ -3,6 +3,7 @@ module.exports = {
     {
       name: "api21-backend",
       script: "./apps/api/dist/main.js",
+      node_args: "--import ./apps/api/dist/instrument.js",
       exec_mode: "cluster",
       instances: "max",
       autorestart: true,
@@ -15,6 +16,7 @@ module.exports = {
     {
       name: "api21-worker",
       script: "./apps/api/dist/worker.js",
+      node_args: "--import ./apps/api/dist/instrument.js",
       exec_mode: "fork",
       instances: 1,
       autorestart: true,

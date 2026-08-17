@@ -7,10 +7,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && cp -r static dist/ && (sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist || true)",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject ./dist && sentry-cli sourcemaps upload ./dist",
-    "start": "node dist/main.js",
-    "start:prod": "node dist/main.js",
+    "start": "node --import ./dist/instrument.js dist/main.js",
+    "start:prod": "node --import ./dist/instrument.js dist/main.js",
     "start:dev": "tsx watch src/main.ts",
-    "start:worker": "node dist/worker.js",
+    "start:worker": "node --import ./dist/instrument.js dist/worker.js",
     "dev": "tsx watch src/main.ts",
     "dev:worker": "tsx watch src/worker.ts",
     "test": "jest --runInBand --forceExit",
