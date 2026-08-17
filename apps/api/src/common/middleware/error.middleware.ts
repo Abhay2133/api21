@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as Sentry from '@sentry/node';
+import { logger } from '../../core/logger/logger.service.js';
 
 export class AppError extends Error {
   public statusCode: number;
@@ -19,7 +20,11 @@ export const errorHandler = (err: any, req: Request, res: Response, _next: NextF
   const message = err.message || 'Internal Server Error';
 
   if (statusCode >= 500) {
-    console.error(`[Error] ${req.method} ${req.originalUrl}:`, err);
+    logger.error(`[Error] ${req.method} ${req.originalUrl}:`, err, {
+      path: req.originalUrl,
+      method: req.method,
+      statusCode,
+    });
     Sentry.captureException(err);
   }
 

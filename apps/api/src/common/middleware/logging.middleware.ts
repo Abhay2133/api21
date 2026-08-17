@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { config } from '../../config/env.js';
+import { logger } from '../../core/logger/logger.service.js';
 
 export const maskSensitiveData = (message: string): string => {
   if (!message || typeof message !== 'string') return message;
@@ -65,7 +66,13 @@ export const loggingMiddleware = (req: Request, res: Response, next: NextFunctio
     const statusCode = res.statusCode;
     const sanitizedUrl = maskSensitiveData(originalUrl);
     const logLine = maskSensitiveData(`[HTTP] ${method} ${sanitizedUrl} ${statusCode} - ${duration}ms - IP: ${ip}`);
-    console.log(logLine);
+    logger.http(logLine, {
+      method,
+      path: sanitizedUrl,
+      statusCode,
+      durationMs: duration,
+      ip,
+    });
   });
 
   next();

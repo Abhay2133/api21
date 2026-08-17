@@ -28,6 +28,8 @@ export const config = {
   deployCiToken: process.env.DEPLOY_CI_TOKEN || 'secret-ci-token',
   redeployScript: process.env.REDEPLOY_SCRIPT || 'node start.js ${deployment_id}',
   sentryDsn: process.env.SENTRY_DSN || '',
+  betterStackSourceToken: process.env.BETTER_STACK_SOURCE_TOKEN || process.env.LOGTAIL_SOURCE_TOKEN || '',
+  betterStackIngestingHost: process.env.BETTER_STACK_INGESTING_HOST || '',
   isProduction: (process.env.NODE_ENV || process.env.GO_ENV) === 'production',
   isTest: (process.env.NODE_ENV || process.env.GO_ENV) === 'test',
 };

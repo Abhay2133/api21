@@ -6,6 +6,7 @@ import { redisService } from './core/redis/redis.service.js';
 import { bullMQService } from './core/bullmq/bullmq.service.js';
 import { setupTerminalWebSocket } from './modules/admin/terminal.ws.js';
 import { scheduleNightlyPm2Restart } from './modules/jobs/maintenance.job.js';
+import { logger } from './core/logger/logger.service.js';
 import http from 'http';
 
 async function bootstrap() {
@@ -26,17 +27,21 @@ async function bootstrap() {
   setupTerminalWebSocket(server);
 
   server.listen(config.port, () => {
-    console.log(`[Server] api21 backend running on http://localhost:${config.port} in ${config.nodeEnv} mode.`);
+    logger.info(`[Server] api21 backend running on http://localhost:${config.port} in ${config.nodeEnv} mode.`, {
+      port: config.port,
+      nodeEnv: config.nodeEnv,
+    });
   });
 
   // 5. Graceful shutdown handler
   const shutdown = async (signal: string) => {
-    console.log(`[Server] Received ${signal}. Starting graceful shutdown...`);
+    logger.info(`[Server] Received ${signal}. Starting graceful shutdown...`);
     server.close(async () => {
       await bullMQService.closeAllQueuesAndWorkers(5000);
       await redisService.close();
       await databaseService.close();
-      console.log('[Server] Graceful shutdown completed.');
+      logger.info('[Server] Graceful shutdown completed.');
+      await logger.flush();
       process.exit(0);
     });
 

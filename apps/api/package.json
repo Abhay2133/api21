@@ -25,6 +25,7 @@
     "@api21/types": "workspace:*",
     "@bull-board/api": "^8.6.0",
     "@bull-board/express": "^8.6.0",
+    "@logtail/node": "^0.5.8",
     "@sentry/node": "^10.70.0",
     "@sentry/profiling-node": "^10.70.0",
     "bcryptjs": "^3.0.3",

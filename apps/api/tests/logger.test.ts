@@ -1,7 +1,8 @@
 import { maskSensitiveData } from '../src/common/middleware/logging.middleware.js';
+import { LoggerService, logger } from '../src/core/logger/logger.service.js';
 import { config } from '../src/config/env.js';
 
-describe('Logger Masking Middleware', () => {
+describe('Logger Masking and Better Stack Integration', () => {
   const originalNodeEnv = process.env.NODE_ENV;
 
   afterEach(() => {
@@ -44,6 +45,24 @@ describe('Logger Masking Middleware', () => {
 
       expect(output).not.toContain('dbsecretpassword');
       expect(output).toContain('postgres://admin:***@localhost:5432/api21');
+    });
+  });
+
+  describe('LoggerService', () => {
+    it('should instantiate and log without throwing errors', () => {
+      const instance = new LoggerService();
+      expect(() => {
+        instance.info('Test info message', { meta: 'value' });
+        instance.warn('Test warn message');
+        instance.error('Test error message', new Error('sample failure'));
+        instance.http('[HTTP] GET /api/v1/health 200 - 5ms', { path: '/api/v1/health' });
+      }).not.toThrow();
+    });
+
+    it('should export singleton logger instance', () => {
+      expect(logger).toBeDefined();
+      expect(typeof logger.info).toBe('function');
+      expect(typeof logger.error).toBe('function');
     });
   });
 });

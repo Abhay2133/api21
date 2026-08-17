@@ -533,11 +533,14 @@ async function main() {
       "building",
     );
 
-    execSync("pnpm --filter ./apps/api build", {
-      cwd: tmpDir,
-      env: buildEnv,
-      stdio: "inherit",
-    });
+    execSync(
+      "pnpm --filter @api21/types build && pnpm --filter @api21/pty build && pnpm --filter ./apps/api build",
+      {
+        cwd: tmpDir,
+        env: buildEnv,
+        stdio: "inherit",
+      },
+    );
 
     const apiMainDistPath = path.join(tmpDir, "apps", "api", "dist", "main.js");
 
