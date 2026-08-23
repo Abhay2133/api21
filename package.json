@@ -22,7 +22,7 @@
     "start": "node apps/api/dist/main.js",
     "start:prod": "node apps/api/dist/main.js",
     "start:worker": "node apps/api/dist/worker.js",
-    "start:pm2": "pm2 start ecosystem.config.cjs --update-env",
+    "start:pm2": "npx pm2 start ecosystem.config.cjs --update-env",
     "test": "pnpm --filter @api21/types build && pnpm --filter @api21/pty build && pnpm -r run test",
     "test:api": "pnpm --filter @api21/types build && pnpm --filter @api21/pty build && pnpm --filter @api21/api test",
     "test:admin:e2e": "pnpm --filter @api21/admin test:e2e",
