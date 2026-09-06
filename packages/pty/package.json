@@ -1,5 +1,5 @@
 {
-  "name": "@api21/pty",
+  "name": "@apps21/pty",
   "version": "1.0.0",
   "description": "Universal cross-platform pseudo-terminal (PTY) engine with dynamic native and fallback providers for Termux, Windows, Linux, and macOS",
   "type": "module",

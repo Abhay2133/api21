@@ -1,1 +1,1 @@
-export { CreateUserDto } from '@api21/types';
+export { CreateUserDto } from '@apps21/types';

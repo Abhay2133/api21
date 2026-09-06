@@ -1,17 +1,17 @@
-# Workspace Agent Rules and Context: api21
+# Workspace Agent Rules and Context: apps21
 
-Welcome! This workspace configuration defines the context, conventions, and guidelines for AI agents working on the `api21` monorepo codebase.
+Welcome! This workspace configuration defines the context, conventions, and guidelines for AI agents working on the `apps21` monorepo codebase.
 
 ---
 
 ## 1. Project Overview & Monorepo Architecture
 
-`api21` is a modular pnpm monorepo consisting of:
-- **`apps/api` (`@api21/api`)**: High-performance Express TypeScript modular REST API server with PostgreSQL (Knex pool), Redis sliding-window rate limiter, BullMQ background jobs, and glassmorphic API documentation.
-- **`apps/chat` (`@api21/chat`)**: Chat application skeleton consuming backend services and shared types.
-- **`apps/admin` (`@api21/admin`)**: Admin dashboard application skeleton for monitoring health and queues.
-- **`packages/types` (`@api21/types`)**: Central shared package exporting DTOs (with `class-validator`), entity interfaces, and API response schemas used across all apps.
-- **`packages/pty` (`@api21/pty`)**: Universal cross-platform pseudo-terminal (PTY) engine with dynamic multi-provider resolution (Termux Bionic, Windows ConPTY, Linux/macOS glibc, and pure child_process fallback).
+`apps21` is a modular pnpm monorepo consisting of:
+- **`apps/api` (`@apps21/api`)**: High-performance Express TypeScript modular REST API server with PostgreSQL (Knex pool), Redis sliding-window rate limiter, BullMQ background jobs, and glassmorphic API documentation.
+- **`apps/chat` (`@apps21/chat`)**: Chat application skeleton consuming backend services and shared types.
+- **`apps/admin` (`@apps21/admin`)**: Admin dashboard application skeleton for monitoring health and queues.
+- **`packages/types` (`@apps21/types`)**: Central shared package exporting DTOs (with `class-validator`), entity interfaces, and API response schemas used across all apps.
+- **`packages/pty` (`@apps21/pty`)**: Universal cross-platform pseudo-terminal (PTY) engine with dynamic multi-provider resolution (Termux Bionic, Windows ConPTY, Linux/macOS glibc, and pure child_process fallback).
 
 ---
 
@@ -56,7 +56,7 @@ pnpm docker:up
 
 # Run API dev server
 pnpm dev
-# or: pnpm --filter @api21/api dev
+# or: pnpm --filter @apps21/api dev
 
 # Run BullMQ worker
 pnpm dev:worker

@@ -1,17 +1,17 @@
 {
-  "name": "@api21/chat",
+  "name": "@apps21/chat",
   "version": "1.0.0",
-  "description": "Chat application skeleton for the api21 monorepo",
+  "description": "Chat application skeleton for the apps21 monorepo",
   "type": "module",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "test": "echo \"@api21/chat: skeleton ready\""
+    "test": "echo \"@apps21/chat: skeleton ready\""
   },
   "dependencies": {
-    "@api21/types": "workspace:*"
+    "@apps21/types": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.14.9",

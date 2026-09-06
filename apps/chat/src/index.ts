@@ -1,4 +1,4 @@
-import type { User, Session, ApiResponse } from '@api21/types';
+import type { User, Session, ApiResponse } from '@apps21/types';
 
 export interface ChatMessage {
   id: string;
@@ -20,4 +20,4 @@ export function createChatMessage(sender: User, content: string): ApiResponse<Ch
   };
 }
 
-console.log('[@api21/chat] Chat skeleton initialized and ready for development.');
+console.log('[@apps21/chat] Chat skeleton initialized and ready for development.');

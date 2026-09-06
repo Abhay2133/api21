@@ -39,7 +39,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <header className="flex h-12 shrink-0 items-center gap-2 border-b border-zinc-800 px-4 md:hidden bg-[#09090b]">
           <SidebarTrigger />
           <div className="text-xs font-semibold text-zinc-100 tracking-tight flex items-center gap-1.5">
-            api21 <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono">ADMIN</span>
+            apps21 <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono">ADMIN</span>
           </div>
         </header>
         {children}

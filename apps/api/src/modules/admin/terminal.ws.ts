@@ -1,6 +1,6 @@
 import { Server as HttpServer } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
-import { spawn, IPty, getPtyProviderStatus } from '@api21/pty';
+import { spawn, IPty, getPtyProviderStatus } from '@apps21/pty';
 import { adminService } from './admin.service.js';
 import { adminModel } from './admin.model.js';
 import { redisService } from '../../core/redis/redis.service.js';

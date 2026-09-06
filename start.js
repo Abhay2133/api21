@@ -20,7 +20,7 @@ if (dns.setDefaultResultOrder) {
 
 const databaseUrl =
   process.env.DATABASE_URL ||
-  "postgres://postgres:postgres@127.0.0.1:5432/api21?sslmode=disable";
+  "postgres://postgres:postgres@127.0.0.1:5432/apps21?sslmode=disable";
 
 const pool = new Pool({
   connectionString: databaseUrl,
@@ -129,7 +129,7 @@ function getRepoUrl() {
     }
   } catch {}
 
-  return "https://github.com/abhay2133/api21.git";
+  return "https://github.com/abhay2133/apps21.git";
 }
 
 /**
@@ -374,7 +374,7 @@ async function main() {
   );
 
   const rootDir = process.cwd();
-  const tmpDir = path.join(rootDir, "tmp", "api21");
+  const tmpDir = path.join(rootDir, "tmp", "apps21");
 
   try {
     /**
@@ -386,7 +386,7 @@ async function main() {
     if (fs.existsSync(path.join(tmpDir, ".git"))) {
       await logStep(
         deploymentId,
-        `Updating existing repository in ./tmp/api21 (branch '${branchName}')...`,
+        `Updating existing repository in ./tmp/apps21 (branch '${branchName}')...`,
         "cloning",
       );
 
@@ -425,7 +425,7 @@ async function main() {
     } else {
       await logStep(
         deploymentId,
-        `Cloning branch '${branchName}' into ./tmp/api21...`,
+        `Cloning branch '${branchName}' into ./tmp/apps21...`,
         "cloning",
       );
 
@@ -529,12 +529,12 @@ async function main() {
      */
     await logStep(
       deploymentId,
-      "Building API project in ./tmp/api21...",
+      "Building API project in ./tmp/apps21...",
       "building",
     );
 
     execSync(
-      "pnpm --filter @api21/types build && pnpm --filter @api21/pty build && pnpm --filter ./apps/api build",
+      "pnpm --filter @apps21/types build && pnpm --filter @apps21/pty build && pnpm --filter ./apps/api build",
       {
         cwd: tmpDir,
         env: buildEnv,

@@ -12,7 +12,7 @@ jobs:
     env:
       NODE_ENV: test
       REDIS_URL: redis://localhost:6379
-      DATABASE_URL: postgres://postgres:password@localhost:5432/api21_test?sslmode=disable
+      DATABASE_URL: postgres://postgres:password@localhost:5432/apps21_test?sslmode=disable
 
     services:
       redis:
@@ -28,7 +28,7 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: api21_test
+          POSTGRES_DB: apps21_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
         ports:

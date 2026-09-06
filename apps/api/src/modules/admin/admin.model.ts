@@ -1,5 +1,5 @@
 import { databaseService } from '../../core/database/database.service.js';
-import { Session, AdminUser } from '@api21/types';
+import { Session, AdminUser } from '@apps21/types';
 
 export interface DeploymentItem {
   id: string;

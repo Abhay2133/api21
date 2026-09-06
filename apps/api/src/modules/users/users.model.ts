@@ -1,5 +1,5 @@
 import { databaseService } from '../../core/database/database.service.js';
-import { User } from '@api21/types';
+import { User } from '@apps21/types';
 
 export class UsersModel {
   async findAll(): Promise<User[]> {

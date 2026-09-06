@@ -42,7 +42,7 @@ importers:
 
   apps/admin:
     dependencies:
-      '@api21/types':
+      '@apps21/types':
         specifier: workspace:*
         version: link:../../packages/types
       '@radix-ui/react-alert-dialog':
@@ -118,10 +118,10 @@ importers:
 
   apps/api:
     dependencies:
-      '@api21/pty':
+      '@apps21/pty':
         specifier: workspace:*
         version: link:../../packages/pty
-      '@api21/types':
+      '@apps21/types':
         specifier: workspace:*
         version: link:../../packages/types
       '@bull-board/api':
@@ -221,7 +221,7 @@ importers:
 
   apps/chat:
     dependencies:
-      '@api21/types':
+      '@apps21/types':
         specifier: workspace:*
         version: link:../../packages/types
     devDependencies:

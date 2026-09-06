@@ -46,7 +46,7 @@ export function Sidebar() {
           </div>
           <div>
             <div className="font-bold text-white tracking-tight flex items-center gap-1.5 text-sm">
-              api21 <span className="text-xs px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">ADMIN</span>
+              apps21 <span className="text-xs px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono">ADMIN</span>
             </div>
             <div className="text-[11px] text-slate-500">System Control Panel</div>
           </div>

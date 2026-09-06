@@ -101,7 +101,7 @@ export function AppSidebar() {
             </div>
             <div className="flex flex-col flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
               <div className="text-sm font-semibold text-zinc-100 truncate leading-none">
-                api21
+                apps21
               </div>
               <div className="text-xs text-zinc-400 truncate mt-1 leading-none">System Control Panel</div>
             </div>

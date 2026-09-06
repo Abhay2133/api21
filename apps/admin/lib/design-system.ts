@@ -1,5 +1,5 @@
 /**
- * api21 Admin Portal - Unified Design System Tokens & Utility Mappings
+ * apps21 Admin Portal - Unified Design System Tokens & Utility Mappings
  * Pure Neutral Dark / Black Theme (#09090b / zinc-800 / zinc-900)
  */
 

@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "api21-backend",
+      name: "apps21-backend",
       script: "./apps/api/dist/main.js",
       node_args: "--import ./apps/api/dist/instrument.js",
       exec_mode: "cluster",
@@ -14,7 +14,7 @@ module.exports = {
       },
     },
     {
-      name: "api21-worker",
+      name: "apps21-worker",
       script: "./apps/api/dist/worker.js",
       node_args: "--import ./apps/api/dist/instrument.js",
       exec_mode: "fork",

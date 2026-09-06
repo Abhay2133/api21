@@ -1,4 +1,4 @@
-import { CreateUserDto, User } from '@api21/types';
+import { CreateUserDto, User } from '@apps21/types';
 import { usersModel, UsersModel } from './users.model.js';
 import { AppError } from '../../common/middleware/error.middleware.js';
 

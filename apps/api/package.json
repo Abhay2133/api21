@@ -1,5 +1,5 @@
 {
-  "name": "@api21/api",
+  "name": "@apps21/api",
   "version": "1.0.0",
   "description": "Modular Express TypeScript REST API server with PostgreSQL (Knex), Redis, BullMQ & Glassmorphic Docs",
   "type": "module",
@@ -21,8 +21,8 @@
     "migrate:make": "tsx node_modules/knex/bin/cli.js migrate:make --knexfile src/config/knexfile.ts"
   },
   "dependencies": {
-    "@api21/pty": "workspace:*",
-    "@api21/types": "workspace:*",
+    "@apps21/pty": "workspace:*",
+    "@apps21/types": "workspace:*",
     "@bull-board/api": "^8.6.0",
     "@bull-board/express": "^8.6.0",
     "@logtail/node": "^0.5.8",

@@ -25,7 +25,7 @@ test.describe('Admin Authentication & Session Guard', () => {
     await page.click('button[type="submit"]');
 
     await expect(page).toHaveURL(/\/overview/);
-    await expect(page.getByText('api21', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('apps21', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('System Control Panel').first()).toBeVisible();
   });
 });

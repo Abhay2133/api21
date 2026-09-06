@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { CreateSessionDto } from '@api21/types';
+import { CreateSessionDto } from '@apps21/types';
 import { validateBody } from '../../common/middleware/validation.middleware.js';
 
 export const validateCreateSession = validateBody(CreateSessionDto);

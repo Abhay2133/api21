@@ -40,11 +40,11 @@ describe('Logger Masking and Better Stack Integration', () => {
     it('should mask database password in production mode', () => {
       process.env.NODE_ENV = 'production';
 
-      const input = 'Connecting to postgres://admin:dbsecretpassword@localhost:5432/api21';
+      const input = 'Connecting to postgres://admin:dbsecretpassword@localhost:5432/apps21';
       const output = maskSensitiveData(input);
 
       expect(output).not.toContain('dbsecretpassword');
-      expect(output).toContain('postgres://admin:***@localhost:5432/api21');
+      expect(output).toContain('postgres://admin:***@localhost:5432/apps21');
     });
   });
 

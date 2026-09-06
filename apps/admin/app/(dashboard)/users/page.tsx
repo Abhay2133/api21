@@ -17,7 +17,7 @@ import {
   AlertDialogCancel,
 } from '../../../components/ui/alert-dialog';
 import { apiClient } from '../../../lib/api-client';
-import { AdminUser, CreateAdminUserDto, UpdateAdminUserDto } from '@api21/types';
+import { AdminUser, CreateAdminUserDto, UpdateAdminUserDto } from '@apps21/types';
 import {
   UserCog,
   UserPlus,
@@ -574,7 +574,7 @@ export default function AdminUsersPage() {
                   </label>
                   <input
                     type="email"
-                    placeholder="alex@api21.dev"
+                    placeholder="alex@apps21.dev"
                     value={createForm.email}
                     onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
                     className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-700"

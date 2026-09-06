@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { adminModel } from './admin.model.js';
-import { Session } from '@api21/types';
+import { Session } from '@apps21/types';
 
 export interface AdminRequest extends Request {
   adminSession?: Session;

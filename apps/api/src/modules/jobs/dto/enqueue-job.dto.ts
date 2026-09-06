@@ -1,1 +1,1 @@
-export { EnqueueJobDto, SampleJobData, SampleJobResult } from '@api21/types';
+export { EnqueueJobDto, SampleJobData, SampleJobResult } from '@apps21/types';

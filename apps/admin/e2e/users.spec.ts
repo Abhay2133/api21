@@ -33,7 +33,7 @@ test.describe.serial('Admin Users Management & Fallback Authentication', () => {
     await page.fill('input[placeholder="e.g. devops_lead"]', testUser);
     await page.fill('input[placeholder="At least 6 characters"]', testPass);
     await page.fill('input[placeholder="Alex Taylor"]', 'Test Admin User');
-    await page.fill('input[placeholder="alex@api21.dev"]', `${testUser}@api21.dev`);
+    await page.fill('input[placeholder="alex@apps21.dev"]', `${testUser}@apps21.dev`);
 
     await page.click('button[type="submit"]:has-text("Create Admin User")');
 

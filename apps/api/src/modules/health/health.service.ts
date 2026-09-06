@@ -1,4 +1,4 @@
-import { HealthResponse } from '@api21/types';
+import { HealthResponse } from '@apps21/types';
 import { healthModel, HealthModel } from './health.model.js';
 import { config } from '../../config/env.js';
 

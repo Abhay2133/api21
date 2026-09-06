@@ -35,7 +35,7 @@ export const createApp = (): Express => {
     'http://localhost:3001',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
-    'https://admin.api21.dev',
+    'https://admin.apps21.dev',
   ];
 
   app.use(
@@ -78,7 +78,7 @@ export const createApp = (): Express => {
 
   // Sentry debug route to test error reporting
   app.get('/debug-sentry', () => {
-    throw new Error('api21 test Sentry error');
+    throw new Error('apps21 test Sentry error');
   });
 
   // The Sentry error handler must be registered before any other error middleware and after all controllers

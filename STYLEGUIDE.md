@@ -1,6 +1,6 @@
 # Code Style Guide & Architecture Specifications
 
-This document outlines the architectural patterns, coding standards, and SOLID principles implemented in the `api21` monorepo codebase.
+This document outlines the architectural patterns, coding standards, and SOLID principles implemented in the `apps21` monorepo codebase.
 
 ---
 
@@ -10,7 +10,7 @@ The repository is organized into workspace apps and shared packages:
 
 ```text
 apps/
-├── api/                     # Backend REST API (@api21/api)
+├── api/                     # Backend REST API (@apps21/api)
 │   ├── src/
 │   │   ├── app.module.ts    # Root NestJS application module
 │   │   ├── app.factory.ts   # Application factory
@@ -21,13 +21,13 @@ apps/
 │   │   └── modules/         # Feature modules (users, sessions, jobs, webhooks, health)
 │   ├── static/              # Interactive API documentation page
 │   └── tests/               # Automated test suites
-├── chat/                    # Chat application (@api21/chat)
+├── chat/                    # Chat application (@apps21/chat)
 │   └── src/index.ts
-└── admin/                   # Admin dashboard (@api21/admin)
+└── admin/                   # Admin dashboard (@apps21/admin)
     └── src/index.ts
 
 packages/
-└── types/                   # Shared types, DTOs & interfaces (@api21/types)
+└── types/                   # Shared types, DTOs & interfaces (@apps21/types)
     └── src/                 # CreateUserDto, CreateSessionDto, EnqueueJobDto, etc.
 ```
 
@@ -47,7 +47,7 @@ packages/
 * **Rule**: High-level modules should depend on abstractions and central providers via Dependency Injection.
 * **Practice**:
   * Services inject `DatabaseService`, `RedisService`, and `BullMQService` via constructor injection (`@Injectable()`).
-  * Shared types and DTOs are centralized in `@api21/types` and consumed by all apps.
+  * Shared types and DTOs are centralized in `@apps21/types` and consumed by all apps.
 
 ### III. Interface Segregation & Strong Typing
 * **Rule**: Avoid `any` types and ensure strict typing across DTOs and database queries.

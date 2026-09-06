@@ -64,7 +64,7 @@ describe('Admin Controller - Integration & Endpoint Tests', () => {
             id: 3,
             username: 'sec_admin',
             name: 'Security Admin',
-            email: 'sec@api21.dev',
+            email: 'sec@apps21.dev',
             role: 'admin',
             is_active: true,
             created_at: new Date(),
@@ -81,7 +81,7 @@ describe('Admin Controller - Integration & Endpoint Tests', () => {
           username: 'sec_admin',
           password: 'Password123!',
           name: 'Security Admin',
-          email: 'sec@api21.dev',
+          email: 'sec@apps21.dev',
           role: 'admin',
         });
 

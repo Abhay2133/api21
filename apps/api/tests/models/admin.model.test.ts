@@ -23,7 +23,7 @@ describe('AdminModel - Unit Tests', () => {
           username: 'sys_admin',
           password_hash: 'hashed',
           name: 'System Admin',
-          email: 'sys@api21.dev',
+          email: 'sys@apps21.dev',
           role: 'admin',
           is_active: true,
           created_at: new Date().toISOString(),
@@ -36,7 +36,7 @@ describe('AdminModel - Unit Tests', () => {
       username: 'sys_admin',
       password_hash: 'hashed',
       name: 'System Admin',
-      email: 'sys@api21.dev',
+      email: 'sys@apps21.dev',
       role: 'admin',
       is_active: true,
     });
@@ -44,7 +44,7 @@ describe('AdminModel - Unit Tests', () => {
     expect(user.username).toBe('sys_admin');
     expect(mockQuery).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO admin_users'),
-      ['sys_admin', 'hashed', 'System Admin', 'sys@api21.dev', 'admin', true]
+      ['sys_admin', 'hashed', 'System Admin', 'sys@apps21.dev', 'admin', true]
     );
   });
 

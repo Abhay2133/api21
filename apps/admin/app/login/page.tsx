@@ -57,7 +57,7 @@ export default function LoginPage() {
           <div className="size-11 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-100 font-bold text-lg mb-3 shadow-lg">
             21
           </div>
-          <h2 className="text-xl font-bold text-zinc-100 tracking-tight">api21 Admin Portal</h2>
+          <h2 className="text-xl font-bold text-zinc-100 tracking-tight">apps21 Admin Portal</h2>
           <p className="text-xs text-zinc-400 mt-1">Authenticate with system master credentials</p>
         </div>
 

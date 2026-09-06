@@ -1,4 +1,4 @@
-import { EnqueueJobDto } from '@api21/types';
+import { EnqueueJobDto } from '@apps21/types';
 import { jobsModel, JobsModel } from './jobs.model.js';
 import { SampleJobData } from './jobs.job.js';
 import { AppError } from '../../common/middleware/error.middleware.js';

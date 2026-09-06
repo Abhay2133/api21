@@ -18,8 +18,8 @@ describe('UsersModel - Unit Tests', () => {
   it('findAll returns array of users', async () => {
     mockQuery.mockResolvedValueOnce({
       rows: [
-        { id: 1, name: 'Alice', email: 'alice@api21.dev' },
-        { id: 2, name: 'Bob', email: 'bob@api21.dev' },
+        { id: 1, name: 'Alice', email: 'alice@apps21.dev' },
+        { id: 2, name: 'Bob', email: 'bob@apps21.dev' },
       ],
     });
 
@@ -30,7 +30,7 @@ describe('UsersModel - Unit Tests', () => {
 
   it('findById returns user or null', async () => {
     mockQuery.mockResolvedValueOnce({
-      rows: [{ id: 1, name: 'Alice', email: 'alice@api21.dev' }],
+      rows: [{ id: 1, name: 'Alice', email: 'alice@apps21.dev' }],
     });
 
     const user = await usersModel.findById(1);
@@ -43,23 +43,23 @@ describe('UsersModel - Unit Tests', () => {
 
   it('findByEmail returns user or null', async () => {
     mockQuery.mockResolvedValueOnce({
-      rows: [{ id: 1, name: 'Alice', email: 'alice@api21.dev' }],
+      rows: [{ id: 1, name: 'Alice', email: 'alice@apps21.dev' }],
     });
 
-    const user = await usersModel.findByEmail('alice@api21.dev');
+    const user = await usersModel.findByEmail('alice@apps21.dev');
     expect(user?.id).toBe(1);
   });
 
   it('create inserts new user', async () => {
     mockQuery.mockResolvedValueOnce({
-      rows: [{ id: 3, name: 'Charlie', email: 'charlie@api21.dev' }],
+      rows: [{ id: 3, name: 'Charlie', email: 'charlie@apps21.dev' }],
     });
 
-    const user = await usersModel.create('Charlie', 'charlie@api21.dev');
+    const user = await usersModel.create('Charlie', 'charlie@apps21.dev');
     expect(user.name).toBe('Charlie');
     expect(mockQuery).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO users'),
-      ['Charlie', 'charlie@api21.dev']
+      ['Charlie', 'charlie@apps21.dev']
     );
   });
 

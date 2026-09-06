@@ -27,7 +27,7 @@ describe('JobsService - Unit Tests', () => {
 
       const result = await jobsService.enqueueJob({
         type: 'emailNotification',
-        payload: { to: 'user@api21.dev' },
+        payload: { to: 'user@apps21.dev' },
         delay: 5000,
         priority: 1,
       });

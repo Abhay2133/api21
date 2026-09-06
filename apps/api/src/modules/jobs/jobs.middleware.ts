@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { EnqueueJobDto } from '@api21/types';
+import { EnqueueJobDto } from '@apps21/types';
 import { validateBody } from '../../common/middleware/validation.middleware.js';
 
 export const validateEnqueueJob = (req: Request, res: Response, next: NextFunction) => {

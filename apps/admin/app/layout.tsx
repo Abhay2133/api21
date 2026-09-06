@@ -16,8 +16,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'api21 Admin | System Control Panel',
-  description: 'Administrative dashboard, system metrics, terminal console, and deployment inspector for api21',
+  title: 'apps21 Admin | System Control Panel',
+  description: 'Administrative dashboard, system metrics, terminal console, and deployment inspector for apps21',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

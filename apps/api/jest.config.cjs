@@ -6,7 +6,7 @@ module.exports = {
   modulePathIgnorePatterns: ['<rootDir>/tmp/', '<rootDir>/dist_old/'],
   moduleFileExtensions: ['ts', 'js', 'json'],
   moduleNameMapper: {
-    '^@api21/types$': '<rootDir>/../../packages/types/src/index.ts',
+    '^@apps21/types$': '<rootDir>/../../packages/types/src/index.ts',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transform: {

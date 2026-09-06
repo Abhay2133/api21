@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { CreateSessionDto, Session } from '@api21/types';
+import { CreateSessionDto, Session } from '@apps21/types';
 import { sessionsModel, SessionsModel } from './sessions.model.js';
 import { AppError } from '../../common/middleware/error.middleware.js';
 

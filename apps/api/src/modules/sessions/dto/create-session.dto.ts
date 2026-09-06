@@ -1,1 +1,1 @@
-export { CreateSessionDto } from '@api21/types';
+export { CreateSessionDto } from '@apps21/types';

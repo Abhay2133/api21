@@ -41,7 +41,7 @@ describe('AdminService - Unit Tests', () => {
         username: 'ops_lead',
         password_hash: hashedPassword,
         name: 'Ops Lead',
-        email: 'ops@api21.dev',
+        email: 'ops@apps21.dev',
         role: 'admin',
         is_active: true,
         created_at: new Date().toISOString(),
@@ -132,7 +132,7 @@ describe('AdminService - Unit Tests', () => {
         id: 5,
         username: 'new_admin',
         name: 'New Admin',
-        email: 'new@api21.dev',
+        email: 'new@apps21.dev',
         role: 'admin',
         is_active: true,
         created_at: new Date().toISOString(),
@@ -143,7 +143,7 @@ describe('AdminService - Unit Tests', () => {
         username: 'new_admin',
         password: 'Password123!',
         name: 'New Admin',
-        email: 'new@api21.dev',
+        email: 'new@apps21.dev',
         role: 'admin',
       });
 

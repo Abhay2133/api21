@@ -7,7 +7,7 @@ import { config } from '../../config/env.js';
 import { AppError } from '../../common/middleware/error.middleware.js';
 import { jobsService } from '../jobs/jobs.service.js';
 import { redisService } from '../../core/redis/redis.service.js';
-import { CreateAdminUserDto, UpdateAdminUserDto } from '@api21/types';
+import { CreateAdminUserDto, UpdateAdminUserDto } from '@apps21/types';
 
 // In-memory store for single-use terminal connection tickets (30-second expiry)
 const terminalTickets = new Map<string, { token: string; expiresAt: number }>();

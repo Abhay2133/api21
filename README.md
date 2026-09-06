@@ -1,4 +1,4 @@
-# api21 Modular Nest.js REST API Engine
+# apps21 Modular Nest.js REST API Engine
 
 A high-performance modular REST API server built with **Node.js, Nest.js, and TypeScript**.
 
@@ -39,21 +39,21 @@ npm run docker:down
 
 ```text
 ├── apps/
-│   ├── api/                     # Main Nest.js Backend API (@api21/api)
+│   ├── api/                     # Main Nest.js Backend API (@apps21/api)
 │   │   ├── src/                 # Controllers, Modules, Guards, Interceptors
 │   │   ├── static/              # Interactive API Docs (index.html)
 │   │   ├── tests/               # Automated Jest test suites
 │   │   ├── package.json
 │   │   └── tsconfig.json
-│   ├── chat/                    # Future Chat Application Skeleton (@api21/chat)
+│   ├── chat/                    # Future Chat Application Skeleton (@apps21/chat)
 │   │   ├── src/index.ts
 │   │   └── package.json
-│   └── admin/                   # Future Admin Dashboard Skeleton (@api21/admin)
+│   └── admin/                   # Future Admin Dashboard Skeleton (@apps21/admin)
 │       ├── src/index.ts
 │       └── package.json
 │
 ├── packages/
-│   └── types/                   # Shared DTOs, schemas & interfaces (@api21/types)
+│   └── types/                   # Shared DTOs, schemas & interfaces (@apps21/types)
 │       ├── src/                 # CreateUserDto, CreateSessionDto, EnqueueJobDto, etc.
 │       ├── package.json
 │       └── tsconfig.json
@@ -84,7 +84,7 @@ npm run docker:down
     ```env
     PORT=5000
     NODE_ENV=development
-    DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/api21?sslmode=disable
+    DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/apps21?sslmode=disable
     REDIS_URL=redis://localhost:6379/0
     DEPLOY_CI_TOKEN=secret-ci-token
     REDEPLOY_SCRIPT=node start.js ${deployment_id}

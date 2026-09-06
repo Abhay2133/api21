@@ -27,7 +27,7 @@ async function bootstrap() {
   setupTerminalWebSocket(server);
 
   server.listen(config.port, () => {
-    logger.info(`[Server] api21 backend running on http://localhost:${config.port} in ${config.nodeEnv} mode.`, {
+    logger.info(`[Server] apps21 backend running on http://localhost:${config.port} in ${config.nodeEnv} mode.`, {
       port: config.port,
       nodeEnv: config.nodeEnv,
     });

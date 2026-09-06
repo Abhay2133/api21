@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, getPtyProviderStatus, ChildProcessPtyAdapter } from '../index.js';
 
-describe('@api21/pty Universal PTY Engine', () => {
+describe('@apps21/pty Universal PTY Engine', () => {
   it('should report provider diagnostic status', () => {
     const status = getPtyProviderStatus();
     assert.ok(status.platform);

@@ -1,7 +1,7 @@
 {
-  "name": "@api21/types",
+  "name": "@apps21/types",
   "version": "1.0.0",
-  "description": "Shared TypeScript types, DTOs, and interfaces for the api21 monorepo",
+  "description": "Shared TypeScript types, DTOs, and interfaces for the apps21 monorepo",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

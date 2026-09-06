@@ -1,5 +1,5 @@
 import { databaseService } from '../../core/database/database.service.js';
-import { Session } from '@api21/types';
+import { Session } from '@apps21/types';
 
 export class SessionsModel {
   async create(

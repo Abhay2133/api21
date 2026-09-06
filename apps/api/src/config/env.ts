@@ -22,7 +22,7 @@ export const config = {
   port: parseInt(process.env.PORT || '5000', 10),
   env: process.env.NODE_ENV || process.env.GO_ENV || 'development',
   nodeEnv: process.env.NODE_ENV || process.env.GO_ENV || 'development',
-  databaseUrl: process.env.DATABASE_URL || 'postgres://postgres:postgres@127.0.0.1:5432/api21?sslmode=disable',
+  databaseUrl: process.env.DATABASE_URL || 'postgres://postgres:postgres@127.0.0.1:5432/apps21?sslmode=disable',
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379/0',
   masterCredentials: process.env.MASTER_CREDENTIALS || 'admin:securepassword',
   deployCiToken: process.env.DEPLOY_CI_TOKEN || 'secret-ci-token',
