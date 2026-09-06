@@ -5,6 +5,7 @@ import { databaseService } from './core/database/database.service.js';
 import { redisService } from './core/redis/redis.service.js';
 import { bullMQService } from './core/bullmq/bullmq.service.js';
 import { setupTerminalWebSocket } from './modules/admin/terminal.ws.js';
+import { setupChatWebSocket } from './modules/chat/chat.ws.js';
 import { scheduleNightlyPm2Restart } from './modules/jobs/maintenance.job.js';
 import { logger } from './core/logger/logger.service.js';
 import http from 'http';
@@ -25,6 +26,7 @@ async function bootstrap() {
   // 5. Create HTTP server, mount WebSockets, and start listening
   const server = http.createServer(app);
   setupTerminalWebSocket(server);
+  setupChatWebSocket(server);
 
   server.listen(config.port, () => {
     logger.info(`[Server] apps21 backend running on http://localhost:${config.port} in ${config.nodeEnv} mode.`, {
