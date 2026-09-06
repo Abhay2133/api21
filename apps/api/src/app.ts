@@ -13,6 +13,7 @@ import { sessionsRouter } from './modules/sessions/sessions.controller.js';
 import { jobsRouter } from './modules/jobs/jobs.controller.js';
 import { webhooksRouter } from './modules/webhooks/webhooks.controller.js';
 import { adminRouter } from './modules/admin/admin.controller.js';
+import { chatRouter } from './modules/chat/chat.controller.js';
 import { setupBullBoard } from './modules/admin/bull-board.setup.js';
 
 function resolveStaticDir(): string {
@@ -49,7 +50,7 @@ export const createApp = (): Express => {
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'X-Device-Token'],
     })
   );
   app.use(express.json());
@@ -75,6 +76,7 @@ export const createApp = (): Express => {
   app.use('/api/v1/jobs', jobsRouter);
   app.use('/api/v1/webhooks', webhooksRouter);
   app.use('/api/v1/admin', adminRouter);
+  app.use('/api/v1/chat', chatRouter);
 
   // Sentry debug route to test error reporting
   app.get('/debug-sentry', () => {
