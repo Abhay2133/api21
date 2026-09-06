@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="apps21 Global Chat - Fast, real-time public chat with device-based sessions and password-protected handles.">
+  <title>apps21 // Global Chat</title>
+
+  <!-- Clean Professional Typography: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Runtime Config -->
+  <script src="/config.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <!-- Main Chat Shell -->
+  <div class="chat-app-shell">
+    
+    <!-- Top Navigation Header -->
+    <header class="chat-header">
+      <div class="header-brand">
+        <div class="brand-logo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">apps21</span>
+          <span class="brand-divider">/</span>
+          <span class="brand-channel">global-chat</span>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <!-- Live Connection Status Badge -->
+        <div id="connectionStatusBadge" class="status-pill status-connecting" title="Connection status">
+          <span class="status-dot"></span>
+          <span id="connectionStatusText" class="status-label">Connecting...</span>
+        </div>
+
+        <!-- Online Count Indicator -->
+        <div id="onlineCountBadge" class="status-pill status-presence" title="Active users in global chat">
+          <svg class="status-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span id="onlineCountText" class="presence-count">1 online</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Identity & Profile Toolbar -->
+    <div class="identity-bar">
+      <div class="identity-details">
+        <div class="identity-avatar" id="userAvatar">
+          <span id="userAvatarLetter">?</span>
+        </div>
+        <div class="identity-meta">
+          <div class="identity-headline">
+            <span class="identity-caption">You:</span>
+            <span id="identityDisplayName" class="identity-name">Guest</span>
+            <span id="identityClaimBadge" class="badge badge-guest">
+              <span class="badge-dot"></span>
+              <span id="identityClaimLabel">Guest</span>
+            </span>
+          </div>
+          <div class="identity-network">
+            <span class="ip-label">IP:</span>
+            <span id="identityIpAddress" class="mono-ip">127.0.0.1</span>
+            <span class="session-divider">•</span>
+            <span id="tokenTruncated" class="mono-token" title="Device session token">Token: ...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="identity-actions">
+        <button id="openClaimModalBtn" class="btn btn-action" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span id="claimBtnText">Claim Handle</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages Container -->
+    <main class="messages-container" id="messagesContainer">
+      <!-- Minimalist Welcome Card -->
+      <div class="system-welcome-card" id="welcomeCard">
+        <div class="welcome-header">
+          <span class="welcome-tag">#global</span>
+          <h2 class="welcome-title">Welcome to apps21 Global Chat</h2>
+        </div>
+        <p class="welcome-desc">
+          This is a public, real-time global chat room. You can chat anonymously as a guest, or claim a permanent handle with a password to reserve your name.
+        </p>
+      </div>
+
+      <!-- Chronological Date Separator -->
+      <div class="date-separator">
+        <span class="date-line"></span>
+        <span class="date-pill" id="currentDatePill">Today</span>
+        <span class="date-line"></span>
+      </div>
+
+      <!-- Messages list -->
+      <div class="messages-stream" id="messagesStream" role="log" aria-live="polite">
+        <!-- Message elements rendered dynamically by app.js -->
+      </div>
+
+      <!-- Jump to bottom button -->
+      <button id="jumpBottomBtn" class="jump-bottom-btn hidden" type="button" title="Jump to recent messages">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <polyline points="19 12 12 19 5 12"></polyline>
+        </svg>
+        <span id="unreadCountBadge" class="unread-badge hidden">0</span>
+      </button>
+    </main>
+
+    <!-- Composer Footer -->
+    <footer class="composer-dock">
+      <form id="messageForm" class="composer-form" autocomplete="off">
+        <div class="composer-box">
+          <textarea
+            id="messageInput"
+            class="composer-textarea"
+            placeholder="Send a message to #global... (Enter to send, Shift+Enter for newline)"
+            rows="1"
+            maxlength="2000"
+            aria-label="Message content"
+            required
+          ></textarea>
+
+          <div class="composer-actions">
+            <div class="composer-hints">
+              <span id="charCounter" class="char-counter">0/2000</span>
+              <span class="hint-sep">•</span>
+              <span class="key-hint"><kbd>↵</kbd> to send</span>
+            </div>
+
+            <button id="sendMessageBtn" class="btn btn-send" type="submit" disabled aria-label="Send message">
+              <svg class="send-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              <span class="send-label">Send</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </footer>
+
+  </div>
+
+  <!-- Claim Handle Modal -->
+  <div id="claimModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="claimModalTitle">
+    <div class="modal-panel">
+      
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-badge">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <div>
+            <h2 id="claimModalTitle" class="modal-title">Claim or Unlock Handle</h2>
+            <p class="modal-subtitle">Reserve a custom handle or unlock an existing password-protected account</p>
+          </div>
+        </div>
+
+        <button id="closeClaimModalBtn" class="modal-close-btn" type="button" aria-label="Close modal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Feedback alerts -->
+      <div id="claimErrorAlert" class="alert alert-error hidden" role="alert">
+        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span id="claimErrorMessage">Error message</span>
+      </div>
+
+      <div id="claimSuccessAlert" class="alert alert-success hidden" role="alert">
+        <svg class="alert-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span id="claimSuccessMessage">Handle claimed successfully!</span>
+      </div>
+
+      <form id="claimHandleForm" class="modal-form" autocomplete="off">
+        <div class="form-group">
+          <label for="claimDisplayName" class="form-label">
+            Display Name / Handle
+            <span class="required-star">*</span>
+          </label>
+          <input
+            type="text"
+            id="claimDisplayName"
+            class="form-input"
+            placeholder="e.g. Abhay, Sarah, Alex"
+            required
+            minlength="2"
+            maxlength="30"
+            pattern="^[\w\s\-_.]+$"
+            title="Letters, numbers, spaces, and - _ . allowed (2-30 characters)"
+          />
+          <span class="form-hint">Unique name visible to all users (2-30 chars).</span>
+        </div>
+
+        <div class="form-group">
+          <label for="claimPassword" class="form-label">
+            Password / PIN
+            <span class="required-star">*</span>
+          </label>
+          <input
+            type="password"
+            id="claimPassword"
+            class="form-input"
+            placeholder="Enter a secret password or PIN"
+            required
+            minlength="4"
+            maxlength="100"
+          />
+          <span class="form-hint">Used to protect this handle and log in from other devices.</span>
+        </div>
+
+        <div class="modal-actions">
+          <button id="cancelClaimBtn" class="btn btn-secondary" type="button">Cancel</button>
+          <button id="submitClaimBtn" class="btn btn-primary" type="submit">
+            <span id="claimSpinner" class="spinner hidden" aria-hidden="true"></span>
+            <span id="claimSubmitText">Save & Claim</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Client Application Script -->
+  <script src="/app.js"></script>
+</body>
+</html>

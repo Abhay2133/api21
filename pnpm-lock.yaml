@@ -224,7 +224,16 @@ importers:
       '@apps21/types':
         specifier: workspace:*
         version: link:../../packages/types
+      dotenv:
+        specifier: ^16.6.1
+        version: 16.6.1
+      express:
+        specifier: ^4.22.2
+        version: 4.22.2(supports-color@8.1.1)
     devDependencies:
+      '@types/express':
+        specifier: ^4.17.25
+        version: 4.17.25
       '@types/node':
         specifier: ^20.14.9
         version: 20.19.43
